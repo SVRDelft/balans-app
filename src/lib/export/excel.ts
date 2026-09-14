@@ -99,6 +99,15 @@ export async function maakOverdrachtWerkboek(
   }
 
   exploitatie.addRow([]);
+  exploitatie.addRow([
+    "Voorraad",
+    "Correctie",
+    "",
+    "Voorraadmutatie (huidig min begin)",
+    0,
+    cijfers.voorraad.mutatieCenten / 100,
+    cijfers.voorraad.mutatieCenten / 100,
+  ]);
   const totaalRij = exploitatie.addRow([
     "Eindsaldo",
     "",
@@ -127,6 +136,7 @@ export async function maakOverdrachtWerkboek(
     b.administratiefBanksaldoCenten / 100,
   ]);
   balans.addRow(["Openstaande debiteuren", b.debiteurenCenten / 100]);
+  balans.addRow(["Spullen & voorraad", b.voorraadCenten / 100]);
   balans.addRow(["Totaal activa", b.totaalActivaCenten / 100]).font = {
     bold: true,
   };
@@ -152,12 +162,54 @@ export async function maakOverdrachtWerkboek(
   balans.addRow(["Activa min passiva", b.balansverschilCenten / 100]);
   balans.addRow([
     "Laatst ingevoerd banksaldo",
-    cijfers.laatsteBanksaldo ? cijfers.laatsteBanksaldo.saldoCenten / 100 : null,
+    cijfers.laatsteBanksaldo
+      ? cijfers.laatsteBanksaldo.saldoCenten / 100
+      : null,
   ]);
   balans.addRow([
     "Verschil met de administratie",
     b.bankverschilCenten === null ? null : b.bankverschilCenten / 100,
   ]);
+
+  const voorraad = werkboek.addWorksheet("Spullen & voorraad");
+  voorraad.columns = [
+    { header: "Spullen", width: 30 },
+    { header: "Eenheid", width: 12 },
+    { header: "Beginaantal", width: 14 },
+    { header: "Beginwaarde per stuk", width: 22, style: { numFmt: EURO } },
+    { header: "Beginwaarde totaal", width: 20, style: { numFmt: EURO } },
+    { header: "Huidig aantal", width: 14 },
+    { header: "Huidige waarde per stuk", width: 24, style: { numFmt: EURO } },
+    { header: "Huidige waarde totaal", width: 22, style: { numFmt: EURO } },
+    { header: "Bewaarplaats", width: 24 },
+    { header: "Notities", width: 50 },
+  ];
+  kopRij(voorraad, 1);
+  voorraad.views = [{ state: "frozen", ySplit: 1 }];
+  for (const post of cijfers.voorraadposten) {
+    voorraad.addRow([
+      post.naam,
+      post.eenheid,
+      post.beginAantal,
+      post.beginWaardePerStukCenten / 100,
+      (post.beginAantal * post.beginWaardePerStukCenten) / 100,
+      post.aantal,
+      post.waardePerStukCenten / 100,
+      (post.aantal * post.waardePerStukCenten) / 100,
+      post.locatie,
+      post.notities,
+    ]);
+  }
+  voorraad.addRow([
+    "Totaal",
+    "",
+    null,
+    null,
+    cijfers.voorraad.beginwaardeCenten / 100,
+    null,
+    null,
+    cijfers.voorraad.waardeCenten / 100,
+  ]).font = { bold: true };
 
   // --- Debiteuren --------------------------------------------------------
   const debiteuren = werkboek.addWorksheet("Debiteuren");
@@ -187,11 +239,7 @@ export async function maakOverdrachtWerkboek(
   }
 
   debiteuren.addRow([]);
-  debiteuren.addRow([
-    "Ouderdom",
-    "tot 30 dagen",
-    cijfers.ouderdom.tot30 / 100,
-  ]);
+  debiteuren.addRow(["Ouderdom", "tot 30 dagen", cijfers.ouderdom.tot30 / 100]);
   debiteuren.addRow(["", "30 tot 60 dagen", cijfers.ouderdom.van30tot60 / 100]);
   debiteuren.addRow(["", "meer dan 60 dagen", cijfers.ouderdom.meer60 / 100]);
 
@@ -302,9 +350,20 @@ export async function maakOverdrachtWerkboek(
   ];
   kopRij(toelichting, 1);
   toelichting.addRow(["Boekjaar", boekjaar.naam]);
-  toelichting.addRow(["Periode", `${formatteerDatum(boekjaar.startDatum)} t/m ${formatteerDatum(boekjaar.eindDatum)}`]);
+  toelichting.addRow([
+    "Periode",
+    `${formatteerDatum(boekjaar.startDatum)} t/m ${formatteerDatum(boekjaar.eindDatum)}`,
+  ]);
   toelichting.addRow(["Voorvoegsel factuurnummers", boekjaar.factuurPrefix]);
   toelichting.addRow(["Beginsaldo bank", boekjaar.beginsaldoBankCenten / 100]);
+  toelichting.addRow([
+    "Beginvoorraad",
+    cijfers.voorraad.beginwaardeCenten / 100,
+  ]);
+  toelichting.addRow([
+    "Voorraadmutatie",
+    "De huidige voorraadwaarde min de beginwaarde telt mee in het resultaat. Aankopen worden ook als uitgave vastgelegd; verbruik verlaagt het huidige aantal.",
+  ]);
   toelichting.addRow([
     "Beginsaldo eigen vermogen",
     boekjaar.beginsaldoEigenVermogenCenten / 100,

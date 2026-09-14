@@ -1,277 +1,102 @@
-# Overstappen op Vercel met Postgres
+# Vercel en Postgres
 
-De app draait nu op een SQLite-bestand op je eigen laptop. Dat is prima om mee
-te beginnen, maar op Vercel werkt het niet: het bestandssysteem daar is niet
-blijvend schrijfbaar, dus een SQLite-bestand raak je bij elke nieuwe versie
-kwijt.
+De app gebruikt Postgres via Prisma 7. Het datamodel staat in
+`prisma/schema.prisma`; de Postgres-migraties staan in
+`prisma/migrations-postgres`. De oude SQLite-migraties in `prisma/migrations`
+zijn alleen een archief. De lokale SQLite-database wordt niet verwijderd.
 
-Het schema is bewust zo gebouwd dat de overstap klein is. Er staat nergens ruwe
-SQL, er zijn geen SQLite-specifieke functies en geen enums. Wat je verandert is
-de provider, de driver adapter en de omgevingsvariabelen.
+## Project verbinden
 
-Reken op een uur, inclusief het overzetten van de bestaande gegevens.
-
----
-
-## 1. Een database aanmaken
-
-Kies er één:
-
-- **Neon** — <https://neon.tech>, gratis niveau is ruim genoeg voor de SVR.
-- **Vercel Postgres** — aan te maken vanuit je Vercel-project onder *Storage*.
-
-Beide geven je een connection string in de vorm:
-
-```
-postgresql://gebruiker:wachtwoord@host/database?sslmode=require
-```
-
-Neon geeft er twee: een *pooled* en een *direct* adres. Gebruik de pooled voor de
-app en de directe voor de migraties.
-
----
-
-## 2. Pakketten wisselen
+Gebruik Node.js 22 of 24 en installeer de afhankelijkheden:
 
 ```bash
-npm uninstall @prisma/adapter-libsql @libsql/client
+npm ci
+npx vercel login
+npx vercel link
 ```
+
+Kies het project `balans-app` van team `SVR` (`svr-d5ac`).
+
+## Database en inloggen
+
+Koppel via Vercel Storage een Neon Postgres-database in Frankfurt. De huidige
+preview-database heet `balans-app-db` en is verbonden met Preview en Development.
+Productie gebruikt de aparte database `balans-app-production-db` in Frankfurt.
+De integratie gebruikt de prefix `NEON_`, omdat er al een handmatig ingestelde
+`DATABASE_URL` in het project stond.
+
+De app gebruikt `NEON_DATABASE_URL` of, zonder prefix, `DATABASE_URL`.
+Voor migraties gebruikt Prisma bij voorkeur `NEON_DATABASE_URL_UNPOOLED`,
+`DATABASE_URL_UNPOOLED` of `DIRECT_DATABASE_URL` (het directe adres).
+De app en migraties moeten altijd naar dezelfde database verwijzen.
+
+Stel daarnaast `APP_WACHTWOORD` en een willekeurige `AUTH_SECRET` van minstens
+32 tekens in. Gebruik geen voorbeeldwaarden. Bewaar deze waarden als
+servervariabelen, zonder `NEXT_PUBLIC_`.
+
+Haal de ontwikkelinstellingen op:
 
 ```bash
-npm install @prisma/adapter-pg pg
+npx vercel env pull .env.local
 ```
+
+Next.js, Prisma en het seed-script laden dezelfde `.env.local`. Dit bestand
+heeft voorrang op een eventuele oude `.env` met een SQLite-adres.
+
+## Eerste installatie
+
+Voor een nieuwe, lege database:
 
 ```bash
-npm install --save-dev @types/pg
+npm run setup
 ```
 
----
+Dit maakt de tabellen aan en vult de startgegevens. Draai het seed-script niet
+bij iedere deployment: het zet sommige begrotings- en relatiegegevens terug
+naar de startwaarden. Gebruik bij een bestaande administratie alleen
+`npm run db:deploy`.
 
-## 3. `prisma/schema.prisma`
+Een oude SQLite-administratie wordt niet automatisch geïmporteerd. Bewaar het
+originele bestand en controleer bij een import alle tabellen, factuurnummers,
+bedragen, datums en bijlagen. Importeer alleen naar een lege database en gebruik
+een transactie, zodat een mislukte import geen halve administratie achterlaat.
 
-Eén regel:
-
-```diff
- datasource db {
--  provider = "sqlite"
-+  provider = "postgresql"
- }
-```
-
----
-
-## 4. `prisma7.config.ts`
-
-Voeg het directe adres toe, zodat migraties niet via de pooler lopen:
-
-```diff
-   datasource: {
-     url: env("DATABASE_URL"),
-+    directUrl: env("DIRECT_DATABASE_URL"),
-   },
-```
-
----
-
-## 5. `src/lib/db.ts`
-
-Vervang de adapter. De rest van het bestand blijft zoals het is; de functie
-`bepaalDatabaseUrl` mag weg, want die is er alleen voor `file:`-paden.
-
-```ts
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../generated/prisma/client";
-
-function maakClient(): PrismaClient {
-  const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL,
-  });
-  return new PrismaClient({ adapter });
-}
-
-const globaalVoorPrisma = globalThis as unknown as {
-  prismaClient?: PrismaClient;
-};
-
-export const db: PrismaClient = globaalVoorPrisma.prismaClient ?? maakClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globaalVoorPrisma.prismaClient = db;
-}
-```
-
----
-
-## 6. Omgevingsvariabelen
-
-Lokaal in `.env`:
-
-```
-DATABASE_URL="postgresql://…?sslmode=require"        # pooled
-DIRECT_DATABASE_URL="postgresql://…?sslmode=require" # direct
-APP_WACHTWOORD="…"
-AUTH_SECRET="…"
-```
-
-In Vercel zet je dezelfde vier onder *Settings › Environment Variables*, voor
-*Production*, *Preview* en *Development*. Gebruik daar een **ander en langer**
-wachtwoord dan lokaal, en een verse `AUTH_SECRET`:
+## Lokaal controleren
 
 ```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
----
-
-## 7. Migraties opnieuw aanmaken
-
-De bestaande migraties in `prisma/migrations/` zijn SQLite-SQL en werken niet op
-Postgres. Gooi ze weg en maak er één nieuwe van:
-
-```bash
-rm -rf prisma/migrations
-```
-
-```bash
-npx prisma migrate dev --name initieel-postgres
-```
-
-Controleer of het werkt:
-
-```bash
-npm run db:seed
-```
-
-```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
 npm run dev
 ```
 
----
+Open <http://localhost:3000> en log in met je eigen naam en het wachtwoord uit
+`APP_WACHTWOORD`. Controleer het dashboard, de verenigingen en de exports.
 
-## 8. Bestaande gegevens meenemen
-
-Sla deze stap over als je op Vercel opnieuw wilt beginnen; draai dan alleen
-`npm run db:seed` tegen de nieuwe database.
-
-Wil je de administratie van dit jaar wél meenemen, gebruik dan het script
-hieronder. Het leest de oude SQLite-database en schrijft alles in de juiste
-volgorde naar Postgres, inclusief de bonnetjes.
-
-Zet het in `scripts/overzetten.mts`:
-
-```ts
-import "dotenv/config";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
-
-const oud = new PrismaClient({
-  adapter: new PrismaLibSql({ url: "file:./prisma/dev.db" }),
-});
-const nieuw = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
-});
-
-// De volgorde is belangrijk: een tabel komt pas nadat alles waar hij naar
-// verwijst er al staat.
-const volgorde = [
-  "instellingen",
-  "boekjaar",
-  "relatie",
-  "begrotingspost",
-  "evenement",
-  "deelnemer",
-  "omslagronde",
-  "bijlage",
-  "uitgave",
-  "factuur",
-  "factuurregel",
-  "betaling",
-  "omslagrondeDeelnemer",
-  "banksaldo",
-  "auditlog",
-] as const;
-
-for (const tabel of volgorde) {
-  const rijen = await (oud as never as Record<string, { findMany: () => Promise<unknown[]> }>)[tabel].findMany();
-  for (const rij of rijen) {
-    await (nieuw as never as Record<string, { create: (a: unknown) => Promise<unknown> }>)[tabel].create({ data: rij });
-  }
-  console.log(`${tabel}: ${rijen.length}`);
-}
-
-// De factuurteller staat al goed omdat het boekjaar één-op-één is overgezet.
-await oud.$disconnect();
-await nieuw.$disconnect();
-```
-
-Draaien (houd `@prisma/adapter-libsql` nog even geïnstalleerd, of installeer hem
-tijdelijk opnieuw):
+## Preview publiceren
 
 ```bash
-npx tsx scripts/overzetten.mts
+npx vercel deploy --target=preview
 ```
 
-Controleer daarna in de app of het aantal facturen, het resultaat en de balans
-overeenkomen met de oude situatie. Verwijder het script en
-`@prisma/adapter-libsql` als het klopt.
+`vercel.json` stelt Frankfurt in als regio en draait bij de build eerst
+`prisma migrate deploy`. `postinstall` genereert de Prisma-client. Er wordt
+geen lokale database of `.env`-bestand geüpload.
 
----
+Gebruik voor productie een aparte database en stel de vereiste variabelen ook
+voor de Production-omgeving in. Publiceer daarna bewust met
+`npx vercel deploy --prod`. Preview- en ontwikkelversies mogen niet naar de
+productiedatabase schrijven.
 
-## 9. Naar Vercel
+## Bijlagen en back-ups
 
-```bash
-npm install -g vercel
-```
+Bijlagen staan in Postgres. Uploads zijn beperkt tot 4 MB, zodat het bestand
+inclusief formuliergegevens binnen de
+[Vercel-requestlimiet](https://vercel.com/docs/functions/limitations) past.
+De browser controleert de grootte vóór het versturen; de server controleert
+opnieuw.
 
-```bash
-vercel link
-```
-
-```bash
-vercel --prod
-```
-
-`prisma generate` draait vanzelf mee, want dat staat als `postinstall` in
-`package.json`.
-
-De migraties draaien niet vanzelf. Doe dat één keer vanaf je eigen machine met de
-productie-`DATABASE_URL` in je `.env`:
-
-```bash
-npx prisma migrate deploy
-```
-
-Of laat Vercel het bij elke build doen door het build-commando in
-`package.json` te veranderen:
-
-```json
-"build": "prisma migrate deploy && next build"
-```
-
----
-
-## 10. Nalopen
-
-- [ ] Inloggen werkt met het wachtwoord uit de Vercel-omgevingsvariabelen
-- [ ] Het dashboard toont de juiste cijfers
-- [ ] Een factuur-PDF opent (`/api/facturen/…/pdf`)
-- [ ] De Excel-export downloadt (`/api/export/excel`)
-- [ ] Een bonnetje uploaden werkt en is daarna te openen
-- [ ] De balans sluit en het bankverschil is hetzelfde als daarvoor
-
----
-
-## Wat je op Vercel niet moet vergeten
-
-**Bestandsgrootte.** Bonnetjes staan in de database. Dat werkt prima op
-Postgres, maar de limiet van 5 MB per bestand in `src/app/(app)/uitgaven/acties.ts`
-en `bodySizeLimit` in `next.config.ts` horen bij elkaar. Verhoog je de een, doe
-dan ook de ander.
-
-**Back-ups.** SQLite kon je kopiëren door het bestand te kopiëren. Bij Neon zet
-je back-ups aan in het dashboard; doe dat meteen, want de administratie van een
-heel bestuursjaar staat erin.
-
-**Geen koppeling met de bank.** Die was er niet en hoort er niet te komen; de
-app is er niet omheen ontworpen.
+Controleer in Neon welke herstel- en back-upmogelijkheden bij het gekozen plan
+horen. Bewaar daarnaast periodiek een database-export; de Excel- en PDF-export
+uit de app zijn rapportages en vervangen geen volledige databaseback-up.

@@ -20,6 +20,8 @@ import {
 } from "@/lib/finance/debiteuren";
 import { berekenAfstemming, type Afstemming } from "@/lib/finance/omslag";
 import { openstaandBedrag } from "@/lib/finance/factuurstatus";
+import { berekenVoorraad } from "@/lib/finance/voorraad";
+import type { Voorraadpost } from "@/generated/prisma/client";
 
 export interface OpenstaandeFactuurRegel {
   id: string;
@@ -60,6 +62,8 @@ export interface BoekjaarCijfers {
   evenementen: EvenementAfstemming[];
   uitgavenZonderPost: number;
   conceptFacturen: number;
+  voorraadposten: Voorraadpost[];
+  voorraad: ReturnType<typeof berekenVoorraad>;
 }
 
 /**
@@ -74,40 +78,51 @@ export interface BoekjaarCijfers {
 export async function haalBoekjaarCijfers(
   boekjaarId: string,
 ): Promise<BoekjaarCijfers> {
-  const [boekjaar, posten, facturen, uitgaven, banksaldo, evenementen] =
-    await Promise.all([
-      db.boekjaar.findUniqueOrThrow({ where: { id: boekjaarId } }),
-      db.begrotingspost.findMany({
-        where: { boekjaarId },
-        orderBy: [{ volgorde: "asc" }, { code: "asc" }],
-      }),
-      db.factuur.findMany({
-        where: { boekjaarId },
-        include: {
-          regels: true,
-          betalingen: true,
-          relatie: { select: { id: true, naam: true } },
-        },
-        orderBy: { volgnummer: "asc" },
-      }),
-      db.uitgave.findMany({
-        where: { boekjaarId },
-        orderBy: { datum: "asc" },
-      }),
-      db.banksaldo.findFirst({
-        where: { boekjaarId },
-        orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
-      }),
-      db.evenement.findMany({
-        where: { boekjaarId },
-        include: {
-          deelnemers: true,
-          uitgaven: true,
-          facturen: { include: { betalingen: true } },
-        },
-        orderBy: { datum: "asc" },
-      }),
-    ]);
+  const [
+    boekjaar,
+    posten,
+    facturen,
+    uitgaven,
+    banksaldo,
+    evenementen,
+    voorraadposten,
+  ] = await Promise.all([
+    db.boekjaar.findUniqueOrThrow({ where: { id: boekjaarId } }),
+    db.begrotingspost.findMany({
+      where: { boekjaarId },
+      orderBy: [{ volgorde: "asc" }, { code: "asc" }],
+    }),
+    db.factuur.findMany({
+      where: { boekjaarId },
+      include: {
+        regels: true,
+        betalingen: true,
+        relatie: { select: { id: true, naam: true } },
+      },
+      orderBy: { volgnummer: "asc" },
+    }),
+    db.uitgave.findMany({
+      where: { boekjaarId },
+      orderBy: { datum: "asc" },
+    }),
+    db.banksaldo.findFirst({
+      where: { boekjaarId },
+      orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
+    }),
+    db.evenement.findMany({
+      where: { boekjaarId },
+      include: {
+        deelnemers: true,
+        uitgaven: true,
+        facturen: { include: { betalingen: true } },
+      },
+      orderBy: { datum: "asc" },
+    }),
+    db.voorraadpost.findMany({
+      where: { boekjaarId },
+      orderBy: { naam: "asc" },
+    }),
+  ]);
 
   // --- realisatie per begrotingspost -------------------------------------
   const inkomstenPerPost = new Map<string, number>();
@@ -123,7 +138,10 @@ export async function haalBoekjaarCijfers(
 
   for (const uitgave of uitgaven) {
     const huidig = uitgavenPerPost.get(uitgave.begrotingspostId) ?? 0;
-    uitgavenPerPost.set(uitgave.begrotingspostId, huidig + uitgave.bedragCenten);
+    uitgavenPerPost.set(
+      uitgave.begrotingspostId,
+      huidig + uitgave.bedragCenten,
+    );
   }
 
   const postRealisaties: PostRealisatie[] = posten.map((post) => {
@@ -147,7 +165,8 @@ export async function haalBoekjaarCijfers(
     };
   });
 
-  const exploitatie = maakExploitatie(postRealisaties);
+  const voorraad = berekenVoorraad(voorraadposten);
+  const exploitatie = maakExploitatie(postRealisaties, voorraad.mutatieCenten);
 
   // --- debiteuren en crediteuren -----------------------------------------
   const openstaandeFacturen: OpenstaandeFactuurRegel[] = [];
@@ -216,6 +235,8 @@ export async function haalBoekjaarCijfers(
     gerealiseerdeInkomstenCenten: exploitatie.totaalInkomstenGerealiseerdCenten,
     gerealiseerdeUitgavenCenten: exploitatie.totaalUitgavenGerealiseerdCenten,
     ingevoerdBanksaldoCenten: banksaldo?.saldoCenten ?? null,
+    voorraadBeginCenten: voorraad.beginwaardeCenten,
+    voorraadCenten: voorraad.waardeCenten,
   });
 
   // --- afstemming per evenement ------------------------------------------
@@ -230,7 +251,8 @@ export async function haalBoekjaarCijfers(
         .reduce((som, uitgave) => som + uitgave.bedragCenten, 0);
       const nogNietVerdeeldCenten = evenement.uitgaven
         .filter(
-          (uitgave) => uitgave.omslagrondeId === null && !uitgave.tenLasteVanSvr,
+          (uitgave) =>
+            uitgave.omslagrondeId === null && !uitgave.tenLasteVanSvr,
         )
         .reduce((som, uitgave) => som + uitgave.bedragCenten, 0);
 
@@ -283,6 +305,8 @@ export async function haalBoekjaarCijfers(
     posten: postRealisaties,
     exploitatie,
     balans,
+    voorraad,
+    voorraadposten,
     ouderdom: maakOuderdomsanalyse(openstaandeFacturen, vandaag()),
     openstaandeFacturen,
     openstaandeUitgaven,

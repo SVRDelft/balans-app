@@ -12,18 +12,21 @@ betalingen en het banksaldo voer je handmatig in.
 
 ## Starten
 
-Je hebt alleen [Node.js 20.9 of nieuwer](https://nodejs.org) nodig. Er is geen
-database-installatie nodig: de app draait op een SQLite-bestand.
+Gebruik [Node.js 22 of 24](https://nodejs.org) en een Postgres-database.
+De app kan via Vercel met Neon worden verbonden; zie [MIGRATIE.md](MIGRATIE.md).
 
 ```bash
 npm install
 ```
 
 ```bash
-cp .env.example .env
+npx vercel link
+npx vercel env pull .env.local
 ```
 
-Zet daarna in `.env` een eigen wachtwoord en een eigen `AUTH_SECRET`. Een
+Zet in Vercel een eigen `APP_WACHTWOORD` en `AUTH_SECRET` en haal de variabelen
+opnieuw op. Zonder Vercel kun je `.env.example` naar `.env.local` kopiëren en
+je eigen Postgres-adres invullen. Een
 willekeurige sleutel genereer je zo:
 
 ```bash
@@ -43,7 +46,7 @@ npm run dev
 ```
 
 De app draait nu op <http://localhost:3000>. Log in met je eigen naam en het
-wachtwoord uit `.env`. Die naam komt bij elke wijziging in het auditlog te staan,
+wachtwoord uit `APP_WACHTWOORD`. Die naam komt bij elke wijziging in het auditlog te staan,
 zodat achteraf te zien is wie wat gedaan heeft.
 
 ---
@@ -51,15 +54,15 @@ zodat achteraf te zien is wie wat gedaan heeft.
 ## Testen zonder iets te installeren
 
 Open de repository op GitHub en kies **Code › Codespaces › Create codespace on
-main**. De Codespace installeert alles, maakt de database aan en vult hem met de
-startgegevens. Start daarna:
+main**. De Codespace installeert de afhankelijkheden. Verbind daarna het
+Vercel-project en haal de ontwikkelvariabelen op zoals hierboven beschreven.
+Gebruik `npm run setup` alleen voor een lege database. Start daarna:
 
 ```bash
 npm run dev
 ```
 
-Het inlogwachtwoord staat in het bestand `.env` dat de Codespace voor je heeft
-aangemaakt.
+Het inlogwachtwoord staat in `APP_WACHTWOORD` in `.env.local`.
 
 > GitHub Pages werkt niet voor deze app: die host alleen statische bestanden en
 > deze app heeft een server en een database nodig. Voor een echt online versie
@@ -136,8 +139,8 @@ blokkeert de uitgave de omslagberekening van het evenement. Een open bar wordt
 pas weken later afgerekend, en dat moet de omslag tegenhouden.
 
 Je kunt een bonnetje of leveranciersfactuur uploaden (JPG, PNG, WEBP, HEIC of
-PDF, maximaal 5 MB). Die bestanden staan in de database zelf, zodat een kopie
-van het databasebestand de volledige administratie bevat.
+PDF, maximaal 4 MB). Die bestanden staan in de database zelf en worden
+meegenomen in een volledige databaseback-up.
 
 ### Evenementen en de omslag
 
@@ -172,10 +175,36 @@ Voer het banksaldo regelmatig in vanuit je bankapp. De app zet dat af tegen het
 saldo dat uit de administratie volgt. **Dat verschil is het beste signaal dat er
 iets vergeten is.**
 
-### Overdracht
+### Spullen en voorraad
+
+Bij *Spullen & voorraad* houd je per boekjaar aantallen, boekwaarde per stuk,
+bewaarplaats en notities bij, bijvoorbeeld voor dassen. Vul voor bestaande spullen
+ook de aantallen en waarde aan het begin van het boekjaar in. De huidige waarde
+staat bij de activa op de balans. De huidige waarde min de beginwaarde staat als
+voorraadmutatie in het resultaat; aankopen leg je ook vast bij *Uitgaven*.
+Voorbeeld: 20 dassen van €5 gekocht, waarvan 12 over zijn, betekent €60 voorraad
+en €40 verbruik. De aankoop van €100 blijft zichtbaar bij de uitgaven.
+
+Bij een nieuw boekjaar kun je de eindvoorraad van vorig jaar overnemen. Neem de
+beginvoorraad ook mee in het beginsaldo eigen vermogen bij *Boekjaren*.
+Afgesloten jaren zijn alleen te bekijken. Wijzigingen worden gelogd.
+
+### Contactgegevens en logo
+
+Vul bij *Instellingen* de gegevens van de SVR in: adres, contactpersoon, e-mail,
+telefoon, website, KvK, btw-nummer en IBAN. Bij *Relaties* zijn dezelfde velden
+beschikbaar. Facturen tonen de afzender en de adres- en registratiedetails van
+de ontvanger. Niet-ingevulde gegevens blijven weg.
+
+Het meegeleverde SVR-logo staat standaard op facturen en de overdrachts-PDF.
+Bij *Instellingen* kun je een eigen PNG/JPG uploaden (maximaal 2 MB en 16 megapixels)
+of het standaardlogo herstellen. Het gekozen logo wordt in de database opgeslagen.
+
+### Overdrachtbestanden
 
 Onder *Overdracht* download je het hele boekjaar als Excel en als PDF:
-exploitatie, balans, debiteurenoverzicht, alle facturen en alle uitgaven. Dat is
+exploitatie, balans, debiteurenoverzicht en spullen met aantallen en waarde.
+Het Excel-bestand bevat daarnaast alle facturen en uitgaven. Dat is
 wat de kascommissie en het volgende bestuur krijgen.
 
 ---
@@ -183,9 +212,8 @@ wat de kascommissie en het volgende bestuur krijgen.
 ## Techniek
 
 - **Next.js 16** (App Router) met **TypeScript** en **React 19**
-- **Prisma 7** met **SQLite** via een driver adapter; geen ruwe SQL en geen
-  SQLite-specifieke functies, zodat overstappen op Postgres alleen een wijziging
-  van de provider en de adapter is — zie [MIGRATIE.md](MIGRATIE.md)
+- **Prisma 7** met **Postgres** via de `@prisma/adapter-pg` driver adapter;
+  hosting op Vercel met Neon — zie [MIGRATIE.md](MIGRATIE.md)
 - **Tailwind CSS 4** met componenten in de conventie van **shadcn/ui**
 - **@react-pdf/renderer** voor de PDF's (geen headless Chromium, werkt op Vercel)
 - **ExcelJS** voor de Excel-export
@@ -215,5 +243,5 @@ ze te testen zijn. Draai `npm test` na elke wijziging daaraan.
 
 ## Verder lezen
 
-- [MIGRATIE.md](MIGRATIE.md) — overstappen op Vercel met Postgres
+- [MIGRATIE.md](MIGRATIE.md) — Vercel en Postgres instellen en publiceren
 - [AANNAMES.md](AANNAMES.md) — de aannames die tijdens het bouwen zijn gedaan

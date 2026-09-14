@@ -9,10 +9,14 @@ import { Input, Select, Textarea, Veld } from "@/components/ui/input";
 import { Melding } from "@/components/ui/melding";
 import { RELATIE_TYPES, RELATIE_TYPE_LABEL } from "@/lib/domein";
 import type { ActieStaat } from "@/lib/acties";
+import {
+  ExtraContactvelden,
+  type ExtraContactWaarden,
+} from "@/components/contactvelden";
 
 import { bewaarRelatie } from "./acties";
 
-export interface RelatieWaarden {
+export interface RelatieWaarden extends ExtraContactWaarden {
   id?: string;
   type: string;
   naam: string;
@@ -34,6 +38,12 @@ export const LEGE_RELATIE: RelatieWaarden = {
   adres: "",
   postcode: "",
   plaats: "",
+  land: "Nederland",
+  telefoon: "",
+  website: "",
+  kvkNummer: "",
+  btwNummer: "",
+  iban: "",
   actief: true,
   bijdragePlichtig: true,
   notities: "",
@@ -119,6 +129,8 @@ export function RelatieFormulier({ waarden }: { waarden: RelatieWaarden }) {
           <Veld label="Plaats" htmlFor="plaats">
             <Input id="plaats" name="plaats" defaultValue={waarden.plaats} />
           </Veld>
+
+          <ExtraContactvelden waarden={waarden} fouten={staat.veldfouten} />
 
           <Veld label="Notities" htmlFor="notities" className="sm:col-span-2">
             <Textarea

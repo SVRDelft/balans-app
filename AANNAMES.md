@@ -156,14 +156,20 @@ afdragen, dan moet er ook btw-berekening per factuurregel bij komen.
 
 ## Technische keuzes die afwijken
 
-### Prisma met een libsql-adapter in plaats van better-sqlite3
+### Prisma met Postgres voor Vercel
 
-Prisma 7 vereist een driver adapter. De voor de hand liggende keuze,
-`better-sqlite3`, heeft geen kant-en-klare versie voor Node 20 op Windows en zou
-dus een C++-compiler vereisen — precies het soort gedoe dat vermeden moest
-worden. `@libsql/client` installeert wél zonder te compileren en spreekt gewoon
-SQLite. Voor Postgres wissel je hem om voor `@prisma/adapter-pg`; dat staat in
-[MIGRATIE.md](MIGRATIE.md).
+Prisma 7 gebruikt `@prisma/adapter-pg`. De administratie, bijlagen en gekozen
+logo's staan in Neon Postgres in Frankfurt. Productie heeft een aparte database;
+Preview en Development delen de ontwikkelgegevens. De oude SQLite-migraties
+blijven als archief beschikbaar. Zie [MIGRATIE.md](MIGRATIE.md).
+
+### Voorraad per boekjaar
+
+Aantallen en boekwaarde per stuk worden voor de begin- en huidige stand bewaard.
+De huidige waarde staat op de balans; de mutatie telt mee in het resultaat.
+Beginnende voorraad is bestaand vermogen en geen opbrengst. Aankopen moeten ook
+bij Uitgaven worden geregistreerd. Een voorraadpost met beginvoorraad wordt niet
+verwijderd wanneer hij is opgebruikt; het huidige aantal wordt dan nul.
 
 ### shadcn/ui zonder Radix
 

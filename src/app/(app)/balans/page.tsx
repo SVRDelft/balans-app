@@ -45,7 +45,8 @@ export default async function BalansPagina() {
           <p>
             Verschil: {formatteerEuro(balans.bankverschilCenten)}. Dit is het
             beste signaal dat er iets vergeten is — een niet-geregistreerde
-            ontvangst, een ontbrekende uitgave, of een beginsaldo dat niet klopt.{" "}
+            ontvangst, een ontbrekende uitgave, of een beginsaldo dat niet
+            klopt.{" "}
             <Link href="/bank" className="underline">
               Naar het banksaldo
             </Link>
@@ -77,8 +78,8 @@ export default async function BalansPagina() {
                 <TableCell>
                   Banksaldo volgens de administratie
                   <span className="block text-xs text-muted-foreground">
-                    beginsaldo {formatteerEuro(boekjaar.beginsaldoBankCenten)} plus
-                    ontvangsten min betaalde uitgaven
+                    beginsaldo {formatteerEuro(boekjaar.beginsaldoBankCenten)}{" "}
+                    plus ontvangsten min betaalde uitgaven
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
@@ -96,6 +97,20 @@ export default async function BalansPagina() {
                   <Bedrag centen={balans.debiteurenCenten} />
                 </TableCell>
               </TableRow>
+              <TableRow>
+                <TableCell>
+                  <Link href="/voorraad" className="hover:underline">
+                    Spullen & voorraad
+                  </Link>
+                  <span className="block text-xs text-muted-foreground">
+                    {cijfers.voorraadposten.length} soorten spullen, tegen
+                    boekwaarde
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Bedrag centen={balans.voorraadCenten} />
+                </TableCell>
+              </TableRow>
             </TableBody>
             <TableFooter>
               <TableRow>
@@ -111,7 +126,9 @@ export default async function BalansPagina() {
         <Card>
           <CardHeader>
             <CardTitle>Passiva</CardTitle>
-            <CardDescription>Wat de SVR schuldig is en het vermogen</CardDescription>
+            <CardDescription>
+              Wat de SVR schuldig is en het vermogen
+            </CardDescription>
           </CardHeader>
           <Table>
             <TableBody>
@@ -136,7 +153,7 @@ export default async function BalansPagina() {
                 <TableCell>
                   Resultaat lopend boekjaar
                   <span className="block text-xs text-muted-foreground">
-                    gerealiseerde inkomsten min uitgaven
+                    inkomsten min uitgaven, plus de voorraadmutatie
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
@@ -148,8 +165,8 @@ export default async function BalansPagina() {
                   <TableCell>
                     Beginbalans: overige vorderingen en schulden
                     <span className="block text-xs text-muted-foreground">
-                      verschil tussen het beginsaldo van de bank en het eigen
-                      vermogen aan het begin van het jaar
+                      beginsaldo bank plus beginvoorraad, min het eigen vermogen
+                      aan het begin van het jaar
                     </span>
                   </TableCell>
                   <TableCell className="text-right">

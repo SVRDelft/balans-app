@@ -5,6 +5,7 @@ import { haalBoekjaarContext } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import { haalBoekjaarCijfers } from "@/lib/rapportage";
 import { OverdrachtDocument } from "@/lib/pdf/overdracht-document";
+import { logoVoorPdf } from "@/lib/logo";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,36 @@ export async function GET() {
   const buffer = await renderToBuffer(
     OverdrachtDocument({
       gegevens: {
+        logoSrc: await logoVoorPdf(instellingen),
+        contactregels: instellingen
+          ? [
+              [
+                instellingen.adres,
+                `${instellingen.postcode} ${instellingen.plaats}`.trim(),
+                instellingen.land,
+              ]
+                .filter(Boolean)
+                .join(" · "),
+              [
+                instellingen.contactpersoon,
+                instellingen.email,
+                instellingen.telefoon,
+                instellingen.website,
+              ]
+                .filter(Boolean)
+                .join(" · "),
+              [
+                instellingen.kvkNummer ? `KvK ${instellingen.kvkNummer}` : "",
+                instellingen.btwNummer
+                  ? `Btw-id ${instellingen.btwNummer}`
+                  : "",
+                instellingen.iban ? `IBAN ${instellingen.iban}` : "",
+              ]
+                .filter(Boolean)
+                .join(" · "),
+            ].filter(Boolean)
+          : [],
+        voorraadposten: cijfers.voorraadposten,
         organisatieNaam:
           instellingen?.organisatieNaam ?? "StudieVerenigingenRaad Delft",
         boekjaarNaam: boekjaar.naam,

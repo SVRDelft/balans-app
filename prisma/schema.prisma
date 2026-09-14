@@ -3,9 +3,7 @@
 // Bedragen staan overal als geheel aantal eurocenten (Int), nooit als float.
 // Datums staan in UTC; de interface toont ze in Europe/Amsterdam.
 //
-// Er staan bewust geen enums in dit schema: SQLite ondersteunt die niet en de
-// overstap naar Postgres moet alleen een wijziging van de provider zijn. De
-// toegestane waarden staan in src/lib/domein.ts.
+// De toegestane waarden voor statussen staan in src/lib/domein.ts.
 
 generator client {
   provider = "prisma-client"
@@ -13,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   // De verbindingsgegevens staan in prisma7.config.ts (Prisma 7).
 }
 
@@ -31,6 +29,14 @@ model Instellingen {
   email            String @default("")
   iban             String @default("")
   kvkNummer        String @default("")
+  contactpersoon   String @default("")
+  telefoon         String @default("")
+  website          String @default("")
+  land             String @default("Nederland")
+  btwNummer        String @default("")
+  logoData         Bytes?
+  logoMimeType     String?
+  logoNaam         String?
   /// De SVR is niet btw-plichtig. Eén plek om dat te veranderen.
   btwPlichtig      Boolean @default(false)
   /// Hele procenten, bijvoorbeeld 21. Alleen gebruikt als btwPlichtig aanstaat.
@@ -71,6 +77,7 @@ model Boekjaar {
   uitgaven         Uitgave[]
   evenementen      Evenement[]
   banksaldi        Banksaldo[]
+  voorraadposten   Voorraadpost[]
 }
 
 // ---------------------------------------------------------------------------
@@ -89,6 +96,12 @@ model Relatie {
   adres          String?
   postcode       String?
   plaats         String?
+  land           String @default("Nederland")
+  telefoon       String @default("")
+  website        String @default("")
+  kvkNummer      String @default("")
+  btwNummer      String @default("")
+  iban           String @default("")
   actief         Boolean @default(true)
   /// Alleen zinvol bij studieverenigingen: krijgt deze vereniging de
   /// jaarlijkse bijdragefactuur?
@@ -422,6 +435,25 @@ model Banksaldo {
   ingevoerdDoor String?
 
   @@index([boekjaarId, datum])
+}
+
+/// Aantallen en boekwaarden van spullen per boekjaar.
+model Voorraadpost {
+  id                       String @id @default(cuid())
+  boekjaarId               String
+  boekjaar                 Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+  naam                     String
+  eenheid                  String @default("stuks")
+  beginAantal               Int @default(0)
+  beginWaardePerStukCenten  Int @default(0)
+  aantal                   Int @default(0)
+  waardePerStukCenten       Int @default(0)
+  locatie                  String @default("")
+  notities                 String @default("")
+  bijgewerktOp             DateTime @updatedAt
+
+  @@unique([boekjaarId, naam])
+  @@index([boekjaarId])
 }
 
 model Auditlog {

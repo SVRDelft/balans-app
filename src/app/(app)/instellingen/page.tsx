@@ -8,7 +8,9 @@ import { InstellingenFormulier } from "./formulier";
 export const metadata: Metadata = { title: "Instellingen" };
 
 export default async function InstellingenPagina() {
-  const instellingen = await db.instellingen.findUnique({ where: { id: "svr" } });
+  const instellingen = await db.instellingen.findUnique({
+    where: { id: "svr" },
+  });
 
   return (
     <>
@@ -23,6 +25,14 @@ export default async function InstellingenPagina() {
           email: instellingen?.email ?? "",
           iban: instellingen?.iban ?? "",
           kvkNummer: instellingen?.kvkNummer ?? "",
+          contactpersoon: instellingen?.contactpersoon ?? "",
+          telefoon: instellingen?.telefoon ?? "",
+          website: instellingen?.website ?? "",
+          land: instellingen?.land ?? "Nederland",
+          btwNummer: instellingen?.btwNummer ?? "",
+          logoNaam: instellingen?.logoNaam ?? "SVR-logo",
+          eigenLogo: Boolean(instellingen?.logoData),
+          logoVersie: instellingen?.bijgewerktOp.toISOString() ?? "standaard",
           btwPlichtig: instellingen?.btwPlichtig ?? false,
           btwPercentage: instellingen?.btwPercentage ?? 21,
           betaaltermijnDagen: instellingen?.betaaltermijnDagen ?? 30,

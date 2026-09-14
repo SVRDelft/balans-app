@@ -1,6 +1,6 @@
 // Startgegevens voor een nieuwe installatie. Het script is herhaalbaar: het
 // werkt bestaande rijen bij in plaats van ze te verdubbelen.
-import "dotenv/config";
+import "../src/lib/env";
 
 import { db } from "../src/lib/db";
 import { maakDag } from "../src/lib/datum";

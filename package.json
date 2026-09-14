@@ -20,8 +20,8 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@libsql/client": "^0.18.0",
-    "@prisma/adapter-libsql": "^7.10.0",
+    "@next/env": "^16.3.5",
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@react-pdf/renderer": "^4.9.0",
@@ -30,15 +30,18 @@
     "exceljs": "^4.4.0",
     "lucide-react": "^1.46.0",
     "next": "16.3.5",
+    "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
+    "sharp": "^0.35.4",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.2.4",

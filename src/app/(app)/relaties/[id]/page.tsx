@@ -23,7 +23,9 @@ export default async function RelatiePagina({
   if (!relatie) notFound();
 
   const koppelingen =
-    relatie._count.facturen + relatie._count.uitgaven + relatie._count.deelnemers;
+    relatie._count.facturen +
+    relatie._count.uitgaven +
+    relatie._count.deelnemers;
 
   return (
     <>
@@ -47,6 +49,12 @@ export default async function RelatiePagina({
           adres: relatie.adres ?? "",
           postcode: relatie.postcode ?? "",
           plaats: relatie.plaats ?? "",
+          land: relatie.land,
+          telefoon: relatie.telefoon,
+          website: relatie.website,
+          kvkNummer: relatie.kvkNummer,
+          btwNummer: relatie.btwNummer,
+          iban: relatie.iban,
           actief: relatie.actief,
           bijdragePlichtig: relatie.bijdragePlichtig,
           notities: relatie.notities ?? "",

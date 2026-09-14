@@ -92,8 +92,9 @@ export default async function OverdrachtPagina() {
             <CardTitle>Downloaden</CardTitle>
             <CardDescription>
               Beide bestanden bevatten de exploitatie, de balans, het
-              debiteurenoverzicht en de afstemming per evenement. Het
-              Excel-bestand bevat daarnaast alle facturen en alle uitgaven.
+              debiteurenoverzicht, de spullen met aantallen en waarde en de
+              afstemming per evenement. Het Excel-bestand bevat daarnaast alle
+              facturen en alle uitgaven.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -141,11 +142,11 @@ export default async function OverdrachtPagina() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
           <p>
-            De administratie loopt van {formatteerDatum(boekjaar.startDatum)} tot{" "}
-            {formatteerDatum(boekjaar.eindDatum)}. Factuurnummers beginnen met{" "}
-            <span className="font-mono">{boekjaar.factuurPrefix}</span> en lopen
-            door; verwijderde concepten laten een gat achter en hun nummer wordt
-            nooit opnieuw uitgegeven.
+            De administratie loopt van {formatteerDatum(boekjaar.startDatum)}{" "}
+            tot {formatteerDatum(boekjaar.eindDatum)}. Factuurnummers beginnen
+            met <span className="font-mono">{boekjaar.factuurPrefix}</span> en
+            lopen door; verwijderde concepten laten een gat achter en hun nummer
+            wordt nooit opnieuw uitgegeven.
           </p>
           <p>
             Maak voor het volgende bestuursjaar een nieuw boekjaar aan bij{" "}
@@ -154,11 +155,12 @@ export default async function OverdrachtPagina() {
             </Link>
             , zet het beginsaldo van de bank en het eigen vermogen op de
             eindstand van dit jaar, en activeer het pas als je erin gaat werken.
-            Dit jaar blijft daarna gewoon te bekijken.
+            Neem vervolgens bij Spullen & voorraad de eindvoorraad over als
+            beginvoorraad. Dit jaar blijft daarna gewoon te bekijken.
           </p>
           <p>
-            De bonnetjes zitten in de database zelf, dus een kopie van het
-            databasebestand bevat de volledige administratie inclusief bijlagen.
+            De bonnetjes en het gekozen logo zitten in de Postgres-database. Een
+            volledige databaseback-up bevat ook deze bijlagen.
           </p>
         </CardContent>
       </Card>

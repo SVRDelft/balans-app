@@ -11,6 +11,7 @@ import {
   FileText,
   LayoutDashboard,
   Receipt,
+  Package,
   Scale,
   Settings,
   Table2,
@@ -42,6 +43,7 @@ const GROEPEN: { titel: string; items: NavItem[] }[] = [
       { href: "/uitgaven", label: "Uitgaven", icoon: Receipt },
       { href: "/evenementen", label: "Evenementen", icoon: CalendarDays },
       { href: "/bank", label: "Banksaldo", icoon: Banknote },
+      { href: "/voorraad", label: "Spullen & voorraad", icoon: Package },
     ],
   },
   {

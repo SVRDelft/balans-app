@@ -1,5 +1,6 @@
 import {
   Document,
+  Image as PdfImage,
   Page,
   StyleSheet,
   Text,
@@ -10,6 +11,7 @@ import { formatteerDatum } from "@/lib/datum";
 import { formatteerEuro } from "@/lib/geld";
 
 export interface FactuurPdfGegevens {
+  logoSrc: string;
   nummer: string;
   omschrijving: string;
   factuurdatum: Date;
@@ -34,6 +36,10 @@ export interface FactuurPdfGegevens {
     adres: string | null;
     postcode: string | null;
     plaats: string | null;
+    land: string;
+    email: string | null;
+    kvkNummer: string;
+    btwNummer: string;
   };
 
   afzender: {
@@ -47,6 +53,11 @@ export interface FactuurPdfGegevens {
     btwPlichtig: boolean;
     btwPercentage: number;
     voetnoot: string;
+    contactpersoon: string;
+    land: string;
+    telefoon: string;
+    website: string;
+    btwNummer: string;
   };
 }
 
@@ -62,7 +73,7 @@ const stijl = StyleSheet.create({
   },
   stempel: {
     position: "absolute",
-    top: 40,
+    top: 26,
     right: 48,
     fontSize: 9,
     color: "#b23b3b",
@@ -74,10 +85,25 @@ const stijl = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 28,
   },
-  organisatie: { fontSize: 14, fontFamily: "Helvetica-Bold" },
+  organisatie: {
+    fontSize: 14,
+    lineHeight: 1.25,
+    marginBottom: 4,
+    fontFamily: "Helvetica-Bold",
+  },
   klein: { fontSize: 9, color: "#5b6472" },
-  titel: { fontSize: 18, fontFamily: "Helvetica-Bold", textAlign: "right" },
-  blokken: { flexDirection: "row", justifyContent: "space-between", marginBottom: 24 },
+  titel: {
+    fontSize: 18,
+    lineHeight: 1.25,
+    marginBottom: 6,
+    fontFamily: "Helvetica-Bold",
+    textAlign: "right",
+  },
+  blokken: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
   blok: { width: "48%" },
   blokkop: {
     fontSize: 8,
@@ -144,7 +170,16 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
         {factuur.isConcept ? <Text style={stijl.stempel}>CONCEPT</Text> : null}
 
         <View style={stijl.kop}>
-          <View>
+          <View style={{ width: "64%" }}>
+            <PdfImage
+              src={factuur.logoSrc}
+              style={{
+                width: 64,
+                height: 64,
+                objectFit: "contain",
+                marginBottom: 8,
+              }}
+            />
             <Text style={stijl.organisatie}>
               {factuur.afzender.organisatieNaam}
             </Text>
@@ -159,8 +194,20 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
             {factuur.afzender.email ? (
               <Text style={stijl.klein}>{factuur.afzender.email}</Text>
             ) : null}
+            {[
+              factuur.afzender.land,
+              factuur.afzender.contactpersoon,
+              factuur.afzender.telefoon,
+              factuur.afzender.website,
+            ]
+              .filter(Boolean)
+              .map((tekst, index) => (
+                <Text key={index} style={stijl.klein}>
+                  {tekst}
+                </Text>
+              ))}
           </View>
-          <View>
+          <View style={{ width: "32%" }}>
             <Text style={stijl.titel}>
               {factuur.isCredit ? "Creditfactuur" : "Factuur"}
             </Text>
@@ -177,12 +224,28 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
             {factuur.relatie.contactpersoon ? (
               <Text>{factuur.relatie.contactpersoon}</Text>
             ) : null}
-            {factuur.relatie.adres ? <Text>{factuur.relatie.adres}</Text> : null}
+            {factuur.relatie.adres ? (
+              <Text>{factuur.relatie.adres}</Text>
+            ) : null}
             {factuur.relatie.postcode || factuur.relatie.plaats ? (
               <Text>
                 {factuur.relatie.postcode} {factuur.relatie.plaats}
               </Text>
             ) : null}
+            {[
+              factuur.relatie.land,
+              factuur.relatie.email,
+              factuur.relatie.kvkNummer
+                ? `KvK ${factuur.relatie.kvkNummer}`
+                : "",
+              factuur.relatie.btwNummer
+                ? `Btw-id ${factuur.relatie.btwNummer}`
+                : "",
+            ]
+              .filter(Boolean)
+              .map((tekst, index) => (
+                <Text key={index}>{tekst}</Text>
+              ))}
           </View>
 
           <View style={stijl.blok}>
@@ -265,6 +328,9 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
               ? `   KvK ${factuur.afzender.kvkNummer}`
               : ""}
             {"   "}
+            {factuur.afzender.btwNummer
+              ? `Btw-id ${factuur.afzender.btwNummer}   `
+              : ""}
             {factuur.afzender.btwPlichtig
               ? `Btw ${factuur.afzender.btwPercentage}% inbegrepen`
               : "Geen btw verschuldigd"}

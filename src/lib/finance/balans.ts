@@ -14,6 +14,8 @@ export interface BalansInvoer {
 
   gerealiseerdeInkomstenCenten: number;
   gerealiseerdeUitgavenCenten: number;
+  voorraadBeginCenten?: number;
+  voorraadCenten?: number;
 
   /** Laatst handmatig ingevoerde banksaldo, of null als dat er niet is. */
   ingevoerdBanksaldoCenten: number | null;
@@ -24,12 +26,14 @@ export interface Balans {
   administratiefBanksaldoCenten: number;
   debiteurenCenten: number;
   totaalActivaCenten: number;
+  voorraadCenten: number;
+  voorraadMutatieCenten: number;
 
   crediteurenCenten: number;
   eigenVermogenBeginCenten: number;
   resultaatCenten: number;
   /**
-   * Verschil tussen het beginsaldo van de bank en het beginsaldo van het eigen
+   * Verschil tussen bank plus voorraad bij aanvang en het beginsaldo van het eigen
    * vermogen. Dat verschil zijn vorderingen of schulden uit het vorige jaar die
    * niet apart zijn ingevoerd. Staat als losse regel op de balans, zodat de
    * balans altijd sluit en het verschil zichtbaar blijft.
@@ -45,24 +49,31 @@ export interface Balans {
 }
 
 /**
- * De balans van het lopende boekjaar. Activa zijn het banksaldo en de
+ * De balans van het lopende boekjaar. Activa zijn bank, voorraad en
  * openstaande debiteuren; passiva de crediteuren, het eigen vermogen aan het
  * begin van het jaar en het resultaat tot nu toe.
  */
 export function berekenBalans(invoer: BalansInvoer): Balans {
+  const voorraadBeginCenten = invoer.voorraadBeginCenten ?? 0;
+  const voorraadCenten = invoer.voorraadCenten ?? 0;
+  const voorraadMutatieCenten = voorraadCenten - voorraadBeginCenten;
   const administratiefBanksaldoCenten =
     invoer.beginsaldoBankCenten +
     invoer.ontvangenBetalingenCenten -
     invoer.betaaldeUitgavenCenten;
 
   const resultaatCenten =
-    invoer.gerealiseerdeInkomstenCenten - invoer.gerealiseerdeUitgavenCenten;
+    invoer.gerealiseerdeInkomstenCenten -
+    invoer.gerealiseerdeUitgavenCenten +
+    voorraadMutatieCenten;
 
   const beginbalansverschilCenten =
-    invoer.beginsaldoBankCenten - invoer.beginsaldoEigenVermogenCenten;
+    invoer.beginsaldoBankCenten +
+    voorraadBeginCenten -
+    invoer.beginsaldoEigenVermogenCenten;
 
   const totaalActivaCenten =
-    administratiefBanksaldoCenten + invoer.debiteurenCenten;
+    administratiefBanksaldoCenten + invoer.debiteurenCenten + voorraadCenten;
 
   const totaalPassivaCenten =
     invoer.crediteurenCenten +
@@ -74,6 +85,8 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
     administratiefBanksaldoCenten,
     debiteurenCenten: invoer.debiteurenCenten,
     totaalActivaCenten,
+    voorraadCenten,
+    voorraadMutatieCenten,
 
     crediteurenCenten: invoer.crediteurenCenten,
     eigenVermogenBeginCenten: invoer.beginsaldoEigenVermogenCenten,

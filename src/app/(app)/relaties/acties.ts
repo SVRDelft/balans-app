@@ -9,27 +9,20 @@ import { vereisSessie } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { RELATIE_TYPES } from "@/lib/domein";
 import { voerUit, type ActieStaat } from "@/lib/acties";
+import { contactVelden, leesContactgegevens } from "@/lib/contactgegevens";
 
 const relatieSchema = z.object({
+  ...contactVelden,
   type: z.enum(RELATIE_TYPES),
   naam: z.string().trim().min(1, "Vul een naam in.").max(120),
-  contactpersoon: z.string().trim().max(120).optional(),
-  email: z.union([z.literal(""), z.email("Dit is geen geldig e-mailadres.")]),
-  adres: z.string().trim().max(200).optional(),
-  postcode: z.string().trim().max(20).optional(),
-  plaats: z.string().trim().max(100).optional(),
   notities: z.string().trim().max(2000).optional(),
 });
 
 function leesFormulier(formulier: FormData) {
   return relatieSchema.safeParse({
+    ...leesContactgegevens(formulier),
     type: formulier.get("type"),
     naam: formulier.get("naam"),
-    contactpersoon: formulier.get("contactpersoon") ?? undefined,
-    email: formulier.get("email") ?? "",
-    adres: formulier.get("adres") ?? undefined,
-    postcode: formulier.get("postcode") ?? undefined,
-    plaats: formulier.get("plaats") ?? undefined,
     notities: formulier.get("notities") ?? undefined,
   });
 }
@@ -68,7 +61,10 @@ export async function bewaarRelatie(
     const id = String(formulier.get("id") ?? "");
 
     if (id) {
-      const relatie = await db.relatie.update({ where: { id }, data: gegevens });
+      const relatie = await db.relatie.update({
+        where: { id },
+        data: gegevens,
+      });
       await logAudit({
         gebruiker: sessie.naam,
         entiteit: "Relatie",
@@ -107,7 +103,9 @@ export async function verwijderRelatie(
     const relatie = await db.relatie.findUnique({
       where: { id },
       include: {
-        _count: { select: { facturen: true, uitgaven: true, deelnemers: true } },
+        _count: {
+          select: { facturen: true, uitgaven: true, deelnemers: true },
+        },
       },
     });
     if (!relatie) return { fout: "Deze relatie bestaat niet meer." };

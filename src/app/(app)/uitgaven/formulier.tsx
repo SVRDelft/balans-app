@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input, Select, Textarea, Veld } from "@/components/ui/input";
 import { Melding } from "@/components/ui/melding";
 import type { ActieStaat } from "@/lib/acties";
+import { BIJLAGE_TE_GROOT, MAX_BIJLAGE_BYTES } from "@/lib/bijlagen";
 
 import { bewaarUitgave } from "./acties";
 
@@ -164,7 +165,9 @@ export function UitgaveFormulier({
               id="evenementId"
               name="evenementId"
               value={evenementId}
-              onChange={(gebeurtenis) => setEvenementId(gebeurtenis.target.value)}
+              onChange={(gebeurtenis) =>
+                setEvenementId(gebeurtenis.target.value)
+              }
             >
               <option value="">Geen</option>
               {evenementen.map((evenement) => (
@@ -182,13 +185,23 @@ export function UitgaveFormulier({
             toelichting={
               waarden.heeftBijlage
                 ? "Er is al een bestand gekoppeld. Een nieuw bestand vervangt het oude."
-                : "JPG, PNG, WEBP, HEIC of PDF, maximaal 5 MB."
+                : "JPG, PNG, WEBP, HEIC of PDF, maximaal 4 MB."
             }
           >
             <Input
               id="bijlage"
               name="bijlage"
               type="file"
+              onChange={(gebeurtenis) => {
+                const invoer = gebeurtenis.currentTarget;
+                const bestand = invoer.files?.[0];
+                invoer.setCustomValidity(
+                  bestand && bestand.size > MAX_BIJLAGE_BYTES
+                    ? BIJLAGE_TE_GROOT
+                    : "",
+                );
+                invoer.reportValidity();
+              }}
               accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf"
               className="py-1.5"
             />
@@ -206,9 +219,9 @@ export function UitgaveFormulier({
                 Het bedrag is definitief
                 {evenementId ? (
                   <span className="block text-xs text-muted-foreground">
-                    Zolang dit uit staat blokkeert deze uitgave de omslag van het
-                    evenement. Laat het uit bij bijvoorbeeld een open bar, waarvan
-                    de eindafrekening later komt.
+                    Zolang dit uit staat blokkeert deze uitgave de omslag van
+                    het evenement. Laat het uit bij bijvoorbeeld een open bar,
+                    waarvan de eindafrekening later komt.
                   </span>
                 ) : null}
               </span>
@@ -219,7 +232,9 @@ export function UitgaveFormulier({
                 type="checkbox"
                 name="betaald"
                 checked={betaald}
-                onChange={(gebeurtenis) => setBetaald(gebeurtenis.target.checked)}
+                onChange={(gebeurtenis) =>
+                  setBetaald(gebeurtenis.target.checked)
+                }
                 className="size-4 rounded border-input"
               />
               Al betaald aan de leverancier

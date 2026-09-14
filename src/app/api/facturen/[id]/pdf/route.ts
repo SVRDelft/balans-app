@@ -4,6 +4,7 @@ import { haalSessie } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { betaaldBedrag } from "@/lib/facturen";
 import { FactuurDocument } from "@/lib/pdf/factuur-document";
+import { logoVoorPdf } from "@/lib/logo";
 
 // @react-pdf/renderer draait op Node, niet op de edge runtime.
 export const runtime = "nodejs";
@@ -39,6 +40,7 @@ export async function GET(
   const buffer = await renderToBuffer(
     FactuurDocument({
       factuur: {
+        logoSrc: await logoVoorPdf(instellingen),
         nummer: factuur.nummer,
         omschrijving: factuur.omschrijving,
         factuurdatum: factuur.factuurdatum,
@@ -61,6 +63,10 @@ export async function GET(
           adres: factuur.relatie.adres,
           postcode: factuur.relatie.postcode,
           plaats: factuur.relatie.plaats,
+          land: factuur.relatie.land,
+          email: factuur.relatie.email,
+          kvkNummer: factuur.relatie.kvkNummer,
+          btwNummer: factuur.relatie.btwNummer,
         },
         afzender: {
           organisatieNaam:
@@ -74,6 +80,11 @@ export async function GET(
           btwPlichtig: instellingen?.btwPlichtig ?? false,
           btwPercentage: instellingen?.btwPercentage ?? 0,
           voetnoot: instellingen?.factuurVoetnoot ?? "",
+          contactpersoon: instellingen?.contactpersoon ?? "",
+          land: instellingen?.land ?? "",
+          telefoon: instellingen?.telefoon ?? "",
+          website: instellingen?.website ?? "",
+          btwNummer: instellingen?.btwNummer ?? "",
         },
       },
     }),

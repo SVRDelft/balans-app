@@ -2,25 +2,10 @@
 # Draait één keer als de Codespace wordt aangemaakt.
 set -euo pipefail
 
-echo "Afhankelijkheden installeren…"
-npm install
+echo "Afhankelijkheden installeren..."
+npm ci
 
-if [ ! -f .env ]; then
-  echo ".env aanmaken…"
-  WACHTWOORD="svr-$(head -c 4 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-  GEHEIM="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-  cat > .env <<EOF
-DATABASE_URL="file:./prisma/dev.db"
-APP_WACHTWOORD="${WACHTWOORD}"
-AUTH_SECRET="${GEHEIM}"
-EOF
-  echo "Het inlogwachtwoord staat in .env: ${WACHTWOORD}"
-fi
-
-echo "Database klaarzetten…"
-npx prisma migrate deploy
-npx prisma db seed
-
-echo
-echo "Klaar. Start de app met:  npm run dev"
-echo "Het inlogwachtwoord staat in het bestand .env"
+echo "Verbind het Vercel-project: npx vercel link"
+echo "Haal de ontwikkelvariabelen op: npx vercel env pull .env.local"
+echo "Alleen voor een lege database: npm run setup"
+echo "Start daarna de app: npm run dev"

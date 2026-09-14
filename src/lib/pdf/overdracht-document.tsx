@@ -1,4 +1,11 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import {
+  Document,
+  Image as PdfImage,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+} from "@react-pdf/renderer";
 
 import { formatteerDatum } from "@/lib/datum";
 import { formatteerEuro } from "@/lib/geld";
@@ -7,6 +14,8 @@ import type { Exploitatie, PostGroep } from "@/lib/finance/exploitatie";
 import type { Ouderdomsanalyse } from "@/lib/finance/debiteuren";
 
 export interface OverdrachtGegevens {
+  logoSrc: string;
+  contactregels: string[];
   organisatieNaam: string;
   boekjaarNaam: string;
   startDatum: Date;
@@ -19,6 +28,17 @@ export interface OverdrachtGegevens {
   ouderdom: Ouderdomsanalyse;
   ingevoerdBanksaldoCenten: number | null;
   banksaldoDatum: Date | null;
+  voorraadposten: {
+    id: string;
+    naam: string;
+    eenheid: string;
+    beginAantal: number;
+    beginWaardePerStukCenten: number;
+    aantal: number;
+    waardePerStukCenten: number;
+    locatie: string;
+    notities: string;
+  }[];
 
   debiteuren: {
     nummer: string;
@@ -45,18 +65,29 @@ export interface OverdrachtGegevens {
 
 const stijl = StyleSheet.create({
   pagina: {
-    paddingTop: 44,
+    paddingTop: 96,
     paddingBottom: 48,
     paddingHorizontal: 44,
-    fontSize: 9,
+    fontSize: 8.5,
     fontFamily: "Helvetica",
     color: "#1c2330",
-    lineHeight: 1.45,
+    lineHeight: 1.2,
   },
-  titel: { fontSize: 17, fontFamily: "Helvetica-Bold" },
-  ondertitel: { fontSize: 10, color: "#5b6472", marginBottom: 18 },
+  titel: {
+    fontSize: 17,
+    lineHeight: 1.25,
+    marginBottom: 6,
+    fontFamily: "Helvetica-Bold",
+  },
+  ondertitel: {
+    fontSize: 9,
+    lineHeight: 1.3,
+    color: "#5b6472",
+    marginBottom: 10,
+  },
   sectie: {
     fontSize: 12,
+    lineHeight: 1.25,
     fontFamily: "Helvetica-Bold",
     marginTop: 16,
     marginBottom: 6,
@@ -65,14 +96,14 @@ const stijl = StyleSheet.create({
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
     color: "#5b6472",
-    marginTop: 8,
+    marginTop: 6,
     marginBottom: 3,
   },
   rij: {
     flexDirection: "row",
     borderBottomWidth: 0.5,
     borderBottomColor: "#e2e6ec",
-    paddingVertical: 3,
+    paddingVertical: 2,
   },
   koprij: {
     flexDirection: "row",
@@ -97,10 +128,35 @@ const stijl = StyleSheet.create({
     left: 44,
     right: 44,
     fontSize: 7.5,
+    height: 14,
     color: "#5b6472",
     textAlign: "center",
   },
 });
+
+function Rapportkop({ gegevens }: { gegevens: OverdrachtGegevens }) {
+  return (
+    <View
+      fixed
+      style={{
+        position: "absolute",
+        top: 28,
+        left: 44,
+        right: 44,
+        flexDirection: "row",
+        alignItems: "center",
+      }}
+    >
+      <PdfImage
+        src={gegevens.logoSrc}
+        style={{ width: 44, height: 44, objectFit: "contain", marginRight: 12 }}
+      />
+      <Text style={{ fontSize: 11, fontFamily: "Helvetica-Bold", flex: 1 }}>
+        {gegevens.organisatieNaam}
+      </Text>
+    </View>
+  );
+}
 
 function Bedragrij({
   label,
@@ -164,17 +220,22 @@ export function OverdrachtDocument({
       author={gegevens.organisatieNaam}
     >
       <Page size="A4" style={stijl.pagina}>
+        <Rapportkop gegevens={gegevens} />
         <Text style={stijl.titel}>
           Financiële overdracht {gegevens.boekjaarNaam}
         </Text>
         <Text style={stijl.ondertitel}>
-          {gegevens.organisatieNaam} ·{" "}
-          {formatteerDatum(gegevens.startDatum)} t/m{" "}
-          {formatteerDatum(gegevens.eindDatum)} · opgesteld op{" "}
+          {gegevens.organisatieNaam} · {formatteerDatum(gegevens.startDatum)}{" "}
+          t/m {formatteerDatum(gegevens.eindDatum)} · opgesteld op{" "}
           {formatteerDatum(gegevens.gemaaktOp)}
           {gegevens.gemaaktDoor ? ` door ${gegevens.gemaaktDoor}` : ""}
         </Text>
 
+        {gegevens.contactregels.map((regel, index) => (
+          <Text key={index} style={{ fontSize: 8, color: "#5b6472" }}>
+            {regel}
+          </Text>
+        ))}
         <Text style={stijl.sectie}>Exploitatie</Text>
         <View style={stijl.koprij}>
           <Text style={[stijl.breed, stijl.vet]}>Post</Text>
@@ -214,6 +275,11 @@ export function OverdrachtDocument({
             gerealiseerd={e.totaalUitgavenGerealiseerdCenten}
           />
           <Bedragrij
+            label="Voorraadmutatie (huidige waarde min beginwaarde)"
+            begroot={0}
+            gerealiseerd={e.voorraadMutatieCenten}
+          />
+          <Bedragrij
             label="EINDSALDO"
             begroot={e.eindsaldoBegrootCenten}
             gerealiseerd={e.eindsaldoGerealiseerdCenten}
@@ -221,12 +287,15 @@ export function OverdrachtDocument({
           />
         </View>
 
-        <Text style={stijl.voet} fixed render={({ pageNumber, totalPages }) =>
-          `${gegevens.organisatieNaam} · overdracht ${gegevens.boekjaarNaam} · pagina ${pageNumber} van ${totalPages}`
-        } />
+        <View style={stijl.voet} fixed>
+          <Text>
+            {gegevens.organisatieNaam} · overdracht {gegevens.boekjaarNaam}
+          </Text>
+        </View>
       </Page>
 
       <Page size="A4" style={stijl.pagina}>
+        <Rapportkop gegevens={gegevens} />
         <Text style={stijl.sectie}>Balans</Text>
 
         <Text style={stijl.subsectie}>ACTIVA</Text>
@@ -234,26 +303,47 @@ export function OverdrachtDocument({
           label="Banksaldo volgens de administratie"
           gerealiseerd={b.administratiefBanksaldoCenten}
         />
-        <Bedragrij label="Openstaande debiteuren" gerealiseerd={b.debiteurenCenten} />
-        <Bedragrij label="Totaal activa" gerealiseerd={b.totaalActivaCenten} vet />
+        <Bedragrij
+          label="Openstaande debiteuren"
+          gerealiseerd={b.debiteurenCenten}
+        />
+        <Bedragrij label="Spullen & voorraad" gerealiseerd={b.voorraadCenten} />
+        <Bedragrij
+          label="Totaal activa"
+          gerealiseerd={b.totaalActivaCenten}
+          vet
+        />
 
         <Text style={stijl.subsectie}>PASSIVA</Text>
-        <Bedragrij label="Openstaande crediteuren" gerealiseerd={b.crediteurenCenten} />
+        <Bedragrij
+          label="Openstaande crediteuren"
+          gerealiseerd={b.crediteurenCenten}
+        />
         <Bedragrij
           label="Eigen vermogen begin boekjaar"
           gerealiseerd={b.eigenVermogenBeginCenten}
         />
-        <Bedragrij label="Resultaat lopend boekjaar" gerealiseerd={b.resultaatCenten} />
+        <Bedragrij
+          label="Resultaat lopend boekjaar"
+          gerealiseerd={b.resultaatCenten}
+        />
         {b.beginbalansverschilCenten !== 0 ? (
           <Bedragrij
             label="Beginbalans: overige vorderingen en schulden"
             gerealiseerd={b.beginbalansverschilCenten}
           />
         ) : null}
-        <Bedragrij label="Totaal passiva" gerealiseerd={b.totaalPassivaCenten} vet />
+        <Bedragrij
+          label="Totaal passiva"
+          gerealiseerd={b.totaalPassivaCenten}
+          vet
+        />
 
         <Text style={stijl.subsectie}>CONTROLES</Text>
-        <Bedragrij label="Activa min passiva" gerealiseerd={b.balansverschilCenten} />
+        <Bedragrij
+          label="Activa min passiva"
+          gerealiseerd={b.balansverschilCenten}
+        />
         {gegevens.ingevoerdBanksaldoCenten !== null ? (
           <>
             <Bedragrij
@@ -274,9 +364,9 @@ export function OverdrachtDocument({
 
         <Text style={stijl.sectie}>Openstaande debiteuren</Text>
         <Text style={{ color: "#5b6472", marginBottom: 4 }}>
-          Tot 30 dagen {formatteerEuro(gegevens.ouderdom.tot30)} · 30 tot 60 dagen{" "}
-          {formatteerEuro(gegevens.ouderdom.van30tot60)} · meer dan 60 dagen{" "}
-          {formatteerEuro(gegevens.ouderdom.meer60)}
+          Tot 30 dagen {formatteerEuro(gegevens.ouderdom.tot30)} · 30 tot 60
+          dagen {formatteerEuro(gegevens.ouderdom.van30tot60)} · meer dan 60
+          dagen {formatteerEuro(gegevens.ouderdom.meer60)}
         </Text>
         <View style={stijl.koprij}>
           <Text style={[stijl.smal, stijl.vet]}>Nummer</Text>
@@ -293,7 +383,9 @@ export function OverdrachtDocument({
           <View style={stijl.rij} key={factuur.nummer} wrap={false}>
             <Text style={stijl.smal}>{factuur.nummer}</Text>
             <Text style={stijl.breed}>{factuur.relatieNaam}</Text>
-            <Text style={stijl.smal}>{formatteerDatum(factuur.factuurdatum)}</Text>
+            <Text style={stijl.smal}>
+              {formatteerDatum(factuur.factuurdatum)}
+            </Text>
             <Text style={stijl.bedrag}>
               {formatteerEuro(factuur.openstaandCenten)}
             </Text>
@@ -309,7 +401,9 @@ export function OverdrachtDocument({
         <Text style={stijl.sectie}>Nog te betalen aan leveranciers</Text>
         <View style={stijl.koprij}>
           <Text style={[stijl.smal, stijl.vet]}>Datum</Text>
-          <Text style={[stijl.breed, stijl.vet]}>Leverancier en omschrijving</Text>
+          <Text style={[stijl.breed, stijl.vet]}>
+            Leverancier en omschrijving
+          </Text>
           <Text style={[stijl.bedrag, stijl.vet]}>Bedrag</Text>
         </View>
         {gegevens.crediteuren.length === 0 ? (
@@ -361,15 +455,102 @@ export function OverdrachtDocument({
         ))}
 
         <Text style={{ marginTop: 16, color: "#5b6472" }}>
-          Uitgangspunt is het baten-lastenstelsel: een factuur telt mee zodra hij
-          verstuurd is en een uitgave zodra hij geregistreerd is, ongeacht of er
-          al betaald is. Concepten, oninbare en gecrediteerde facturen tellen
-          niet mee als opbrengst.
+          Uitgangspunt is het baten-lastenstelsel: een factuur telt mee zodra
+          hij verstuurd is en een uitgave zodra hij geregistreerd is, ongeacht
+          of er al betaald is. Concepten, oninbare en gecrediteerde facturen
+          tellen niet mee als opbrengst.
         </Text>
 
-        <Text style={stijl.voet} fixed render={({ pageNumber, totalPages }) =>
-          `${gegevens.organisatieNaam} · overdracht ${gegevens.boekjaarNaam} · pagina ${pageNumber} van ${totalPages}`
-        } />
+        <View style={stijl.voet} fixed>
+          <Text>
+            {gegevens.organisatieNaam} · overdracht {gegevens.boekjaarNaam}
+          </Text>
+        </View>
+      </Page>
+      <Page size="A4" style={stijl.pagina}>
+        <Rapportkop gegevens={gegevens} />
+        <Text style={stijl.titel}>Spullen & voorraad</Text>
+        <Text style={stijl.ondertitel}>
+          {gegevens.boekjaarNaam} · aantallen en boekwaarde
+        </Text>
+        <View style={stijl.koprij}>
+          <Text style={[stijl.breed, stijl.vet]}>Spullen</Text>
+          <Text style={[stijl.bedrag, stijl.vet]}>Begin</Text>
+          <Text style={[stijl.bedrag, stijl.vet]}>Beginwaarde</Text>
+          <Text style={[stijl.bedrag, stijl.vet]}>Huidig</Text>
+          <Text style={[stijl.bedrag, stijl.vet]}>Huidige waarde</Text>
+        </View>
+        {gegevens.voorraadposten.length === 0 ? (
+          <Text style={{ marginTop: 8 }}>
+            Geen spullen vastgelegd in dit boekjaar.
+          </Text>
+        ) : null}
+        {gegevens.voorraadposten.map((post) => (
+          <View
+            key={post.id}
+            wrap={false}
+            style={{
+              borderBottomWidth: 0.5,
+              borderBottomColor: "#e2e6ec",
+              paddingVertical: 6,
+            }}
+          >
+            <View style={{ flexDirection: "row" }}>
+              <Text style={stijl.breed}>{post.naam}</Text>
+              <Text style={stijl.bedrag}>
+                {post.beginAantal} {post.eenheid}
+              </Text>
+              <Text style={stijl.bedrag}>
+                {formatteerEuro(
+                  post.beginAantal * post.beginWaardePerStukCenten,
+                )}
+              </Text>
+              <Text style={stijl.bedrag}>
+                {post.aantal} {post.eenheid}
+              </Text>
+              <Text style={stijl.bedrag}>
+                {formatteerEuro(post.aantal * post.waardePerStukCenten)}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 8, color: "#5b6472", marginTop: 3 }}>
+              Per {post.eenheid}: begin{" "}
+              {formatteerEuro(post.beginWaardePerStukCenten)}, huidig{" "}
+              {formatteerEuro(post.waardePerStukCenten)}
+              {post.locatie ? ` · Bewaarplaats: ${post.locatie}` : ""}
+            </Text>
+            {post.notities ? (
+              <Text style={{ fontSize: 8, color: "#5b6472" }}>
+                {post.notities}
+              </Text>
+            ) : null}
+          </View>
+        ))}
+        <View style={{ marginTop: 12 }}>
+          <Bedragrij
+            label="Waarde begin boekjaar"
+            gerealiseerd={b.voorraadCenten - b.voorraadMutatieCenten}
+          />
+          <Bedragrij
+            label="Huidige waarde op de balans"
+            gerealiseerd={b.voorraadCenten}
+            vet
+          />
+          <Bedragrij
+            label="Voorraadmutatie in het resultaat"
+            gerealiseerd={b.voorraadMutatieCenten}
+          />
+        </View>
+        <Text style={{ marginTop: 14, color: "#5b6472" }}>
+          Aankopen staan ook bij de uitgaven. De verandering in voorraadwaarde
+          corrigeert het resultaat voor spullen die nog aanwezig zijn of zijn
+          verbruikt. De beginvoorraad hoort bij het eigen vermogen aan het begin
+          van het boekjaar.
+        </Text>
+        <View style={stijl.voet} fixed>
+          <Text>
+            {gegevens.organisatieNaam} · overdracht {gegevens.boekjaarNaam}
+          </Text>
+        </View>
       </Page>
     </Document>
   );

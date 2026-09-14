@@ -1,0 +1,6 @@
+.env*
+!.env.example
+prisma/*.db*
+.devcontainer
+coverage
+.vercel

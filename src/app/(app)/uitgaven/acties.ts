@@ -10,8 +10,8 @@ import { db } from "@/lib/db";
 import { datumUitInvoer } from "@/lib/datum";
 import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
 import { leesTekst, leesVinkje, voerUit, type ActieStaat } from "@/lib/acties";
+import { BIJLAGE_TE_GROOT, MAX_BIJLAGE_BYTES } from "@/lib/bijlagen";
 
-const MAX_BIJLAGE_BYTES = 5 * 1024 * 1024;
 const TOEGESTANE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -29,7 +29,7 @@ async function leesBijlage(
   if (!(bestand instanceof File) || bestand.size === 0) return {};
 
   if (bestand.size > MAX_BIJLAGE_BYTES) {
-    return { fout: "Het bonnetje is groter dan 5 MB. Verklein het bestand." };
+    return { fout: BIJLAGE_TE_GROOT };
   }
   if (!TOEGESTANE_TYPES.includes(bestand.type)) {
     return {
@@ -74,7 +74,8 @@ export async function bewaarUitgave(
     const veldfouten: Record<string, string> = {};
     if (!omschrijving) veldfouten.omschrijving = "Vul een omschrijving in.";
     if (!leverancierNaam) veldfouten.leverancierNaam = "Vul de leverancier in.";
-    if (!begrotingspostId) veldfouten.begrotingspostId = "Kies een begrotingspost.";
+    if (!begrotingspostId)
+      veldfouten.begrotingspostId = "Kies een begrotingspost.";
     if (!datum) veldfouten.datum = "Vul een geldige datum in.";
     if (bedragCenten === null) veldfouten.bedrag = "Vul een bedrag in.";
 
@@ -108,10 +109,12 @@ export async function bewaarUitgave(
       const bestaand = await db.uitgave.findUnique({ where: { id } });
       if (!bestaand) return { fout: "Deze uitgave bestaat niet meer." };
 
-      if (bestaand.omslagrondeId && bestaand.bedragCenten !== gegevens.bedragCenten) {
+      if (
+        bestaand.omslagrondeId &&
+        bestaand.bedragCenten !== gegevens.bedragCenten
+      ) {
         return {
-          fout:
-            "Deze uitgave is al in een omslag verdeeld. Het bedrag wijzigen zou de al verstuurde facturen laten kloppen noch de afstemming. Boek het verschil als een nieuwe uitgave.",
+          fout: "Deze uitgave is al in een omslag verdeeld. Het bedrag wijzigen zou de al verstuurde facturen laten kloppen noch de afstemming. Boek het verschil als een nieuwe uitgave.",
         };
       }
 
@@ -180,8 +183,7 @@ export async function verwijderUitgave(
 
     if (uitgave.omslagrondeId) {
       return {
-        fout:
-          "Deze uitgave is al in een omslag verdeeld en kan niet verwijderd worden. Corrigeer via een creditfactuur of een tegenboeking.",
+        fout: "Deze uitgave is al in een omslag verdeeld en kan niet verwijderd worden. Corrigeer via een creditfactuur of een tegenboeking.",
       };
     }
 

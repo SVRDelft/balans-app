@@ -20,8 +20,8 @@ next-env.d.ts
 /prisma/*.db-wal
 
 # omgevingsvariabelen — .env bevat het wachtwoord
-.env
-.env*.local
+.env*
+!.env.example
 
 # door de Prisma CLI geïnstalleerde skills (symlinks, niet overdraagbaar)
 /.claude/skills/

@@ -1,33 +1,22 @@
-import path from "node:path";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
 // Bewust een relatief pad en niet de "@/"-alias: dit bestand wordt ook buiten
 // Next.js geladen, door het seed-script.
 import { PrismaClient } from "../generated/prisma/client";
 
-/**
- * Een relatief `file:`-pad wordt uitgerekend vanaf de hoofdmap van het project,
- * zodat de Prisma CLI en de applicatie gegarandeerd hetzelfde bestand gebruiken.
- * Een niet-`file:`-adres (libsql of Turso) wordt ongewijzigd doorgegeven.
- */
-export function bepaalDatabaseUrl(ruw = process.env.DATABASE_URL): string {
-  if (!ruw || ruw.trim() === "") {
+function maakClient(): PrismaClient {
+  const connectionString =
+    process.env.NEON_DATABASE_URL ?? process.env.DATABASE_URL;
+  if (!connectionString || !/^postgres(ql)?:\/\//.test(connectionString)) {
     throw new Error(
-      "DATABASE_URL ontbreekt. Kopieer .env.example naar .env en vul het in.",
+      "DATABASE_URL moet een Postgres-adres zijn. Haal de Vercel-variabelen op met vercel env pull .env.local.",
     );
   }
-  if (!ruw.startsWith("file:")) return ruw;
-
-  const pad = ruw.slice("file:".length);
-  if (pad === "" || path.isAbsolute(pad)) return ruw;
-
-  // turbopackIgnore: de bundler kan het pad niet statisch bepalen en zou
-  // anders het hele project meenemen in de build-output.
-  const absoluut = path.resolve(/* turbopackIgnore: true */ process.cwd(), pad);
-  return `file:${absoluut.replace(/\\/g, "/")}`;
-}
-
-function maakClient(): PrismaClient {
-  const adapter = new PrismaLibSql({ url: bepaalDatabaseUrl() });
+  const adapter = new PrismaPg({
+    connectionString,
+    max: 5,
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 10_000,
+  });
   return new PrismaClient({ adapter });
 }
 
