@@ -107,12 +107,15 @@ altijd op een inkomstenpost boeken; het formulier zet die daarom bovenaan.
 ### Bonnetjes in de database
 
 Bonnetjes en leveranciersfacturen worden als bestand in de database bewaard, niet
-op schijf. Twee redenen: een kopie van het databasebestand bevat dan de volledige
+op schijf. Twee redenen: een back-up van de database bevat dan de volledige
 administratie inclusief bijlagen, wat de overdracht een stuk simpeler maakt, en
-de app heeft geen schrijfbaar bestandssysteem nodig — dat scheelt gedoe bij een
-latere verhuizing naar Vercel.
+de app heeft geen schrijfbaar bestandssysteem nodig — dat is op Vercel ook niet
+beschikbaar.
 
-Maximaal 5 MB per bestand, in JPG, PNG, WEBP, HEIC of PDF.
+Maximaal 4 MB per bestand, in JPG, PNG, WEBP, HEIC of PDF. Die grens staat in
+`src/lib/bijlagen.ts` en hoort samen met `bodySizeLimit` in `next.config.ts`, dat
+op 4,5 MB staat: het verschil is de ruimte voor de rest van het formulier binnen
+de requestlimiet van Vercel. Verhoog je de een, doe dan ook de ander.
 
 ### Losse namen als deelnemer
 
