@@ -1,0 +1,445 @@
+// Datamodel van de financiële administratie van de SVR.
+//
+// Bedragen staan overal als geheel aantal eurocenten (Int), nooit als float.
+// Datums staan in UTC; de interface toont ze in Europe/Amsterdam.
+//
+// Er staan bewust geen enums in dit schema: SQLite ondersteunt die niet en de
+// overstap naar Postgres moet alleen een wijziging van de provider zijn. De
+// toegestane waarden staan in src/lib/domein.ts.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  // De verbindingsgegevens staan in prisma7.config.ts (Prisma 7).
+}
+
+// ---------------------------------------------------------------------------
+// Organisatie
+// ---------------------------------------------------------------------------
+
+/// Eén rij met de gegevens van de SVR zelf. Staat op de factuur.
+model Instellingen {
+  id               String @id @default("svr")
+  organisatieNaam  String @default("StudieVerenigingenRaad Delft")
+  adres            String @default("")
+  postcode         String @default("")
+  plaats           String @default("Delft")
+  email            String @default("")
+  iban             String @default("")
+  kvkNummer        String @default("")
+  /// De SVR is niet btw-plichtig. Eén plek om dat te veranderen.
+  btwPlichtig      Boolean @default(false)
+  /// Hele procenten, bijvoorbeeld 21. Alleen gebruikt als btwPlichtig aanstaat.
+  btwPercentage    Int     @default(21)
+  betaaltermijnDagen Int   @default(30)
+  factuurVoetnoot  String  @default("")
+  bijgewerktOp     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Boekjaar
+// ---------------------------------------------------------------------------
+
+model Boekjaar {
+  id            String   @id @default(cuid())
+  /// Bijvoorbeeld "SVR 62 · 2026-2027"
+  naam          String   @unique
+  /// Voorvoegsel voor factuurnummers, bijvoorbeeld "SVR62-2026"
+  factuurPrefix String   @unique
+  startDatum    DateTime
+  eindDatum     DateTime
+  /// Precies één boekjaar is actief; in de rest kan niet geschreven worden.
+  actief        Boolean  @default(false)
+
+  beginsaldoBankCenten          Int @default(0)
+  beginsaldoEigenVermogenCenten Int @default(0)
+
+  /// Loopt alleen op. Nummers worden nooit hergebruikt, ook niet na het
+  /// verwijderen van een concept.
+  factuurTeller Int @default(0)
+
+  notities     String?
+  aangemaaktOp DateTime @default(now())
+  bijgewerktOp DateTime @updatedAt
+
+  begrotingsposten Begrotingspost[]
+  facturen         Factuur[]
+  uitgaven         Uitgave[]
+  evenementen      Evenement[]
+  banksaldi        Banksaldo[]
+}
+
+// ---------------------------------------------------------------------------
+// Relaties
+// ---------------------------------------------------------------------------
+
+/// Studieverenigingen, personen en leveranciers. Relaties leven over
+/// boekjaren heen: de aangesloten verenigingen wisselen niet per jaar.
+model Relatie {
+  id             String  @id @default(cuid())
+  /// 'studievereniging' | 'persoon' | 'leverancier' | 'overig'
+  type           String
+  naam           String  @unique
+  contactpersoon String?
+  email          String?
+  adres          String?
+  postcode       String?
+  plaats         String?
+  actief         Boolean @default(true)
+  /// Alleen zinvol bij studieverenigingen: krijgt deze vereniging de
+  /// jaarlijkse bijdragefactuur?
+  bijdragePlichtig Boolean @default(false)
+  notities       String?
+  aangemaaktOp   DateTime @default(now())
+  bijgewerktOp   DateTime @updatedAt
+
+  facturen   Factuur[]
+  uitgaven   Uitgave[]
+  deelnemers Deelnemer[]
+
+  @@index([type])
+}
+
+// ---------------------------------------------------------------------------
+// Begroting
+// ---------------------------------------------------------------------------
+
+model Begrotingspost {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  code      String
+  naam      String
+  /// 'vast' (betaald uit de bijdragen) | 'omslag' (doorbelast aan deelnemers)
+  categorie String
+  /// 'inkomst' | 'uitgave'
+  soort     String
+
+  begrootCenten Int     @default(0)
+  volgorde      Int     @default(0)
+  notities      String?
+
+  factuurregels Factuurregel[]
+  uitgaven      Uitgave[]
+
+  evenementenAlsKostenpost    Evenement[] @relation("EvenementKostenpost")
+  evenementenAlsOpbrengstpost Evenement[] @relation("EvenementOpbrengstpost")
+
+  @@unique([boekjaarId, code])
+  @@index([boekjaarId, categorie, soort])
+}
+
+// ---------------------------------------------------------------------------
+// Facturen
+// ---------------------------------------------------------------------------
+
+model Factuur {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  /// Bijvoorbeeld "SVR62-2026-0001"
+  nummer     String @unique
+  volgnummer Int
+
+  relatieId String
+  relatie   Relatie @relation(fields: [relatieId], references: [id])
+
+  factuurdatum DateTime
+  vervaldatum  DateTime
+  omschrijving String
+
+  /// 'concept' | 'verstuurd' | 'deels_betaald' | 'betaald' | 'oninbaar' | 'gecrediteerd'
+  status String @default("concept")
+  /// 'normaal' | 'credit'
+  soort  String @default("normaal")
+
+  evenementId String?
+  evenement   Evenement? @relation(fields: [evenementId], references: [id])
+
+  omslagrondeId String?
+  omslagronde   Omslagronde? @relation(fields: [omslagrondeId], references: [id])
+
+  /// Een creditfactuur wijst naar de factuur die hij corrigeert.
+  crediteertFactuurId String?  @unique
+  crediteertFactuur   Factuur? @relation("Creditering", fields: [crediteertFactuurId], references: [id])
+  creditfactuur       Factuur? @relation("Creditering")
+
+  /// Som van de regels. Wordt bij elke wijziging opnieuw berekend.
+  totaalCenten Int @default(0)
+
+  notities     String?
+  verstuurdOp  DateTime?
+  aangemaaktOp DateTime  @default(now())
+  bijgewerktOp DateTime  @updatedAt
+
+  regels     Factuurregel[]
+  betalingen Betaling[]
+
+  omslagrondeDeelnemers OmslagrondeDeelnemer[]
+
+  @@index([boekjaarId, status])
+  @@index([relatieId])
+  @@index([evenementId])
+}
+
+model Factuurregel {
+  id        String  @id @default(cuid())
+  factuurId String
+  factuur   Factuur @relation(fields: [factuurId], references: [id], onDelete: Cascade)
+
+  /// Verplicht: zonder begrotingspost is begroting tegenover realisatie
+  /// onmogelijk.
+  begrotingspostId String
+  begrotingspost   Begrotingspost @relation(fields: [begrotingspostId], references: [id])
+
+  omschrijving       String
+  aantal             Int @default(1)
+  prijsPerStukCenten Int
+  /// Altijd aantal * prijsPerStukCenten.
+  bedragCenten       Int
+  volgorde           Int @default(0)
+
+  @@index([factuurId])
+  @@index([begrotingspostId])
+}
+
+model Betaling {
+  id        String  @id @default(cuid())
+  factuurId String
+  factuur   Factuur @relation(fields: [factuurId], references: [id], onDelete: Cascade)
+
+  datum        DateTime
+  bedragCenten Int
+  notitie      String?
+
+  geregistreerdOp   DateTime @default(now())
+  geregistreerdDoor String?
+
+  @@index([factuurId])
+}
+
+// ---------------------------------------------------------------------------
+// Uitgaven
+// ---------------------------------------------------------------------------
+
+model Uitgave {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  datum DateTime
+
+  relatieId String?
+  relatie   Relatie? @relation(fields: [relatieId], references: [id])
+  /// Altijd gevuld, ook zonder gekoppelde relatie, zodat overzichten leesbaar
+  /// blijven.
+  leverancierNaam String
+
+  omschrijving String
+  bedragCenten Int
+
+  begrotingspostId String
+  begrotingspost   Begrotingspost @relation(fields: [begrotingspostId], references: [id])
+
+  evenementId String?
+  evenement   Evenement? @relation(fields: [evenementId], references: [id])
+
+  /// Zolang dit uit staat blokkeert de uitgave de omslagberekening. Een open
+  /// bar wordt pas weken later afgerekend.
+  bedragDefinitief Boolean @default(false)
+
+  /// Gezet als de uitgave na de omslag binnenkwam en bewust ten laste van de
+  /// SVR is geboekt in plaats van doorbelast.
+  tenLasteVanSvr Boolean @default(false)
+
+  /// De omslagronde die deze uitgave heeft doorbelast. Leeg betekent nog niet
+  /// verdeeld.
+  omslagrondeId String?
+  omslagronde   Omslagronde? @relation(fields: [omslagrondeId], references: [id])
+
+  betaald   Boolean   @default(false)
+  betaaldOp DateTime?
+
+  notities String?
+
+  bijlageId String?  @unique
+  bijlage   Bijlage? @relation(fields: [bijlageId], references: [id])
+
+  aangemaaktOp DateTime @default(now())
+  bijgewerktOp DateTime @updatedAt
+
+  @@index([boekjaarId])
+  @@index([evenementId])
+  @@index([begrotingspostId])
+}
+
+/// Bonnetjes en leveranciersfacturen staan in de database zelf, zodat het
+/// overdragen van één databasebestand de hele administratie meeneemt en de app
+/// geen schrijfbaar bestandssysteem nodig heeft.
+model Bijlage {
+  id           String   @id @default(cuid())
+  bestandsnaam String
+  mimeType     String
+  grootte      Int
+  data         Bytes
+  geuploadOp   DateTime @default(now())
+  geuploadDoor String?
+
+  uitgave Uitgave?
+}
+
+// ---------------------------------------------------------------------------
+// Evenementen en omslag
+// ---------------------------------------------------------------------------
+
+model Evenement {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  naam  String
+  datum DateTime
+  /// 'open' | 'omslag_berekend' | 'afgesloten'
+  status String @default("open")
+
+  /// Post waarop de kosten van dit evenement thuishoren.
+  kostenpostId String?
+  kostenpost   Begrotingspost? @relation("EvenementKostenpost", fields: [kostenpostId], references: [id])
+
+  /// Post waarop de omslagfacturen als inkomst worden geboekt.
+  opbrengstpostId String?
+  opbrengstpost   Begrotingspost? @relation("EvenementOpbrengstpost", fields: [opbrengstpostId], references: [id])
+
+  notities     String?
+  aangemaaktOp DateTime @default(now())
+  bijgewerktOp DateTime @updatedAt
+
+  deelnemers   Deelnemer[]
+  uitgaven     Uitgave[]
+  facturen     Factuur[]
+  omslagrondes Omslagronde[]
+
+  @@index([boekjaarId])
+}
+
+model Deelnemer {
+  id          String    @id @default(cuid())
+  evenementId String
+  evenement   Evenement @relation(fields: [evenementId], references: [id], onDelete: Cascade)
+
+  relatieId String?
+  relatie   Relatie? @relation(fields: [relatieId], references: [id])
+  /// Naam van de deelnemer; bij een gekoppelde relatie gelijk aan relatie.naam.
+  naam      String
+
+  aantalPersonen Int @default(1)
+
+  aangemeld Boolean @default(true)
+  /// Alleen hierop wordt omgeslagen. Dit onderscheid is de kern van de module.
+  bevestigdBetalend Boolean @default(false)
+
+  notities String?
+
+  omslagrondeRegels OmslagrondeDeelnemer[]
+
+  @@index([evenementId])
+}
+
+/// Eén berekening van de omslag. Ronde 1 is de initiële verdeling, latere
+/// rondes zijn naheffingen voor kosten die daarna binnenkwamen.
+model Omslagronde {
+  id          String    @id @default(cuid())
+  evenementId String
+  evenement   Evenement @relation(fields: [evenementId], references: [id], onDelete: Cascade)
+
+  rondeNummer Int
+  /// 'initieel' | 'naheffing'
+  type        String
+
+  berekendOp   DateTime @default(now())
+  berekendDoor String
+
+  totaalKostenCenten Int
+  /// Momentopname op het moment van berekenen, zodat achteraf te zien is
+  /// waarover verdeeld is.
+  aantalAangemeld    Int
+  aantalBevestigd    Int
+
+  /// Kostprijs per persoon, naar boven afgerond op hele centen.
+  kostprijsPerPersoonCenten Int
+  /// De prijs die daadwerkelijk gefactureerd is. Nooit lager dan de kostprijs.
+  prijsPerPersoonCenten     Int
+  totaalGefactureerdCenten  Int
+
+  notities String?
+
+  regels   OmslagrondeDeelnemer[]
+  facturen Factuur[]
+  uitgaven Uitgave[]
+
+  @@unique([evenementId, rondeNummer])
+}
+
+model OmslagrondeDeelnemer {
+  id            String      @id @default(cuid())
+  omslagrondeId String
+  omslagronde   Omslagronde @relation(fields: [omslagrondeId], references: [id], onDelete: Cascade)
+
+  deelnemerId String
+  deelnemer   Deelnemer @relation(fields: [deelnemerId], references: [id], onDelete: Cascade)
+
+  naam           String
+  aantalPersonen Int
+  bedragCenten   Int
+
+  factuurId String?
+  factuur   Factuur? @relation(fields: [factuurId], references: [id])
+
+  @@index([omslagrondeId])
+}
+
+// ---------------------------------------------------------------------------
+// Bank en controle
+// ---------------------------------------------------------------------------
+
+/// Handmatig ingevoerd banksaldo. Het verschil met het saldo dat uit de
+/// administratie volgt is het beste signaal dat er iets vergeten is.
+model Banksaldo {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  datum        DateTime
+  saldoCenten  Int
+  notitie      String?
+  ingevoerdOp  DateTime @default(now())
+  ingevoerdDoor String?
+
+  @@index([boekjaarId, datum])
+}
+
+model Auditlog {
+  id       String   @id @default(cuid())
+  tijdstip DateTime @default(now())
+  /// Naam die bij het inloggen is opgegeven.
+  gebruiker String
+
+  entiteit   String
+  entiteitId String?
+  /// 'aangemaakt' | 'gewijzigd' | 'verwijderd' | vrije omschrijving
+  actie      String
+  samenvatting String
+  /// JSON als tekst. Geen Json-kolom, zodat het schema op elke provider werkt.
+  details    String?
+
+  boekjaarId String?
+
+  @@index([tijdstip])
+  @@index([entiteit, entiteitId])
+}

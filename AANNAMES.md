@@ -1,0 +1,187 @@
+# Aannames
+
+Alles wat tijdens het bouwen is ingevuld zonder dat het in de opdracht stond.
+Loop dit door en corrigeer wat niet klopt; de meeste punten zijn in de app zelf
+aan te passen.
+
+---
+
+## Moet je verifiëren
+
+### Het aantal aangesloten studieverenigingen
+
+De zestien uit de opdracht zijn geseed: TG, VvTP, Variscopic, Froude, ETV, PS,
+LIFE, Curius, CH, ID, VSV, Stylos, MV, Hooke, Leeghwater en Bèta, allemaal
+bijdrageplichtig. Je gaf zelf aan dat dit nog geverifieerd moet worden.
+Toevoegen en verwijderen kan bij *Gegevens › Relaties*.
+
+De jaarbijdrage wordt verdeeld over álle bijdrageplichtige verenigingen: bij
+zestien is dat € 116,25 per stuk (€ 1.860 ÷ 16). Verandert het aantal, dan
+verandert het bedrag per vereniging mee. Het scherm *Jaarfacturen bijdrage* laat
+de verdeling zien vóórdat je iets aanmaakt.
+
+### Het beginsaldo van het boekjaar
+
+Beginsaldo bank en beginsaldo eigen vermogen staan allebei op € 0,00. Die zijn
+niet uit de opdracht af te leiden — het boekjaar 2025-2026 sloot op − € 664,29,
+maar dat is een resultaat en geen eindsaldo. Vul ze in bij *Beheer › Boekjaren*
+zodra je de eindstand van vorig jaar hebt.
+
+Staan bank en eigen vermogen niet gelijk, dan betekent dat dat er vorderingen of
+schulden uit het vorige jaar zijn die niet apart zijn ingevoerd. De balans toont
+dat verschil dan als losse regel, zodat hij altijd sluit en het verschil
+zichtbaar blijft.
+
+### De datum van het LBG
+
+Het geseede evenement "LBG 2027" staat op 11 maart 2027. Dat is een plaatshouder;
+pas hem aan zodra de zaal geboekt is.
+
+### Gegevens van de vereniging
+
+Adres, e-mailadres, IBAN en KvK-nummer zijn leeg. Ze staan op elke factuur en in
+de herinneringstekst, dus vul ze in bij *Beheer › Instellingen*.
+
+---
+
+## Keuzes in het ontwerp
+
+### De naam bij het inloggen
+
+De opdracht vraagt één gedeeld wachtwoord én een auditlog dat vastlegt wie wat
+wijzigde. Met alleen een gedeeld wachtwoord is die tweede eis niet in te vullen.
+Daarom vraagt het inlogscherm naast het wachtwoord om je naam. Die naam wordt
+niet gecontroleerd — het is geen beveiliging, het is een handtekening.
+
+Bij echte accounts later vervang je alleen `controleerWachtwoord` en de inhoud
+van `Sessie` in `src/lib/auth/sessie.ts`; de rest van de app gebruikt alleen
+`sessie.naam`.
+
+### Relaties hangen niet aan een boekjaar
+
+De opdracht zegt dat alle gegevens aan een boekjaar hangen. Voor relaties is dat
+bewust niet gedaan: de aangesloten verenigingen wisselen niet per jaar, en het
+zou betekenen dat elk bestuur ze opnieuw moet invoeren. Facturen, uitgaven,
+begrotingsposten, evenementen en banksaldi hangen wél aan een boekjaar.
+
+### Prijs per persoon bij de omslag
+
+De kosten gedeeld door het aantal bevestigd betalende personen komt zelden op een
+heel aantal centen uit. De app rondt de prijs per persoon **naar boven** af, zodat
+de kosten altijd gedekt zijn. Het verschil dat daardoor ontstaat is hoogstens
+één cent per persoon — bij 181 deelnemers dus minder dan twee euro — en wordt in
+de afstemming getoond als afronding, niet als fout.
+
+Je mag een hogere prijs invullen dan de kostprijs, bijvoorbeeld om op een rond
+bedrag uit te komen. Een **lagere** prijs weigert de app: daarmee zou het verlies
+bij voorbaat vaststaan, en dat is precies wat dit systeem moet voorkomen.
+
+### Wanneer telt een factuur mee
+
+Uitgangspunt is het baten-lastenstelsel: een factuur telt mee als opbrengst zodra
+hij op *verstuurd* staat, en een uitgave telt mee zodra hij geregistreerd is,
+ongeacht of er al betaald is. Dat past bij de balans die de opdracht beschrijft,
+met debiteuren aan de ene en crediteuren aan de andere kant.
+
+Concepten tellen niet mee. Oninbaar afgeboekte en gecrediteerde facturen ook
+niet: geld dat niet komt, is geen opbrengst.
+
+Eén uitzondering: in de **afstemming per evenement** tellen concepten wél mee.
+Daar is de vraag of de kosten volledig zijn doorbelast, en dat zijn ze zodra de
+facturen gemaakt zijn. Dat de factuur nog verstuurd moet worden, wordt er apart
+bij vermeld.
+
+### Ouderdom van debiteuren
+
+Gerekend vanaf de **factuurdatum**, niet vanaf de vervaldatum. Bij de standaard
+betaaltermijn van 30 dagen valt "meer dan 30 dagen open" samen met "over de
+vervaldatum heen".
+
+### Doorbelasting op een uitgavenpost
+
+Staat er een factuurregel op een uitgavenpost, dan wordt dat bedrag van de
+gerealiseerde kosten op die post afgetrokken in plaats van als opbrengst
+geteld. Dat is wat een doorbelasting is. In de praktijk zul je facturen bijna
+altijd op een inkomstenpost boeken; het formulier zet die daarom bovenaan.
+
+### Bonnetjes in de database
+
+Bonnetjes en leveranciersfacturen worden als bestand in de database bewaard, niet
+op schijf. Twee redenen: een kopie van het databasebestand bevat dan de volledige
+administratie inclusief bijlagen, wat de overdracht een stuk simpeler maakt, en
+de app heeft geen schrijfbaar bestandssysteem nodig — dat scheelt gedoe bij een
+latere verhuizing naar Vercel.
+
+Maximaal 5 MB per bestand, in JPG, PNG, WEBP, HEIC of PDF.
+
+### Losse namen als deelnemer
+
+Een deelnemer mag een losse naam zijn in plaats van een bestaande relatie. Op het
+moment dat de omslag berekend wordt heeft de app wél een relatie nodig, want een
+factuur gaat naar iemand. Voor losse namen maakt de app dan eenmalig een relatie
+van het type *persoon* aan, of hergebruikt een bestaande relatie met dezelfde
+naam.
+
+### Naheffing over dezelfde deelnemers
+
+Een naheffing gaat over de deelnemers uit de **eerste** omslagronde, ook als de
+deelnemerslijst daarna is gewijzigd. Dat is wat de opdracht vraagt en het is ook
+het enige dat verdedigbaar is: iemand die er bij het evenement niet was, kun je
+achteraf geen extra rekening sturen.
+
+### Verwijderen versus archiveren
+
+Een relatie die al aan facturen, uitgaven of evenementen hangt wordt bij
+"verwijderen" op non-actief gezet in plaats van weggegooid. De historie moet
+overdraagbaar blijven.
+
+Een uitgave die al in een omslag is verdeeld is niet meer te verwijderen en het
+bedrag ervan niet meer te wijzigen: de facturen die eruit volgden zijn dan al
+verstuurd.
+
+### PDF's worden niet opgeslagen
+
+De factuur-PDF wordt gemaakt op het moment dat je hem opvraagt. Dat kan omdat een
+verstuurde factuur niet meer te wijzigen is, dus het resultaat is elke keer
+hetzelfde. Een concept-PDF krijgt een duidelijk stempel CONCEPT.
+
+### Geen btw
+
+De SVR is niet btw-plichtig, dus facturen tonen geen btw. De schakelaar en het
+percentage staan op één plek, bij *Beheer › Instellingen*. Let op: er wordt op dit
+moment alleen een regel op de factuur mee aangepast; gaat de SVR echt btw
+afdragen, dan moet er ook btw-berekening per factuurregel bij komen.
+
+---
+
+## Technische keuzes die afwijken
+
+### Prisma met een libsql-adapter in plaats van better-sqlite3
+
+Prisma 7 vereist een driver adapter. De voor de hand liggende keuze,
+`better-sqlite3`, heeft geen kant-en-klare versie voor Node 20 op Windows en zou
+dus een C++-compiler vereisen — precies het soort gedoe dat vermeden moest
+worden. `@libsql/client` installeert wél zonder te compileren en spreekt gewoon
+SQLite. Voor Postgres wissel je hem om voor `@prisma/adapter-pg`; dat staat in
+[MIGRATIE.md](MIGRATIE.md).
+
+### shadcn/ui zonder Radix
+
+De componenten in `src/components/ui/` volgen de conventies van shadcn/ui: zelfde
+mappen, zelfde `cn`-helper, zelfde CSS-variabelen. Voor keuzelijsten,
+aankruisvakjes en dialogen zijn gewone HTML-elementen gebruikt in plaats van
+Radix. Die versturen vanzelf mee met het formulier, werken zonder JavaScript en
+schelen een hoop code.
+
+`components.json` staat er wel, dus `npx shadcn@latest add dialog` werkt gewoon
+als je later iets van shadcn nodig hebt.
+
+### Geen enums in het datamodel
+
+SQLite kent geen enums. De toegestane waarden staan als constanten in
+`src/lib/domein.ts`. Zo werkt hetzelfde schema op SQLite en op Postgres.
+
+### Vitest 4 in plaats van 5
+
+Vitest 5 vraagt om `@types/node` 22 of nieuwer en liep vast op de npm-versie die
+bij Node 20 hoort. Vitest 4 doet hetzelfde werk.
