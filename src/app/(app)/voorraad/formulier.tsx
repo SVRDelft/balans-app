@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Bedragveld } from "@/components/ui/bedragveld";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input, Textarea, Veld } from "@/components/ui/input";
+import { Input, Select, Textarea, Veld } from "@/components/ui/input";
 import { Melding } from "@/components/ui/melding";
 import type { ActieStaat } from "@/lib/acties";
 import { bewaarVoorraad, neemVoorraadOver, verwijderVoorraad } from "./acties";
@@ -20,6 +20,7 @@ export interface VoorraadWaarden {
   waardePerStukCenten: number;
   locatie: string;
   notities: string;
+  begrotingspostId: string;
 }
 
 export const LEGE_VOORRAAD: VoorraadWaarden = {
@@ -31,12 +32,21 @@ export const LEGE_VOORRAAD: VoorraadWaarden = {
   waardePerStukCenten: 0,
   locatie: "",
   notities: "",
+  begrotingspostId: "",
 };
+
+export interface Uitgavenpost {
+  id: string;
+  code: string;
+  naam: string;
+}
 
 export function VoorraadFormulier({
   waarden = LEGE_VOORRAAD,
+  uitgavenposten = [],
 }: {
   waarden?: VoorraadWaarden;
+  uitgavenposten?: Uitgavenpost[];
 }) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(
     bewaarVoorraad,
@@ -66,6 +76,25 @@ export function VoorraadFormulier({
               defaultValue={waarden.naam}
               placeholder="Bijvoorbeeld: SVR-dassen"
             />
+          </Veld>
+          <Veld
+            label="Begrotingspost"
+            htmlFor="begrotingspostId"
+            fout={staat.veldfouten?.begrotingspostId}
+            toelichting="Waar het verbruik van deze spullen als kosten thuishoort. Zonder post komt het op de verzamelregel Voorraadmutatie."
+          >
+            <Select
+              id="begrotingspostId"
+              name="begrotingspostId"
+              defaultValue={waarden.begrotingspostId}
+            >
+              <option value="">Geen — alleen op de verzamelregel</option>
+              {uitgavenposten.map((post) => (
+                <option key={post.id} value={post.id}>
+                  {post.code} — {post.naam}
+                </option>
+              ))}
+            </Select>
           </Veld>
           <Veld
             label="Eenheid"

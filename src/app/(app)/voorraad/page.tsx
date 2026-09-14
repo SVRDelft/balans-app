@@ -34,10 +34,18 @@ export default async function VoorraadPagina({
 }) {
   const [{ boekjaar, schrijfbaar, alleBoekjaren }, parameters] =
     await Promise.all([vereisBoekjaarContext(), searchParams]);
-  const posten = await db.voorraadpost.findMany({
-    where: { boekjaarId: boekjaar.id },
-    orderBy: { naam: "asc" },
-  });
+  const [posten, uitgavenposten] = await Promise.all([
+    db.voorraadpost.findMany({
+      where: { boekjaarId: boekjaar.id },
+      orderBy: { naam: "asc" },
+      include: { begrotingspost: { select: { code: true, naam: true } } },
+    }),
+    db.begrotingspost.findMany({
+      where: { boekjaarId: boekjaar.id, soort: "uitgave" },
+      orderBy: [{ volgorde: "asc" }, { code: "asc" }],
+      select: { id: true, code: true, naam: true },
+    }),
+  ]);
   const totaal = berekenVoorraad(posten);
   const gekozen = parameters.bewerken
     ? posten.find((post) => post.id === parameters.bewerken)
@@ -83,6 +91,7 @@ export default async function VoorraadPagina({
         <div className="mb-6">
           <VoorraadFormulier
             key={gekozen?.id ?? "nieuw"}
+            uitgavenposten={uitgavenposten}
             waarden={
               gekozen
                 ? {
@@ -95,6 +104,7 @@ export default async function VoorraadPagina({
                     waardePerStukCenten: gekozen.waardePerStukCenten,
                     locatie: gekozen.locatie,
                     notities: gekozen.notities,
+                    begrotingspostId: gekozen.begrotingspostId ?? "",
                   }
                 : undefined
             }
@@ -114,6 +124,7 @@ export default async function VoorraadPagina({
                 <TableHead>Nu</TableHead>
                 <TableHead className="text-right">Per stuk</TableHead>
                 <TableHead className="text-right">Huidige waarde</TableHead>
+                <TableHead>Begrotingspost</TableHead>
                 <TableHead>Bewaarplaats</TableHead>
               </TableRow>
             </TableHeader>
@@ -148,6 +159,22 @@ export default async function VoorraadPagina({
                   </TableCell>
                   <TableCell className="text-right">
                     <Bedrag centen={post.aantal * post.waardePerStukCenten} />
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    {post.begrotingspost ? (
+                      <>
+                        <span className="font-mono">
+                          {post.begrotingspost.code}
+                        </span>
+                        <span className="block text-muted-foreground">
+                          {post.begrotingspost.naam}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        niet gekoppeld
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell>{post.locatie || "—"}</TableCell>
                 </TableRow>

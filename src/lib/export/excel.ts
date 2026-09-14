@@ -181,6 +181,7 @@ export async function maakOverdrachtWerkboek(
     { header: "Huidig aantal", width: 14 },
     { header: "Huidige waarde per stuk", width: 24, style: { numFmt: EURO } },
     { header: "Huidige waarde totaal", width: 22, style: { numFmt: EURO } },
+    { header: "Begrotingspost", width: 34 },
     { header: "Bewaarplaats", width: 24 },
     { header: "Notities", width: 50 },
   ];
@@ -196,6 +197,9 @@ export async function maakOverdrachtWerkboek(
       post.aantal,
       post.waardePerStukCenten / 100,
       (post.aantal * post.waardePerStukCenten) / 100,
+      post.begrotingspost
+        ? `${post.begrotingspost.code} — ${post.begrotingspost.naam}`
+        : "niet gekoppeld",
       post.locatie,
       post.notities,
     ]);

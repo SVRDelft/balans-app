@@ -139,6 +139,7 @@ model Begrotingspost {
 
   factuurregels Factuurregel[]
   uitgaven      Uitgave[]
+  voorraadposten Voorraadpost[]
 
   evenementenAlsKostenpost    Evenement[] @relation("EvenementKostenpost")
   evenementenAlsOpbrengstpost Evenement[] @relation("EvenementOpbrengstpost")
@@ -452,8 +453,15 @@ model Voorraadpost {
   notities                 String @default("")
   bijgewerktOp             DateTime @updatedAt
 
+  /// Op welke begrotingspost het verbruik van deze spullen thuishoort. Zonder
+  /// koppeling belandt de mutatie op één verzamelregel in de exploitatie en is
+  /// niet te zien of hij binnen de begroting van die post blijft.
+  begrotingspostId String?
+  begrotingspost   Begrotingspost? @relation(fields: [begrotingspostId], references: [id])
+
   @@unique([boekjaarId, naam])
   @@index([boekjaarId])
+  @@index([begrotingspostId])
 }
 
 model Auditlog {

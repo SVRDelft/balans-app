@@ -35,6 +35,7 @@ const schema = z.object({
   waardePerStukCenten: bedrag,
   locatie: z.string().trim().max(200),
   notities: z.string().trim().max(2000),
+  begrotingspostId: z.string().trim().max(60),
 });
 
 export async function bewaarVoorraad(
@@ -63,7 +64,31 @@ export async function bewaarVoorraad(
         ),
       };
     }
-    berekenVoorraad([invoer.data]);
+    const { begrotingspostId: gekozenPost, ...voorraadgegevens } = invoer.data;
+    berekenVoorraad([voorraadgegevens]);
+
+    // Voorraadverbruik is een kostenpost, dus alleen een uitgavenpost van dit
+    // boekjaar kan eraan hangen.
+    let begrotingspostId: string | null = null;
+    if (gekozenPost) {
+      const post = await db.begrotingspost.findFirst({
+        where: {
+          id: gekozenPost,
+          boekjaarId: boekjaar.id,
+          soort: "uitgave",
+        },
+        select: { id: true },
+      });
+      if (!post) {
+        return {
+          fout: "Kies een uitgavenpost uit de begroting van dit boekjaar.",
+          veldfouten: { begrotingspostId: "Deze begrotingspost kan niet." },
+        };
+      }
+      begrotingspostId = post.id;
+    }
+
+    const gegevens = { ...voorraadgegevens, begrotingspostId };
     const id = leesTekst(formulier, "id");
     await db.$transaction(async (tx) => {
       if (
@@ -77,9 +102,9 @@ export async function bewaarVoorraad(
         );
       }
       const post = id
-        ? await tx.voorraadpost.update({ where: { id }, data: invoer.data })
+        ? await tx.voorraadpost.update({ where: { id }, data: gegevens })
         : await tx.voorraadpost.create({
-            data: { ...invoer.data, boekjaarId: boekjaar.id },
+            data: { ...gegevens, boekjaarId: boekjaar.id },
           });
       await logAudit(
         {
@@ -88,7 +113,7 @@ export async function bewaarVoorraad(
           entiteitId: post.id,
           actie: id ? "gewijzigd" : "aangemaakt",
           samenvatting: `${post.naam}: ${post.aantal} ${post.eenheid}`,
-          details: invoer.data,
+          details: gegevens,
           boekjaarId: boekjaar.id,
         },
         tx,

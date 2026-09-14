@@ -16,6 +16,16 @@ export interface BalansInvoer {
   gerealiseerdeUitgavenCenten: number;
   voorraadBeginCenten?: number;
   voorraadCenten?: number;
+  /**
+   * Het deel van de voorraadmutatie dat nog niet in
+   * `gerealiseerdeUitgavenCenten` verwerkt is.
+   *
+   * Hangt een voorraadpost aan een begrotingspost, dan telt het verbruik daar
+   * al mee als kosten. Dat deel mag hier niet nog een keer bij, anders wordt
+   * het dubbel geteld. Laat het veld weg en de hele mutatie wordt meegenomen —
+   * dat is het gedrag zonder gekoppelde voorraadposten.
+   */
+  voorraadMutatieBuitenPostenCenten?: number;
 
   /** Laatst handmatig ingevoerde banksaldo, of null als dat er niet is. */
   ingevoerdBanksaldoCenten: number | null;
@@ -62,10 +72,15 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
     invoer.ontvangenBetalingenCenten -
     invoer.betaaldeUitgavenCenten;
 
+  // Alleen het deel dat nog nergens in zit; de rest zit al in de uitgaven van
+  // de begrotingsposten waaraan de spullen hangen.
+  const voorraadMutatieBuitenPostenCenten =
+    invoer.voorraadMutatieBuitenPostenCenten ?? voorraadMutatieCenten;
+
   const resultaatCenten =
     invoer.gerealiseerdeInkomstenCenten -
     invoer.gerealiseerdeUitgavenCenten +
-    voorraadMutatieCenten;
+    voorraadMutatieBuitenPostenCenten;
 
   const beginbalansverschilCenten =
     invoer.beginsaldoBankCenten +

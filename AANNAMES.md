@@ -174,6 +174,30 @@ Beginnende voorraad is bestaand vermogen en geen opbrengst. Aankopen moeten ook
 bij Uitgaven worden geregistreerd. Een voorraadpost met beginvoorraad wordt niet
 verwijderd wanneer hij is opgebruikt; het huidige aantal wordt dan nul.
 
+### Verbruik van spullen telt op de begrotingspost
+
+Aan een voorraadpost kan een begrotingspost hangen. Verlaag je het aantal, dan
+telt de waarde die daarmee verdwijnt als kosten op die post, zodat begroot
+tegenover gerealiseerd blijft kloppen. Geef je twee dassen van € 5,00 weg, dan
+staat er € 10,00 gerealiseerd op *SVR-dassen en -strikken*, met eronder de
+toelichting dat het om voorraadverbruik gaat.
+
+**Voer dat verbruik niet óók in bij Uitgaven.** Dan zou het dubbel geteld worden,
+en bovendien komt er een betaling of een schuld aan een leverancier in de
+administratie die er niet is; dat loopt meteen mis in de controle op het
+banksaldo. Uitgaven zijn voor geld dat de deur uit gaat, voorraadverbruik voor
+waarde die de deur uit gaat.
+
+Het teken werkt beide kanten op. Koop je voor € 100,00 nieuwe dassen, dan staat
+die € 100,00 als uitgave in de administratie en groeit de voorraad met € 100,00;
+per saldo nul, want je hebt geld voor spullen geruild. Pas als je ze weggeeft
+worden het kosten. Verkoop je spullen, maak dan gewoon een factuur voor de
+opbrengst; de voorraaddaling is dan de kostprijs ervan.
+
+Spullen zonder begrotingspost blijven op één verzamelregel *Voorraadmutatie* in
+de exploitatie staan, precies zoals daarvoor. De berekening zit in
+`src/lib/finance/voorraadtoerekening.ts` en is getest op dubbeltelling.
+
 ### shadcn/ui zonder Radix
 
 De componenten in `src/components/ui/` volgen de conventies van shadcn/ui: zelfde

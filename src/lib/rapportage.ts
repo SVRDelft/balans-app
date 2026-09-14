@@ -21,6 +21,7 @@ import {
 import { berekenAfstemming, type Afstemming } from "@/lib/finance/omslag";
 import { openstaandBedrag } from "@/lib/finance/factuurstatus";
 import { berekenVoorraad } from "@/lib/finance/voorraad";
+import { rekenVoorraadToe } from "@/lib/finance/voorraadtoerekening";
 import type { Voorraadpost } from "@/generated/prisma/client";
 
 export interface OpenstaandeFactuurRegel {
@@ -62,7 +63,9 @@ export interface BoekjaarCijfers {
   evenementen: EvenementAfstemming[];
   uitgavenZonderPost: number;
   conceptFacturen: number;
-  voorraadposten: Voorraadpost[];
+  voorraadposten: (Voorraadpost & {
+    begrotingspost: { code: string; naam: string } | null;
+  })[];
   voorraad: ReturnType<typeof berekenVoorraad>;
 }
 
@@ -121,6 +124,7 @@ export async function haalBoekjaarCijfers(
     db.voorraadpost.findMany({
       where: { boekjaarId },
       orderBy: { naam: "asc" },
+      include: { begrotingspost: { select: { code: true, naam: true } } },
     }),
   ]);
 
@@ -144,14 +148,26 @@ export async function haalBoekjaarCijfers(
     );
   }
 
+  // Het verbruik van spullen telt mee als kosten op de begrotingspost waaraan
+  // ze hangen; de rest blijft op de verzamelregel staan.
+  const toerekening = rekenVoorraadToe(
+    voorraadposten,
+    new Set(
+      posten.filter((post) => post.soort === "uitgave").map((post) => post.id),
+    ),
+  );
+
   const postRealisaties: PostRealisatie[] = posten.map((post) => {
     const viaFacturen = inkomstenPerPost.get(post.id) ?? 0;
     const viaUitgaven = uitgavenPerPost.get(post.id) ?? 0;
+    const viaVoorraad = toerekening.kostenPerBegrotingspost.get(post.id) ?? 0;
 
     // Een factuurregel op een uitgavenpost is een doorbelasting en verlaagt
     // dus de kosten op die post.
     const gerealiseerdCenten =
-      post.soort === "inkomst" ? viaFacturen : viaUitgaven - viaFacturen;
+      post.soort === "inkomst"
+        ? viaFacturen
+        : viaUitgaven - viaFacturen + viaVoorraad;
 
     return {
       id: post.id,
@@ -161,12 +177,16 @@ export async function haalBoekjaarCijfers(
       soort: post.soort as PostSoort,
       begrootCenten: post.begrootCenten,
       gerealiseerdCenten,
+      voorraadVerbruikCenten: viaVoorraad,
       volgorde: post.volgorde,
     };
   });
 
   const voorraad = berekenVoorraad(voorraadposten);
-  const exploitatie = maakExploitatie(postRealisaties, voorraad.mutatieCenten);
+  const exploitatie = maakExploitatie(
+    postRealisaties,
+    toerekening.buitenPostenCenten,
+  );
 
   // --- debiteuren en crediteuren -----------------------------------------
   const openstaandeFacturen: OpenstaandeFactuurRegel[] = [];
@@ -237,6 +257,8 @@ export async function haalBoekjaarCijfers(
     ingevoerdBanksaldoCenten: banksaldo?.saldoCenten ?? null,
     voorraadBeginCenten: voorraad.beginwaardeCenten,
     voorraadCenten: voorraad.waardeCenten,
+    // Het toegerekende deel zit al in de gerealiseerde uitgaven hierboven.
+    voorraadMutatieBuitenPostenCenten: toerekening.buitenPostenCenten,
   });
 
   // --- afstemming per evenement ------------------------------------------
