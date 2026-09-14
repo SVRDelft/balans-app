@@ -24,13 +24,18 @@ import {
   VoorraadOvernemen,
   LegeVoorraadVerwijderen,
 } from "./formulier";
+import { VerbruikFormulier } from "./verbruikformulier";
 
 export const metadata: Metadata = { title: "Spullen & voorraad" };
 
 export default async function VoorraadPagina({
   searchParams,
 }: {
-  searchParams: Promise<{ bewerken?: string; nieuw?: string }>;
+  searchParams: Promise<{
+    bewerken?: string;
+    nieuw?: string;
+    verbruik?: string;
+  }>;
 }) {
   const [{ boekjaar, schrijfbaar, alleBoekjaren }, parameters] =
     await Promise.all([vereisBoekjaarContext(), searchParams]);
@@ -51,6 +56,11 @@ export default async function VoorraadPagina({
     ? posten.find((post) => post.id === parameters.bewerken)
     : null;
   if (parameters.bewerken && !gekozen) notFound();
+
+  const verbruikPost = parameters.verbruik
+    ? posten.find((post) => post.id === parameters.verbruik)
+    : null;
+  if (parameters.verbruik && !verbruikPost) notFound();
 
   return (
     <>
@@ -86,6 +96,19 @@ export default async function VoorraadPagina({
         <Melding toon="info" className="mb-4">
           Dit boekjaar is afgesloten. De spullen zijn alleen te bekijken.
         </Melding>
+      ) : null}
+      {schrijfbaar && verbruikPost ? (
+        <div className="mb-6">
+          <VerbruikFormulier
+            key={verbruikPost.id}
+            id={verbruikPost.id}
+            naam={verbruikPost.naam}
+            eenheid={verbruikPost.eenheid}
+            aantal={verbruikPost.aantal}
+            waardePerStukCenten={verbruikPost.waardePerStukCenten}
+            begrotingspost={verbruikPost.begrotingspost}
+          />
+        </div>
       ) : null}
       {schrijfbaar && (parameters.nieuw === "1" || gekozen) ? (
         <div className="mb-6">
@@ -126,6 +149,7 @@ export default async function VoorraadPagina({
                 <TableHead className="text-right">Huidige waarde</TableHead>
                 <TableHead>Begrotingspost</TableHead>
                 <TableHead>Bewaarplaats</TableHead>
+                {schrijfbaar ? <TableHead /> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -177,6 +201,17 @@ export default async function VoorraadPagina({
                     )}
                   </TableCell>
                   <TableCell>{post.locatie || "—"}</TableCell>
+                  {schrijfbaar ? (
+                    <TableCell className="text-right">
+                      {post.aantal > 0 ? (
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link href={`/voorraad?verbruik=${post.id}`}>
+                            Verbruik boeken
+                          </Link>
+                        </Button>
+                      ) : null}
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))}
             </TableBody>

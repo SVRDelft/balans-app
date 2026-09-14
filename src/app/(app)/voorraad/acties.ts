@@ -8,8 +8,8 @@ import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { logAudit } from "@/lib/audit";
 import { type ActieStaat, voerUit, leesTekst } from "@/lib/acties";
-import { parseerBedragNaarCenten } from "@/lib/geld";
-import { berekenVoorraad } from "@/lib/finance/voorraad";
+import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
+import { berekenVerbruik, berekenVoorraad } from "@/lib/finance/voorraad";
 
 const geheel = z
   .string()
@@ -37,6 +37,100 @@ const schema = z.object({
   notities: z.string().trim().max(2000),
   begrotingspostId: z.string().trim().max(60),
 });
+
+const verbruikSchema = z.object({
+  aantal: z
+    .string()
+    .regex(/^\d+$/, "Vul een geheel aantal in.")
+    .transform(Number)
+    .pipe(z.number().int().min(1, "Vul een aantal van minstens 1 in.")),
+  reden: z
+    .string()
+    .trim()
+    .min(1, "Vul in waar de spullen heen zijn gegaan.")
+    .max(200),
+});
+
+/**
+ * Boekt verbruik af: de waarde verdwijnt uit de voorraad op de balans en telt
+ * als kosten mee op de begrotingspost waaraan de spullen hangen.
+ */
+export async function boekVerbruik(
+  _staat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisSessie();
+  return voerUit(async () => {
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
+    const id = leesTekst(formulier, "id");
+    if (!id) return { fout: "Onbekende voorraadpost." };
+
+    const invoer = verbruikSchema.safeParse({
+      aantal: formulier.get("aantal") ?? "",
+      reden: formulier.get("reden") ?? "",
+    });
+    if (!invoer.success) {
+      return {
+        fout: "Controleer de ingevulde gegevens.",
+        veldfouten: Object.fromEntries(
+          invoer.error.issues.map((fout) => [
+            String(fout.path[0]),
+            fout.message,
+          ]),
+        ),
+      };
+    }
+
+    let melding = "";
+    await db.$transaction(async (tx) => {
+      const post = await tx.voorraadpost.findFirst({
+        where: { id, boekjaarId: boekjaar.id },
+        include: { begrotingspost: { select: { code: true, naam: true } } },
+      });
+      if (!post) {
+        throw new Error("Deze voorraadpost hoort niet bij het actieve boekjaar.");
+      }
+
+      const verbruik = berekenVerbruik({
+        aantal: post.aantal,
+        verbruikt: invoer.data.aantal,
+        waardePerStukCenten: post.waardePerStukCenten,
+      });
+
+      await tx.voorraadpost.update({
+        where: { id },
+        data: { aantal: verbruik.nieuwAantal },
+      });
+
+      const bestemming = post.begrotingspost
+        ? `begrotingspost ${post.begrotingspost.code}`
+        : "de verzamelregel Voorraadmutatie";
+
+      await logAudit(
+        {
+          gebruiker: sessie.naam,
+          entiteit: "Voorraadpost",
+          entiteitId: post.id,
+          actie: "verbruik geboekt",
+          samenvatting:
+            `${post.naam}: ${invoer.data.aantal} ${post.eenheid} af ` +
+            `(${formatteerEuro(verbruik.waardeCenten)}) naar ${bestemming} — ${invoer.data.reden}. ` +
+            `Nog ${verbruik.nieuwAantal} over.`,
+          details: { ...invoer.data, waardeCenten: verbruik.waardeCenten },
+          boekjaarId: boekjaar.id,
+        },
+        tx,
+      );
+
+      melding = post.begrotingspost
+        ? `${invoer.data.aantal} ${post.eenheid} afgeboekt. ${formatteerEuro(verbruik.waardeCenten)} is uit de balans gehaald en staat nu als kosten op ${post.begrotingspost.code} — ${post.begrotingspost.naam}.`
+        : `${invoer.data.aantal} ${post.eenheid} afgeboekt. ${formatteerEuro(verbruik.waardeCenten)} is uit de balans gehaald, maar staat op de verzamelregel Voorraadmutatie omdat deze spullen nog geen begrotingspost hebben.`;
+    });
+
+    revalidatePath("/", "layout");
+    return { melding };
+  });
+}
 
 export async function bewaarVoorraad(
   _staat: ActieStaat,
