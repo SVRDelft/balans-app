@@ -380,7 +380,7 @@ export async function maakOverdrachtWerkboek(
   ]);
   toelichting.addRow([
     "Meegeteld als opbrengst",
-    "Facturen met status verstuurd, deels betaald of betaald. Concepten, oninbare en gecrediteerde facturen tellen niet mee.",
+    "Facturen tellen vanaf versturen. Verstuurde credits corrigeren de oorspronkelijke opbrengst. Bij oninbaar blijft het ontvangen deel meetellen; concepten tellen niet mee.",
   ]);
   toelichting.addRow([
     "Bedragen",

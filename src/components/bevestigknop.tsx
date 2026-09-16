@@ -47,8 +47,9 @@ export function BevestigKnop({
         {children}
       </Button>
       {staat.fout ? (
-        <p className="mt-1 text-xs text-destructive">{staat.fout}</p>
+        <p role="alert" className="mt-1 text-xs text-destructive">{staat.fout}</p>
       ) : null}
+      {staat.melding ? <p role="status" className="mt-1 text-xs text-success">{staat.melding}</p> : null}
     </form>
   );
 }

@@ -10,7 +10,7 @@ import { EvenementFormulier } from "../formulier";
 export const metadata: Metadata = { title: "Nieuw evenement" };
 
 export default async function NieuwEvenementPagina() {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/evenementen");
 
   const posten = await db.begrotingspost.findMany({
     where: { boekjaarId: boekjaar.id },

@@ -16,11 +16,11 @@ export const metadata: Metadata = { title: "Factuur bewerken" };
 export default async function BewerkFactuurPagina({
   params,
 }: PageProps<"/facturen/[id]/bewerken">) {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/facturen");
   const { id } = await params;
 
   const factuur = await db.factuur.findUnique({
-    where: { id },
+    where: { id, boekjaarId: boekjaar.id },
     include: { regels: { orderBy: { volgorde: "asc" } } },
   });
   if (!factuur) notFound();

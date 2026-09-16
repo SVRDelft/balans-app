@@ -36,8 +36,9 @@ export async function bewaarBegrotingspost(
       veldfouten.soort = "Kies inkomst of uitgave.";
     }
 
-    const begrootCenten = parseerBedragNaarCenten(begrootTekst) ?? 0;
-    if (begrootCenten < 0) {
+    const begrootCenten = parseerBedragNaarCenten(begrootTekst || "0");
+    if (begrootCenten === null) veldfouten.begroot = "Vul een geldig bedrag in.";
+    else if (begrootCenten < 0) {
       veldfouten.begroot = "Een begroot bedrag is niet negatief.";
     }
 
@@ -51,13 +52,13 @@ export async function bewaarBegrotingspost(
       naam: naam!,
       categorie,
       soort,
-      begrootCenten,
+      begrootCenten: begrootCenten!,
       notities: leesTekst(formulier, "notities") ?? null,
     };
 
     if (id) {
       const post = await db.begrotingspost.update({
-        where: { id },
+        where: { id, boekjaarId: boekjaar.id },
         data: gegevens,
       });
       await logAudit({
@@ -111,7 +112,7 @@ export async function verwijderBegrotingspost(
     if (!id) return { fout: "Onbekende begrotingspost." };
 
     const post = await db.begrotingspost.findUnique({
-      where: { id },
+      where: { id, boekjaarId: boekjaar.id },
       include: { _count: { select: { factuurregels: true, uitgaven: true } } },
     });
     if (!post) return { fout: "Deze begrotingspost bestaat niet meer." };
@@ -122,7 +123,7 @@ export async function verwijderBegrotingspost(
       };
     }
 
-    await db.begrotingspost.delete({ where: { id } });
+    await db.begrotingspost.delete({ where: { id, boekjaarId: boekjaar.id } });
     await logAudit({
       gebruiker: sessie.naam,
       entiteit: "Begrotingspost",

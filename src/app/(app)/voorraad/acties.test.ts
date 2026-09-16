@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => {
     count: vi.fn(),
     createMany: vi.fn(),
   };
-  const tx = { voorraadpost, boekjaar: { findFirst: vi.fn() } };
+  const tx = { voorraadpost, boekjaar: { findFirst: vi.fn() }, begrotingspost: { findMany: vi.fn() } };
   return {
     tx,
     transaction: vi.fn(),
@@ -25,6 +25,9 @@ vi.mock("@/lib/boekjaar", () => ({ vereisSchrijfbaarBoekjaar: mocks.year }));
 vi.mock("@/lib/audit", () => ({ logAudit: mocks.audit }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({
+  unstable_rethrow: (fout: unknown) => {
+    if (fout && typeof fout === "object" && "digest" in fout) throw fout;
+  },
   redirect: () => {
     throw Object.assign(new Error("redirect"), { digest: "NEXT_REDIRECT;" });
   },
@@ -57,6 +60,7 @@ beforeEach(() => {
     startDatum: new Date("2026-09-01"),
   });
   mocks.transaction.mockImplementation((fn) => fn(mocks.tx));
+  mocks.tx.begrotingspost.findMany.mockResolvedValue([]);
 });
 
 describe("beveiliging van voorraadwijzigingen", () => {

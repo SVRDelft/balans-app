@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
@@ -17,6 +18,7 @@ import {
   Table2,
   Target,
   Users,
+  Menu,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -72,16 +74,16 @@ function isActief(pathname: string, href: string): boolean {
 
 export function Navigatie() {
   const pathname = usePathname();
+  const menu = useRef<HTMLDetailsElement>(null);
 
-  return (
-    <nav className="lg:py-2">
-      <ul className="flex gap-1 overflow-x-auto px-3 py-2 lg:flex-col lg:gap-0 lg:overflow-visible lg:px-3 lg:py-0">
+  const inhoud = (
+      <ul className="grid grid-cols-2 gap-x-3 px-3 py-2 lg:flex lg:flex-col lg:gap-0 lg:py-0">
         {GROEPEN.map((groep) => (
-          <li key={groep.titel} className="contents lg:block lg:pt-4">
-            <p className="hidden px-2 pb-1 text-[0.68rem] font-semibold tracking-wider text-muted-foreground uppercase lg:block">
+          <li key={groep.titel} className="pt-3">
+            <p className="px-2 pb-1 text-[0.68rem] font-semibold tracking-wider text-muted-foreground uppercase">
               {groep.titel}
             </p>
-            <ul className="contents lg:block lg:space-y-0.5">
+            <ul className="space-y-0.5">
               {groep.items.map((item) => {
                 const actief = isActief(pathname, item.href);
                 const Icoon = item.icoon;
@@ -90,8 +92,9 @@ export function Navigatie() {
                     <Link
                       href={item.href}
                       aria-current={actief ? "page" : undefined}
+                      onClick={() => { if (menu.current) menu.current.open = false; }}
                       className={cn(
-                        "flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap transition-colors",
+                        "flex min-h-10 items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring lg:min-h-9",
                         actief
                           ? "bg-primary/10 font-medium text-primary"
                           : "text-foreground/75 hover:bg-accent hover:text-foreground",
@@ -107,6 +110,22 @@ export function Navigatie() {
           </li>
         ))}
       </ul>
+  );
+  return (
+    <nav aria-label="Hoofdnavigatie" className="pb-3 lg:py-2">
+      <div className="hidden lg:block">{inhoud}</div>
+      <details ref={menu} className="lg:hidden" onKeyDown={(event) => {
+        if (event.key === "Escape" && menu.current?.open) {
+          menu.current.open = false;
+          menu.current.querySelector("summary")?.focus();
+        }
+      }}>
+      <summary className="mx-4 flex cursor-pointer list-none items-center justify-between rounded-lg border border-border px-3 py-2.5 text-sm font-medium">
+        <span className="flex items-center gap-2"><Menu className="size-4" />Menu</span>
+        <span className="text-muted-foreground">{GROEPEN.flatMap((groep) => groep.items).find((item) => isActief(pathname, item.href))?.label}</span>
+      </summary>
+      {inhoud}
+      </details>
     </nav>
   );
 }

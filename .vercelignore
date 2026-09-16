@@ -4,3 +4,6 @@ prisma/*.db*
 .devcontainer
 coverage
 .vercel
+.next-e2e
+playwright-report
+test-results

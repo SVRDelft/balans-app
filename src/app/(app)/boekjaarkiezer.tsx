@@ -25,13 +25,13 @@ export function Boekjaarkiezer({
     <label className="flex items-center gap-2 text-sm">
       <span className="sr-only">Boekjaar</span>
       <Select
-        className="h-8 w-auto min-w-[15rem] text-sm"
+        className="h-9 w-auto max-w-full min-w-0 text-sm sm:min-w-[15rem]"
         value={huidigId}
         disabled={bezig}
         onChange={(gebeurtenis) => {
           const id = gebeurtenis.target.value;
-          startOvergang(() => {
-            void kiesBoekjaar(id);
+          startOvergang(async () => {
+            await kiesBoekjaar(id);
           });
         }}
       >

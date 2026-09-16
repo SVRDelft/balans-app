@@ -18,9 +18,9 @@ import {
 import { vereisBoekjaarContext } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import { formatteerDatum } from "@/lib/datum";
-import { OPENSTAANDE_STATUSSEN, TELLENDE_STATUSSEN } from "@/lib/domein";
 import { betaaldBedrag } from "@/lib/facturen";
-import { openstaandBedrag } from "@/lib/finance/factuurstatus";
+import { factuurOpenstaand, factuurRealisatie } from "@/lib/finance/factuurstanden";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
 import { formatteerEuro } from "@/lib/geld";
 
 export const metadata: Metadata = { title: "Vereniging" };
@@ -38,6 +38,7 @@ export default async function VerenigingPagina({
         where: { boekjaarId: boekjaar.id },
         orderBy: { volgnummer: "asc" },
         include: {
+          ...factuurStandRelaties,
           betalingen: { orderBy: { datum: "asc" } },
           evenement: { select: { id: true, naam: true } },
         },
@@ -51,10 +52,10 @@ export default async function VerenigingPagina({
   if (!vereniging) notFound();
 
   const tellend = vereniging.facturen.filter((factuur) =>
-    TELLENDE_STATUSSEN.includes(factuur.status as never),
+    factuur.status !== "concept",
   );
   const verschuldigd = tellend.reduce(
-    (som, factuur) => som + factuur.totaalCenten,
+    (som, factuur) => som + factuurRealisatie(factuur),
     0,
   );
   const betaald = tellend.reduce(
@@ -62,11 +63,10 @@ export default async function VerenigingPagina({
     0,
   );
   const openstaand = vereniging.facturen
-    .filter((factuur) => OPENSTAANDE_STATUSSEN.includes(factuur.status as never))
     .reduce(
       (som, factuur) =>
         som +
-        openstaandBedrag(factuur.totaalCenten, betaaldBedrag(factuur.betalingen)),
+        factuurOpenstaand(factuur),
       0,
     );
 
@@ -118,11 +118,7 @@ export default async function VerenigingPagina({
             ) : null}
             {vereniging.facturen.map((factuur) => {
               const factuurBetaald = betaaldBedrag(factuur.betalingen);
-              const factuurOpen = OPENSTAANDE_STATUSSEN.includes(
-                factuur.status as never,
-              )
-                ? openstaandBedrag(factuur.totaalCenten, factuurBetaald)
-                : 0;
+              const factuurOpen = factuurOpenstaand(factuur);
 
               return (
                 <TableRow key={factuur.id}>

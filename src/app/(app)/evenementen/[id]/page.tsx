@@ -54,11 +54,11 @@ export const metadata: Metadata = { title: "Evenement" };
 export default async function EvenementPagina({
   params,
 }: PageProps<"/evenementen/[id]">) {
-  const { schrijfbaar } = await vereisBoekjaarContext();
+  const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
   const { id } = await params;
 
   const evenement = await db.evenement.findUnique({
-    where: { id },
+    where: { id, boekjaarId: boekjaar.id },
     include: {
       kostenpost: { select: { code: true, naam: true } },
       opbrengstpost: { select: { code: true, naam: true } },

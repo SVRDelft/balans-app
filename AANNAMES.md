@@ -76,6 +76,13 @@ Je mag een hogere prijs invullen dan de kostprijs, bijvoorbeeld om op een rond
 bedrag uit te komen. Een **lagere** prijs weigert de app: daarmee zou het verlies
 bij voorbaat vaststaan, en dat is precies wat dit systeem moet voorkomen.
 
+Dit is bij de review van september 2026 bewust zo gehouden. Het alternatief is de
+restcent exact verdelen, zodat de som van de deelfacturen precies het totaal is
+(de functie `verdeelCenten` doet dat al voor de jaarfacturen). Nadeel daarvan is
+dat deelnemers onderling een cent verschillen op hun factuur. De afweging was:
+een paar euro overdekking die zichtbaar op de afstemming staat is te verkiezen
+boven facturen die niet allemaal hetzelfde bedrag noemen.
+
 ### Wanneer telt een factuur mee
 
 Uitgangspunt is het baten-lastenstelsel: een factuur telt mee als opbrengst zodra
@@ -131,6 +138,38 @@ Een naheffing gaat over de deelnemers uit de **eerste** omslagronde, ook als de
 deelnemerslijst daarna is gewijzigd. Dat is wat de opdracht vraagt en het is ook
 het enige dat verdedigbaar is: iemand die er bij het evenement niet was, kun je
 achteraf geen extra rekening sturen.
+
+### De bankimport wijkt af van de oorspronkelijke opdracht
+
+De opdracht was uitdrukkelijk: *"Er komt geen koppeling met de bank — niet nu, en
+ontwerp er ook niet omheen."* Er zit nu wél een import van MT940-afschriften in.
+
+Het verschil met wat toen bedoeld werd: de app praat niet met de bank. Er is geen
+API, geen inloggegevens, geen machtiging. Je downloadt zelf een bestand bij ABN
+AMRO en leest dat in, en elke voorgestelde koppeling bevestig je met de hand
+voordat er geboekt wordt. In die zin is het hetzelfde handwerk als overtypen,
+alleen zonder de typefouten.
+
+Maar het is wel degelijk "eromheen ontworpen": er zijn twee modellen bijgekomen
+(`Bankimport` en `Bankmutatie`), een schermenreeks en een MT940-parser die
+onderhouden moet worden. Wie dit niet wil, kan het scherm uit de navigatie halen;
+de rest van de administratie werkt er niet van afhankelijk.
+
+### Betalingen kunnen hard verwijderd worden
+
+Een factuur kan alleen weg zolang hij concept is, en een uitgave alleen zolang
+hij niet in een omslag verdeeld is. Voor **betalingen** geldt die bescherming
+niet: een geregistreerde betaling kan verwijderd worden, en dan is hij weg. Ook
+het terugdraaien van een bankimport verwijdert betalingen en uitgaven definitief.
+
+Er blijft wel een spoor: elke verwijdering komt met bedrag, factuurnummer en
+gebruiker in het auditlog. Voor een kascommissie is dat meestal genoeg, maar het
+is geen echte softe verwijdering.
+
+Ook dit is bij de review van september 2026 bewust zo gelaten. Wil een volgend
+bestuur het strenger, dan is dat een schemawijziging (een `verwijderdOp`-kolom op
+`Betaling`) plus aanpassing van elke plek die betalingen optelt — met name
+`hertelFactuur` en `haalBoekjaarCijfers`.
 
 ### Verwijderen versus archiveren
 

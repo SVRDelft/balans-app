@@ -40,8 +40,8 @@ export function VerbruikFormulier({
   );
   const [invoer, setInvoer] = useState("1");
 
-  const gekozen = Number.parseInt(invoer, 10);
-  const geldig = Number.isFinite(gekozen) && gekozen >= 1 && gekozen <= aantal;
+  const gekozen = Number(invoer);
+  const geldig = Number.isInteger(gekozen) && gekozen >= 1 && gekozen <= aantal;
   const waarde = geldig ? gekozen * waardePerStukCenten : 0;
 
   return (

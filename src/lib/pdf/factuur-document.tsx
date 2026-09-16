@@ -22,6 +22,10 @@ export interface FactuurPdfGegevens {
   notities: string | null;
   totaalCenten: number;
   betaaldCenten: number;
+  openstaandCenten: number;
+  afgeboektCenten: number;
+  creditfactuur: { nummer: string; bedragCenten: number } | null;
+  crediteertFactuurNummer: string | null;
 
   regels: {
     omschrijving: string;
@@ -158,7 +162,19 @@ const stijl = StyleSheet.create({
 });
 
 export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
-  const openstaand = factuur.totaalCenten - factuur.betaaldCenten;
+  const openstaand = factuur.openstaandCenten;
+  const betaaltekst = factuur.isConcept
+    ? "Dit is een concept. Maak op basis van dit document nog geen bedrag over."
+    : factuur.isCredit
+      ? openstaand < 0
+        ? `Deze credit is verrekend met de oorspronkelijke factuur. Wij betalen nog ${formatteerEuro(-openstaand)} aan u terug.`
+        : "Deze credit is verrekend met de oorspronkelijke factuur. Voor deze creditfactuur hoeft u niets over te maken."
+      : openstaand < 0
+        ? `Wij betalen het te veel ontvangen bedrag van ${formatteerEuro(-openstaand)} aan u terug.`
+        : openstaand === 0
+          ? "Voor deze factuur staat geen bedrag meer open."
+          : factuur.afzender.voetnoot ||
+            "Wij verzoeken u het nog te voldoen bedrag binnen de betaaltermijn over te maken onder vermelding van het factuurnummer.";
 
   return (
     <Document
@@ -266,6 +282,11 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
         </View>
 
         <Text style={stijl.vet}>{factuur.omschrijving}</Text>
+        {factuur.crediteertFactuurNummer ? (
+          <Text style={stijl.klein}>
+            Correctie op factuur {factuur.crediteertFactuurNummer}
+          </Text>
+        ) : null}
 
         <View style={stijl.tabelkop}>
           <Text style={[stijl.kolomOmschrijving, stijl.vet]}>Omschrijving</Text>
@@ -295,20 +316,44 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
         </View>
 
         {factuur.betaaldCenten !== 0 ? (
-          <>
-            <View style={stijl.totaalrij}>
-              <Text style={stijl.totaalLabel}>Reeds ontvangen</Text>
-              <Text style={stijl.totaalBedrag}>
-                {formatteerEuro(factuur.betaaldCenten)}
-              </Text>
-            </View>
-            <View style={stijl.totaalrij}>
-              <Text style={[stijl.totaalLabel, stijl.vet]}>Nog te voldoen</Text>
-              <Text style={[stijl.totaalBedrag, stijl.vet]}>
-                {formatteerEuro(openstaand)}
-              </Text>
-            </View>
-          </>
+          <View style={stijl.totaalrij}>
+            <Text style={stijl.totaalLabel}>
+              {factuur.betaaldCenten < 0
+                ? "Reeds terugbetaald"
+                : "Reeds ontvangen"}
+            </Text>
+            <Text style={stijl.totaalBedrag}>
+              {formatteerEuro(Math.abs(factuur.betaaldCenten))}
+            </Text>
+          </View>
+        ) : null}
+        {factuur.creditfactuur ? (
+          <View style={stijl.totaalrij}>
+            <Text style={stijl.totaalLabel}>
+              Credit {factuur.creditfactuur.nummer}
+            </Text>
+            <Text style={stijl.totaalBedrag}>
+              {formatteerEuro(factuur.creditfactuur.bedragCenten)}
+            </Text>
+          </View>
+        ) : null}
+        {factuur.afgeboektCenten > 0 ? (
+          <View style={stijl.totaalrij}>
+            <Text style={stijl.totaalLabel}>Oninbaar afgeboekt</Text>
+            <Text style={stijl.totaalBedrag}>
+              {formatteerEuro(factuur.afgeboektCenten)}
+            </Text>
+          </View>
+        ) : null}
+        {!factuur.isConcept ? (
+          <View style={stijl.totaalrij}>
+            <Text style={[stijl.totaalLabel, stijl.vet]}>
+              {openstaand < 0 ? "Nog terug te betalen" : "Nog te voldoen"}
+            </Text>
+            <Text style={[stijl.totaalBedrag, stijl.vet]}>
+              {formatteerEuro(Math.abs(openstaand))}
+            </Text>
+          </View>
         ) : null}
 
         {factuur.notities ? (
@@ -318,10 +363,7 @@ export function FactuurDocument({ factuur }: { factuur: FactuurPdfGegevens }) {
         ) : null}
 
         <View style={stijl.voet} fixed>
-          <Text>
-            {factuur.afzender.voetnoot ||
-              "Wij verzoeken u het bedrag binnen de betaaltermijn over te maken onder vermelding van het factuurnummer."}
-          </Text>
+          <Text>{betaaltekst}</Text>
           <Text>
             {factuur.afzender.iban ? `IBAN ${factuur.afzender.iban}` : ""}
             {factuur.afzender.kvkNummer

@@ -5,6 +5,11 @@ import { db } from "@/lib/db";
 import { betaaldBedrag } from "@/lib/facturen";
 import { FactuurDocument } from "@/lib/pdf/factuur-document";
 import { logoVoorPdf } from "@/lib/logo";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
+import {
+  factuurOpenstaand,
+  factuurRealisatie,
+} from "@/lib/finance/factuurstanden";
 
 // @react-pdf/renderer draait op Node, niet op de edge runtime.
 export const runtime = "nodejs";
@@ -25,6 +30,7 @@ export async function GET(
     db.factuur.findUnique({
       where: { id },
       include: {
+        ...factuurStandRelaties,
         relatie: true,
         regels: { orderBy: { volgorde: "asc" } },
         betalingen: { select: { bedragCenten: true } },
@@ -51,6 +57,20 @@ export async function GET(
         notities: factuur.notities,
         totaalCenten: factuur.totaalCenten,
         betaaldCenten: betaaldBedrag(factuur.betalingen),
+        openstaandCenten: factuurOpenstaand(factuur),
+        afgeboektCenten:
+          factuur.status === "oninbaar"
+            ? Math.max(0, factuur.totaalCenten - factuurRealisatie(factuur))
+            : 0,
+        creditfactuur:
+          factuur.creditfactuur &&
+          !["concept", "oninbaar"].includes(factuur.creditfactuur.status)
+            ? {
+                nummer: factuur.creditfactuur.nummer,
+                bedragCenten: factuur.creditfactuur.totaalCenten,
+              }
+            : null,
+        crediteertFactuurNummer: factuur.crediteertFactuur?.nummer ?? null,
         regels: factuur.regels.map((regel) => ({
           omschrijving: regel.omschrijving,
           aantal: regel.aantal,

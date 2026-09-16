@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { Paginakop } from "@/components/paginakop";
 import { db } from "@/lib/db";
+import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { centenNaarInvoer } from "@/lib/geld";
 
 import { BegrotingspostFormulier } from "../formulier";
@@ -14,9 +15,10 @@ export default async function BegrotingspostPagina({
   params,
 }: PageProps<"/begroting/[id]">) {
   const { id } = await params;
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/begroting");
 
   const post = await db.begrotingspost.findUnique({
-    where: { id },
+    where: { id, boekjaarId: boekjaar.id },
     include: { _count: { select: { factuurregels: true, uitgaven: true } } },
   });
   if (!post) notFound();

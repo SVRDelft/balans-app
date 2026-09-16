@@ -78,11 +78,13 @@ Het inlogwachtwoord staat in `APP_WACHTWOORD` in `.env.local`.
 | `npm run build`      | Maakt een productieversie                                  |
 | `npm start`          | Draait de productieversie (na `npm run build`)             |
 | `npm test`           | Draait de tests op de financiële berekeningen              |
+| `npm run test:e2e`   | Test de gebruikersstromen in Chromium met een tijdelijke database |
 | `npm run typecheck`  | Controleert de types zonder te bouwen                      |
 | `npm run lint`       | Controleert de code                                        |
 | `npm run setup`      | Database aanmaken en startgegevens laden                   |
 | `npm run db:seed`    | Alleen de startgegevens (opnieuw) laden                    |
 | `npm run db:migrate` | Nieuwe migratie maken na een wijziging in het datamodel    |
+| `npm run db:deploy`  | Past bestaande migraties toe, met behoud van gegevens      |
 | `npm run db:studio`  | Bladert door de database in de browser                     |
 | `npm run db:reset`   | **Gooit alle gegevens weg** en begint opnieuw              |
 
@@ -95,7 +97,9 @@ Het inlogwachtwoord staat in `APP_WACHTWOORD` in `.env.local`.
 Er is altijd precies één **actief** boekjaar. Alleen daarin kun je schrijven;
 oudere jaren zijn wel te bekijken. Bovenin wissel je van boekjaar. Relaties
 (studieverenigingen, personen, leveranciers) blijven over boekjaren heen
-bestaan; begrotingsposten maak je per jaar opnieuw.
+bestaan. Het eerste boekjaar wordt automatisch actief. Bij het aanmaken van een
+volgend jaar kun je de begrotingsposten en bedragen kopiëren. Activeer dat jaar
+wanneer je erin wilt gaan werken en neem de voorraad over via *Spullen & voorraad*.
 
 ### Begroting
 
@@ -121,6 +125,14 @@ hergebruikt**, ook niet als je een concept verwijdert. Een gat in de reeks is
 verklaarbaar; een hergebruikt nummer niet.
 
 Deelbetalingen kunnen: de status volgt automatisch uit de som van de betalingen.
+
+Een creditfactuur telt mee zodra je deze op *verstuurd* zet. De app verrekent
+de credit met het origineel en laat een eventuele terugbetaling apart zien.
+Bij *Oninbaar afboeken* blijven ontvangen bedragen als inkomsten staan; alleen
+het nog te ontvangen bedrag wordt afgeboekt. Je kunt de afboeking herstellen.
+
+Zoek op nummer, omschrijving of relatie. Het filter *Vervallen* kijkt naar de
+werkelijke vervaldatum. Ook uitgaven en relaties hebben een zoekveld.
 
 Met **Jaarfacturen bijdrage** maak je in één klik voor alle bijdrageplichtige
 studieverenigingen een conceptfactuur met het bedrag uit de begroting.
@@ -175,6 +187,17 @@ Voer het banksaldo regelmatig in vanuit je bankapp. De app zet dat af tegen het
 saldo dat uit de administratie volgt. **Dat verschil is het beste signaal dat er
 iets vergeten is.**
 
+### Bankafschriften inlezen
+
+Onder *Banksaldo › Bankafschriften* lees je een MT940-bestand in dat je bij ABN
+AMRO downloadt. De app stelt koppelingen voor tussen de mutaties en je openstaande
+facturen en uitgaven; je bevestigt die zelf voordat er iets geboekt wordt.
+
+Dit is een **handmatige import van een bestand dat jij downloadt**, geen
+koppeling met de bank: de app praat nooit zelf met ABN AMRO en heeft geen
+bankgegevens van je nodig. Je kunt de app volledig gebruiken zonder ooit een
+afschrift in te lezen; alles is ook met de hand in te voeren.
+
 ### Spullen en voorraad
 
 Bij *Spullen & voorraad* houd je per boekjaar aantallen, boekwaarde per stuk,
@@ -210,6 +233,23 @@ wat de kascommissie en het volgende bestuur krijgen.
 ---
 
 ## Techniek
+
+### Controles voor publicatie
+
+```bash
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm run test:e2e
+```
+
+Installeer voor de browsertests eenmalig Chromium met
+`npx playwright install chromium`. De testgebruiker van de ontwikkel-database
+moet databases mogen aanmaken. De runner maakt een unieke tijdelijke database,
+past de migraties toe en test op poort 3101. Na afloop verwijdert hij uitsluitend
+die testdatabase. Gebruik hiervoor ontwikkelvariabelen, geen productievariabelen.
+Testresultaten, sessiegegevens en exports blijven buiten Git.
 
 - **Next.js 16** (App Router) met **TypeScript** en **React 19**
 - **Prisma 7** met **Postgres** via de `@prisma/adapter-pg` driver adapter;

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.E2E_BASE_URL ? ".next-e2e" : ".next",
   outputFileTracingIncludes: {
     "/api/**": ["./public/svr-logo.jpg"],
   },

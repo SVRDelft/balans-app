@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { BevestigKnop } from "@/components/bevestigknop";
 import { Kerngetal, Paginakop } from "@/components/paginakop";
@@ -47,7 +50,8 @@ export default async function BankPagina() {
     <>
       <Paginakop
         titel="Banksaldo"
-        beschrijving="Het bestuur voert het saldo handmatig in vanuit de bankapp. Er is bewust geen koppeling met de bank."
+        beschrijving="Importeer je bankafschrift of voer het saldo in. Controleer daarna het verschil met de administratie."
+        acties={<Button asChild><Link href="/bank/importeren"><Upload />Bankafschrift importeren</Link></Button>}
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">

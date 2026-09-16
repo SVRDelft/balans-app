@@ -24,6 +24,12 @@ export async function GET(
       "Content-Disposition": `inline; filename="${veiligeNaam}"`,
       "Content-Length": String(bijlage.grootte),
       "Cache-Control": "private, max-age=3600",
+      // Het mimetype komt van de browser bij het uploaden. Het wordt bij het
+      // opslaan getoetst aan een vaste lijst, maar zonder nosniff kan een
+      // browser een verkeerd gelabeld bestand alsnog anders interpreteren.
+      "X-Content-Type-Options": "nosniff",
+      // Een bonnetje hoort niets uit te voeren en niets in te laden.
+      "Content-Security-Policy": "default-src 'none'; img-src 'self'; object-src 'none'; sandbox",
     },
   });
 }

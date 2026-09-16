@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Paperclip, Plus } from "lucide-react";
 
 import { Paginakop } from "@/components/paginakop";
+import { Zoekveld } from "@/components/zoekveld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export default async function UitgavenPagina({
 }: PageProps<"/uitgaven">) {
   const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
   const parameters = await searchParams;
+  const zoekterm = typeof parameters.q === "string" ? parameters.q.trim().slice(0, 120) : "";
 
   const postFilter = typeof parameters.post === "string" ? parameters.post : "";
   const evenementFilter =
@@ -39,6 +41,10 @@ export default async function UitgavenPagina({
     db.uitgave.findMany({
       where: {
         boekjaarId: boekjaar.id,
+        ...(zoekterm ? { OR: [
+          { leverancierNaam: { contains: zoekterm, mode: "insensitive" as const } },
+          { omschrijving: { contains: zoekterm, mode: "insensitive" as const } },
+        ] } : {}),
         ...(postFilter ? { begrotingspostId: postFilter } : {}),
         ...(evenementFilter ? { evenementId: evenementFilter } : {}),
         ...(betaaldFilter === "ja"
@@ -88,9 +94,11 @@ export default async function UitgavenPagina({
       />
 
       <form
+        key={[zoekterm, postFilter, evenementFilter, betaaldFilter].join("|")}
         method="get"
         className="mb-4 flex flex-wrap items-end gap-3 niet-afdrukken"
       >
+        <Zoekveld waarde={zoekterm} placeholder="Leverancier of omschrijving" />
         <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
           Begrotingspost
           <select name="post" defaultValue={postFilter} className="veld w-64">
@@ -131,7 +139,7 @@ export default async function UitgavenPagina({
         <Button type="submit" variant="secondary" size="sm">
           Filteren
         </Button>
-        {postFilter || evenementFilter || betaaldFilter ? (
+        {zoekterm || postFilter || evenementFilter || betaaldFilter ? (
           <Button type="button" variant="ghost" size="sm" asChild>
             <Link href="/uitgaven">Wissen</Link>
           </Button>

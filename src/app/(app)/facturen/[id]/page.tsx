@@ -34,9 +34,12 @@ import {
   formatteerTijdstempel,
   vandaag,
 } from "@/lib/datum";
-import { OPENSTAANDE_STATUSSEN, type FactuurStatus } from "@/lib/domein";
+
 import { betaaldBedrag, maakHerinneringstekst } from "@/lib/facturen";
-import { isTeveelBetaald, openstaandBedrag } from "@/lib/finance/factuurstatus";
+import { isTeveelBetaald } from "@/lib/finance/factuurstatus";
+import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
+import { dagenTeLaat } from "@/lib/finance/vervaldatum";
 import { centenNaarInvoer, formatteerEuro } from "@/lib/geld";
 import { haalSessie } from "@/lib/auth/server";
 
@@ -56,11 +59,11 @@ export const metadata: Metadata = { title: "Factuur" };
 export default async function FactuurPagina({
   params,
 }: PageProps<"/facturen/[id]">) {
-  const { schrijfbaar } = await vereisBoekjaarContext();
+  const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
   const { id } = await params;
 
   const factuur = await db.factuur.findUnique({
-    where: { id },
+    where: { id, boekjaarId: boekjaar.id },
     include: {
       relatie: true,
       regels: {
@@ -69,8 +72,7 @@ export default async function FactuurPagina({
       },
       betalingen: { orderBy: { datum: "asc" } },
       evenement: { select: { id: true, naam: true } },
-      creditfactuur: { select: { id: true, nummer: true } },
-      crediteertFactuur: { select: { id: true, nummer: true } },
+      ...factuurStandRelaties,
     },
   });
   if (!factuur) notFound();
@@ -81,13 +83,11 @@ export default async function FactuurPagina({
   ]);
 
   const betaald = betaaldBedrag(factuur.betalingen);
-  const openstaand = openstaandBedrag(factuur.totaalCenten, betaald);
+  const openstaand = factuurOpenstaand(factuur);
   const teveel = isTeveelBetaald(factuur.totaalCenten, betaald);
   const isConcept = factuur.status === "concept";
-  const isOpenstaand = OPENSTAANDE_STATUSSEN.includes(
-    factuur.status as FactuurStatus,
-  );
-  const dagenOpen = dagenTussen(factuur.factuurdatum, vandaag());
+  const isOpenstaand = openstaand > 0;
+  const dagenOpen = dagenTeLaat(factuur.vervaldatum, vandaag(), openstaand);
 
   const herinneringstekst = maakHerinneringstekst({
     relatieNaam: factuur.relatie.naam,
@@ -97,7 +97,8 @@ export default async function FactuurPagina({
     vervaldatum: formatteerDatum(factuur.vervaldatum),
     openstaandBedrag: formatteerEuro(openstaand),
     omschrijving: factuur.omschrijving,
-    organisatieNaam: instellingen?.organisatieNaam ?? "StudieVerenigingenRaad Delft",
+    organisatieNaam:
+      instellingen?.organisatieNaam ?? "StudieVerenigingenRaad Delft",
     iban: instellingen?.iban ?? "",
     afzender: sessie?.naam ?? "",
     dagenOver: dagenTussen(factuur.vervaldatum, vandaag()),
@@ -153,7 +154,7 @@ export default async function FactuurPagina({
 
       {factuur.creditfactuur ? (
         <Melding toon="waarschuwing" className="mb-4">
-          Deze factuur is gecrediteerd met{" "}
+          Bij deze factuur hoort creditfactuur{" "}
           <Link
             href={`/facturen/${factuur.creditfactuur.id}`}
             className="underline"
@@ -178,10 +179,10 @@ export default async function FactuurPagina({
               <CardTitle>{factuur.omschrijving}</CardTitle>
               <CardDescription>
                 Vervaldatum {formatteerDatum(factuur.vervaldatum)}
-                {isOpenstaand && dagenOpen > 30 ? (
+                {isOpenstaand && dagenOpen > 0 ? (
                   <span className="text-destructive">
                     {" "}
-                    · staat {dagenOpen} dagen open
+                    · {dagenOpen} dagen te laat
                   </span>
                 ) : null}
                 {factuur.evenement ? (
@@ -257,7 +258,9 @@ export default async function FactuurPagina({
                 <p className="text-xs font-medium text-muted-foreground">
                   Notities
                 </p>
-                <p className="text-sm whitespace-pre-wrap">{factuur.notities}</p>
+                <p className="text-sm whitespace-pre-wrap">
+                  {factuur.notities}
+                </p>
               </CardContent>
             ) : null}
           </Card>
@@ -320,7 +323,9 @@ export default async function FactuurPagina({
                 </Table>
               )}
 
-              {schrijfbaar && !isConcept && factuur.status !== "gecrediteerd" ? (
+              {schrijfbaar &&
+              !isConcept &&
+              (factuur.status !== "gecrediteerd" || openstaand > 0) ? (
                 <div className="border-t border-border pt-4">
                   <BetalingFormulier
                     factuurId={factuur.id}
@@ -380,10 +385,12 @@ export default async function FactuurPagina({
                   </>
                 ) : null}
 
-                {isOpenstaand ? (
+                {isOpenstaand && !factuur.crediteertFactuurId ? (
                   <>
                     <OninbaarKnop id={factuur.id} nummer={factuur.nummer} />
-                    <CreditKnop id={factuur.id} nummer={factuur.nummer} />
+                    {!factuur.creditfactuur ? (
+                      <CreditKnop id={factuur.id} nummer={factuur.nummer} />
+                    ) : null}
                   </>
                 ) : null}
 
@@ -391,7 +398,9 @@ export default async function FactuurPagina({
                   <HerstelKnop id={factuur.id} nummer={factuur.nummer} />
                 ) : null}
 
-                {factuur.status === "betaald" && !factuur.creditfactuur ? (
+                {factuur.status === "betaald" &&
+                factuur.soort !== "credit" &&
+                !factuur.creditfactuur ? (
                   <CreditKnop id={factuur.id} nummer={factuur.nummer} />
                 ) : null}
               </CardContent>

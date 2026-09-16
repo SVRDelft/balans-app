@@ -51,7 +51,7 @@ export function CreditKnop({ id, nummer }: { id: string; nummer: string }) {
     <BevestigKnop
       actie={maakCreditfactuur}
       velden={{ id }}
-      vraag={`Creditfactuur maken voor ${nummer}? De oorspronkelijke factuur krijgt de status gecrediteerd.`}
+      vraag={`Creditfactuur maken voor ${nummer}? Controleer het concept en zet het daarna op verstuurd om de creditering te verwerken.`}
     >
       <Undo2 />
       Crediteren
@@ -64,7 +64,7 @@ export function OninbaarKnop({ id, nummer }: { id: string; nummer: string }) {
     <BevestigKnop
       actie={zetStatus}
       velden={{ id, status: "oninbaar" }}
-      vraag={`${nummer} als oninbaar afboeken? Het bedrag telt daarna niet meer mee als opbrengst.`}
+      vraag={`${nummer} als oninbaar afboeken? Alleen het nog onbetaalde deel wordt afgeboekt.`}
     >
       <Check />
       Oninbaar afboeken

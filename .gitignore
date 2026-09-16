@@ -5,6 +5,7 @@
 
 # build
 /.next/
+/.next-e2e/
 /out/
 /build
 *.tsbuildinfo
@@ -13,11 +14,28 @@ next-env.d.ts
 # door Prisma gegenereerd; wordt opnieuw gemaakt door `npm install`
 /src/generated/
 
-# de database zelf hoort niet in versiebeheer
-/prisma/*.db
-/prisma/*.db-journal
-/prisma/*.db-shm
-/prisma/*.db-wal
+# de database zelf hoort niet in versiebeheer, waar hij ook staat
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+
+# uitvoer van de app: exports en geüploade bonnetjes horen niet in de repo
+/uploads/
+/public/uploads/
+*.csv
+*.xlsx
+*.xls
+
+# bankbestanden
+*.940
+*.sta
+*.mt940
+*.camt
+*.camt053
 
 # omgevingsvariabelen — .env bevat het wachtwoord
 .env*
@@ -30,6 +48,8 @@ next-env.d.ts
 .DS_Store
 *.pem
 /coverage
+/test-results/
+/playwright-report/
 .vercel
 npm-debug.log*
 yarn-debug.log*

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
+import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
 import { datumUitInvoer, telDagenOp, vandaag } from "@/lib/datum";
 import { hertelFactuur, volgendFactuurnummer } from "@/lib/facturen";
@@ -59,11 +60,12 @@ export async function bewaarEvenement(
       notities: leesTekst(formulier, "notities") ?? null,
     };
 
+    await controleerKoppelingen(boekjaar.id, [gegevens.kostenpostId, gegevens.opbrengstpostId].filter((id): id is string => Boolean(id)));
     const id = leesTekst(formulier, "id");
 
     if (id) {
       const evenement = await db.evenement.update({
-        where: { id },
+        where: { id, boekjaarId: boekjaar.id },
         data: gegevens,
       });
       await logAudit({
@@ -109,7 +111,7 @@ export async function voegDeelnemerToe(
   const sessie = await vereisSessie();
 
   return voerUit(async () => {
-    await vereisSchrijfbaarBoekjaar();
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
 
     const evenementId = leesTekst(formulier, "evenementId");
     if (!evenementId) return { fout: "Onbekend evenement." };
@@ -130,6 +132,7 @@ export async function voegDeelnemerToe(
     }
     if (!naam) return { fout: "Kies een relatie of vul een naam in." };
 
+    if (!await db.evenement.findFirst({ where: { id: evenementId, boekjaarId: boekjaar.id, status: { not: "afgesloten" } } })) return { fout: "Dit evenement is niet beschikbaar in het actieve boekjaar." };
     await db.deelnemer.create({
       data: {
         evenementId,
@@ -162,20 +165,21 @@ export async function wijzigDeelnemer(
   const sessie = await vereisSessie();
 
   return voerUit(async () => {
-    await vereisSchrijfbaarBoekjaar();
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
 
     const id = leesTekst(formulier, "id");
     const veld = leesTekst(formulier, "veld");
     if (!id || !veld) return { fout: "Onvolledige opdracht." };
 
-    const deelnemer = await db.deelnemer.findUnique({ where: { id } });
+    const deelnemer = await db.deelnemer.findUnique({ where: { id, evenement: { boekjaarId: boekjaar.id, status: { not: "afgesloten" } } }, include: { _count: { select: { omslagrondeRegels: true } } } });
     if (!deelnemer) return { fout: "Deze deelnemer bestaat niet meer." };
+    if (deelnemer._count.omslagrondeRegels > 0 && veld !== "aangemeld") return { fout: "Deze deelnemer is al in een omslag verwerkt. De betaalverdeling staat vast." };
 
     if (veld === "aantalPersonen") {
       const aantal = leesGeheelGetal(formulier, "waarde") ?? 1;
       if (aantal < 1) return { fout: "Het aantal personen is minimaal 1." };
       await db.deelnemer.update({
-        where: { id },
+        where: { id, evenement: { boekjaarId: boekjaar.id } },
         data: { aantalPersonen: aantal },
       });
       await logAudit({
@@ -188,7 +192,7 @@ export async function wijzigDeelnemer(
     } else if (veld === "aangemeld" || veld === "bevestigdBetalend") {
       const nieuweWaarde = !deelnemer[veld];
       await db.deelnemer.update({
-        where: { id },
+        where: { id, evenement: { boekjaarId: boekjaar.id } },
         data: { [veld]: nieuweWaarde },
       });
       await logAudit({
@@ -214,13 +218,13 @@ export async function verwijderDeelnemer(
   const sessie = await vereisSessie();
 
   return voerUit(async () => {
-    await vereisSchrijfbaarBoekjaar();
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
 
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende deelnemer." };
 
     const deelnemer = await db.deelnemer.findUnique({
-      where: { id },
+      where: { id, evenement: { boekjaarId: boekjaar.id } },
       include: { _count: { select: { omslagrondeRegels: true } } },
     });
     if (!deelnemer) return { fout: "Deze deelnemer bestaat niet meer." };
@@ -232,7 +236,7 @@ export async function verwijderDeelnemer(
       };
     }
 
-    await db.deelnemer.delete({ where: { id } });
+    await db.deelnemer.delete({ where: { id, evenement: { boekjaarId: boekjaar.id } } });
     await logAudit({
       gebruiker: sessie.naam,
       entiteit: "Deelnemer",
@@ -277,7 +281,7 @@ export async function berekenOmslagActie(
     }
 
     const evenement = await db.evenement.findUnique({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       include: {
         deelnemers: true,
         uitgaven: true,
@@ -544,7 +548,7 @@ export async function boekTenLasteVanSvr(
     if (!evenementId) return { fout: "Onbekend evenement." };
 
     const evenement = await db.evenement.findUnique({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       include: { uitgaven: true },
     });
     if (!evenement) return { fout: "Dit evenement bestaat niet meer." };
@@ -596,7 +600,7 @@ export async function sluitEvenement(
     if (!evenementId) return { fout: "Onbekend evenement." };
 
     const evenement = await db.evenement.findUnique({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       include: { facturen: true, uitgaven: true },
     });
     if (!evenement) return { fout: "Dit evenement bestaat niet meer." };
@@ -624,7 +628,7 @@ export async function sluitEvenement(
     }
 
     await db.evenement.update({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       data: { status: "afgesloten" },
     });
 
@@ -655,13 +659,13 @@ export async function heropenEvenement(
     if (!evenementId) return { fout: "Onbekend evenement." };
 
     const evenement = await db.evenement.findUnique({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       include: { omslagrondes: { select: { id: true } } },
     });
     if (!evenement) return { fout: "Dit evenement bestaat niet meer." };
 
     await db.evenement.update({
-      where: { id: evenementId },
+      where: { id: evenementId, boekjaarId: boekjaar.id },
       data: {
         status: evenement.omslagrondes.length > 0 ? "omslag_berekend" : "open",
       },

@@ -17,6 +17,7 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!sessie) {
+    if (pathname.startsWith("/api/")) return new NextResponse("Niet ingelogd", { status: 401, headers: { "Cache-Control": "no-store" } });
     const doel = new URL(INLOGPAD, request.url);
     if (pathname !== "/") doel.searchParams.set("verder", pathname + search);
     return NextResponse.redirect(doel);

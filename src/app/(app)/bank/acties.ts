@@ -67,10 +67,11 @@ export async function verwijderBanksaldo(
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekend banksaldo." };
 
-    const saldo = await db.banksaldo.findUnique({ where: { id } });
+    const saldo = await db.banksaldo.findUnique({ where: { id, boekjaarId: boekjaar.id }, include: { bankimport: true } });
     if (!saldo) return { fout: "Dit banksaldo bestaat niet meer." };
+    if (saldo.bankimport) return { fout: "Dit saldo hoort bij een bevestigd bankafschrift. Het blijft bewaard bij de import." };
 
-    await db.banksaldo.delete({ where: { id } });
+    await db.banksaldo.delete({ where: { id, boekjaarId: boekjaar.id } });
 
     await logAudit({
       gebruiker: sessie.naam,

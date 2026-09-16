@@ -8,7 +8,7 @@ import { BegrotingspostFormulier, LEGE_POST } from "../formulier";
 export const metadata: Metadata = { title: "Nieuwe begrotingspost" };
 
 export default async function NieuweBegrotingspostPagina() {
-  await vereisSchrijfbaarBoekjaar();
+  await vereisSchrijfbaarBoekjaar("/begroting");
 
   return (
     <>

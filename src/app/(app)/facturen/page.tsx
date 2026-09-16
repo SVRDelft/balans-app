@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Plus, Wand2 } from "lucide-react";
 
 import { Paginakop } from "@/components/paginakop";
+import { Zoekveld } from "@/components/zoekveld";
+import { dagenTeLaat } from "@/lib/finance/vervaldatum";
 import { FactuurStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,15 +21,14 @@ import {
 } from "@/components/ui/table";
 import { vereisBoekjaarContext } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
-import { dagenTussen, formatteerDatum, vandaag } from "@/lib/datum";
+import { formatteerDatum, vandaag } from "@/lib/datum";
 import {
   FACTUUR_STATUSSEN,
   FACTUUR_STATUS_LABEL,
-  OPENSTAANDE_STATUSSEN,
   type FactuurStatus,
 } from "@/lib/domein";
-import { betaaldBedrag } from "@/lib/facturen";
-import { openstaandBedrag } from "@/lib/finance/factuurstatus";
+import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
 
 export const metadata: Metadata = { title: "Facturen" };
 
@@ -36,6 +37,7 @@ export default async function FacturenPagina({
 }: PageProps<"/facturen">) {
   const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
   const parameters = await searchParams;
+  const zoekterm = typeof parameters.q === "string" ? parameters.q.trim().slice(0, 120) : "";
 
   const statusFilter =
     typeof parameters.status === "string" ? parameters.status : "";
@@ -45,21 +47,28 @@ export default async function FacturenPagina({
     typeof parameters.evenement === "string" ? parameters.evenement : "";
 
   const statusVoorwaarde =
-    statusFilter === "openstaand"
-      ? { status: { in: [...OPENSTAANDE_STATUSSEN] } }
+    statusFilter === "openstaand" || statusFilter === "vervallen"
+      ? { status: { notIn: ["concept", "oninbaar"] } }
       : FACTUUR_STATUSSEN.includes(statusFilter as FactuurStatus)
         ? { status: statusFilter }
         : {};
 
-  const [facturen, relaties, evenementen] = await Promise.all([
+  const [gevonden, relaties, evenementen] = await Promise.all([
     db.factuur.findMany({
       where: {
         boekjaarId: boekjaar.id,
         ...statusVoorwaarde,
+        ...(statusFilter === "vervallen" ? { vervaldatum: { lt: vandaag() }, totaalCenten: { gt: 0 } } : {}),
+        ...(zoekterm ? { OR: [
+          { nummer: { contains: zoekterm, mode: "insensitive" as const } },
+          { omschrijving: { contains: zoekterm, mode: "insensitive" as const } },
+          { relatie: { naam: { contains: zoekterm, mode: "insensitive" as const } } },
+        ] } : {}),
         ...(relatieFilter ? { relatieId: relatieFilter } : {}),
         ...(evenementFilter ? { evenementId: evenementFilter } : {}),
       },
       include: {
+        ...factuurStandRelaties,
         relatie: { select: { naam: true } },
         betalingen: { select: { bedragCenten: true } },
         evenement: { select: { naam: true } },
@@ -79,18 +88,12 @@ export default async function FacturenPagina({
   ]);
 
   const peildatum = vandaag();
+  const facturen = gevonden.filter((factuur) => statusFilter === "vervallen" ? dagenTeLaat(factuur.vervaldatum, peildatum, factuurOpenstaand(factuur)) > 0 : statusFilter === "openstaand" ? factuurOpenstaand(factuur) !== 0 : true);
   const totaal = facturen.reduce(
     (som, factuur) => som + factuur.totaalCenten,
     0,
   );
-  const totaalOpenstaand = facturen.reduce((som, factuur) => {
-    if (!OPENSTAANDE_STATUSSEN.includes(factuur.status as FactuurStatus)) {
-      return som;
-    }
-    return (
-      som + openstaandBedrag(factuur.totaalCenten, betaaldBedrag(factuur.betalingen))
-    );
-  }, 0);
+  const totaalOpenstaand = facturen.reduce((som, factuur) => som + factuurOpenstaand(factuur), 0);
 
   return (
     <>
@@ -118,14 +121,17 @@ export default async function FacturenPagina({
       />
 
       <form
+        key={[zoekterm, statusFilter, relatieFilter, evenementFilter].join("|")}
         method="get"
         className="mb-4 flex flex-wrap items-end gap-3 niet-afdrukken"
       >
+        <Zoekveld waarde={zoekterm} placeholder="Nummer, relatie of omschrijving" />
         <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
           Status
           <select name="status" defaultValue={statusFilter} className="veld w-48">
             <option value="">Alle</option>
             <option value="openstaand">Openstaand</option>
+            <option value="vervallen">Te laat</option>
             {FACTUUR_STATUSSEN.map((status) => (
               <option key={status} value={status}>
                 {FACTUUR_STATUS_LABEL[status]}
@@ -165,7 +171,7 @@ export default async function FacturenPagina({
         <Button type="submit" variant="secondary" size="sm">
           Filteren
         </Button>
-        {statusFilter || relatieFilter || evenementFilter ? (
+        {zoekterm || statusFilter || relatieFilter || evenementFilter ? (
           <Button type="button" variant="ghost" size="sm" asChild>
             <Link href="/facturen">Wissen</Link>
           </Button>
@@ -192,14 +198,9 @@ export default async function FacturenPagina({
             </TableHeader>
             <TableBody>
               {facturen.map((factuur) => {
-                const betaald = betaaldBedrag(factuur.betalingen);
-                const openstaand = OPENSTAANDE_STATUSSEN.includes(
-                  factuur.status as FactuurStatus,
-                )
-                  ? openstaandBedrag(factuur.totaalCenten, betaald)
-                  : 0;
-                const dagenOpen = dagenTussen(factuur.factuurdatum, peildatum);
-                const teLaat = openstaand !== 0 && dagenOpen > 30;
+                const openstaand = factuurOpenstaand(factuur);
+                const dagenOpen = dagenTeLaat(factuur.vervaldatum, peildatum, openstaand);
+                const teLaat = dagenOpen > 0;
 
                 return (
                   <TableRow key={factuur.id}>
@@ -224,7 +225,7 @@ export default async function FacturenPagina({
                       {formatteerDatum(factuur.factuurdatum)}
                       {teLaat ? (
                         <span className="block text-xs text-destructive">
-                          {dagenOpen} dagen open
+                          {dagenOpen} {dagenOpen === 1 ? "dag" : "dagen"} te laat
                         </span>
                       ) : null}
                     </TableCell>

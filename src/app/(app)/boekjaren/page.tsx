@@ -115,7 +115,7 @@ export default async function BoekjarenPagina() {
         </Table>
       </Card>
 
-      {huidig ? (
+      {huidig && context?.schrijfbaar ? (
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>{huidig.naam} bewerken</CardTitle>
@@ -126,6 +126,7 @@ export default async function BoekjarenPagina() {
           </CardHeader>
           <div className="px-5 pb-5">
             <BoekjaarFormulier
+              key={huidig.id}
               waarden={{
                 id: huidig.id,
                 naam: huidig.naam,
@@ -148,16 +149,15 @@ export default async function BoekjarenPagina() {
         <CardHeader>
           <CardTitle>Nieuw boekjaar aanmaken</CardTitle>
           <CardDescription>
-            Voor het volgende bestuur. Relaties blijven bestaan; begrotingsposten
-            maak je opnieuw aan voor het nieuwe jaar.
+            Relaties blijven bestaan. Je kunt de begroting van een bestaand boekjaar overnemen.
           </CardDescription>
         </CardHeader>
         <div className="px-5 pb-5">
           <Melding toon="info" className="mb-4">
-            Het nieuwe boekjaar wordt niet meteen actief. Activeer het pas als je
-            er echt in gaat werken.
+            {boekjaren.length === 0 ? "Maak je eerste boekjaar aan om te beginnen. Dit wordt meteen het actieve boekjaar." : "Het nieuwe boekjaar wordt niet meteen actief. Activeer het pas als je er echt in gaat werken."}
           </Melding>
           <BoekjaarFormulier
+            boekjaren={boekjaren.map(({ id, naam }) => ({ id, naam }))}
             waarden={{
               naam: "",
               factuurPrefix: "",

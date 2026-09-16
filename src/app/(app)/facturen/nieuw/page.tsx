@@ -11,7 +11,7 @@ import { FactuurFormulier } from "../formulier";
 export const metadata: Metadata = { title: "Nieuwe factuur" };
 
 export default async function NieuweFactuurPagina() {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/facturen");
 
   const [relaties, posten, evenementen, instellingen] = await Promise.all([
     db.relatie.findMany({

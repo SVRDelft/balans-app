@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
 
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
@@ -34,28 +36,29 @@ export async function bewaarBoekjaar(
     if (startDatum && eindDatum && eindDatum <= startDatum) {
       veldfouten.eindDatum = "De einddatum ligt vóór de startdatum.";
     }
-    if (Object.keys(veldfouten).length > 0) {
-      return { fout: "Controleer de ingevulde gegevens.", veldfouten };
-    }
-
     const beginsaldoBankCenten =
-      parseerBedragNaarCenten(String(formulier.get("beginsaldoBank") ?? "")) ?? 0;
+      parseerBedragNaarCenten(String(formulier.get("beginsaldoBank") || "0"));
     const beginsaldoEigenVermogenCenten =
       parseerBedragNaarCenten(
-        String(formulier.get("beginsaldoEigenVermogen") ?? ""),
-      ) ?? 0;
+        String(formulier.get("beginsaldoEigenVermogen") || "0"),
+      );
+    if (beginsaldoBankCenten === null) veldfouten.beginsaldoBank = "Vul een geldig bedrag in.";
+    if (beginsaldoEigenVermogenCenten === null) veldfouten.beginsaldoEigenVermogen = "Vul een geldig bedrag in.";
+    if (Object.keys(veldfouten).length > 0) return { fout: "Controleer de ingevulde gegevens.", veldfouten };
 
     const id = leesTekst(formulier, "id");
 
     if (id) {
+      const bestaand = await db.boekjaar.findUnique({ where: { id } });
+      if (!bestaand?.actief) return { fout: "Alleen het actieve boekjaar kan gewijzigd worden." };
       const boekjaar = await db.boekjaar.update({
-        where: { id },
+        where: { id, actief: true },
         data: {
           naam: naam!,
           startDatum: startDatum!,
           eindDatum: eindDatum!,
-          beginsaldoBankCenten,
-          beginsaldoEigenVermogenCenten,
+          beginsaldoBankCenten: beginsaldoBankCenten!,
+          beginsaldoEigenVermogenCenten: beginsaldoEigenVermogenCenten!,
           notities: leesTekst(formulier, "notities") ?? null,
         },
       });
@@ -65,22 +68,34 @@ export async function bewaarBoekjaar(
         entiteit: "Boekjaar",
         entiteitId: boekjaar.id,
         actie: "gewijzigd",
-        samenvatting: `Boekjaar ${boekjaar.naam}: beginsaldo bank ${formatteerEuro(beginsaldoBankCenten)}, eigen vermogen ${formatteerEuro(beginsaldoEigenVermogenCenten)}`,
+        samenvatting: `Boekjaar ${boekjaar.naam}: beginsaldo bank ${formatteerEuro(beginsaldoBankCenten!)}, eigen vermogen ${formatteerEuro(beginsaldoEigenVermogenCenten!)}`,
         boekjaarId: boekjaar.id,
       });
     } else {
-      const boekjaar = await db.boekjaar.create({
+      const boekjaar = await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
+      const eerste = (await tx.boekjaar.count()) === 0;
+      const nieuw = await tx.boekjaar.create({
         data: {
           naam: naam!,
           factuurPrefix: factuurPrefix!,
           startDatum: startDatum!,
           eindDatum: eindDatum!,
-          beginsaldoBankCenten,
-          beginsaldoEigenVermogenCenten,
+          beginsaldoBankCenten: beginsaldoBankCenten!,
+          beginsaldoEigenVermogenCenten: beginsaldoEigenVermogenCenten!,
           notities: leesTekst(formulier, "notities") ?? null,
-          actief: false,
+          actief: eerste,
         },
       });
+      const bronId = leesTekst(formulier, "kopieerVan");
+      if (bronId) {
+        const bron = await tx.boekjaar.findUnique({ where: { id: bronId }, include: { begrotingsposten: true } });
+        if (!bron) throw new Error("Het gekozen boekjaar bestaat niet meer.");
+        await tx.begrotingspost.createMany({ data: bron.begrotingsposten.map(({ code, naam, categorie, soort, begrootCenten, volgorde, notities }) => ({ boekjaarId: nieuw.id, code, naam, categorie, soort, begrootCenten, volgorde, notities })) });
+      }
+      return nieuw;
+      });
+      if (boekjaar.actief) (await cookies()).set(BOEKJAAR_COOKIE, boekjaar.id, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 31536000 });
 
       await logAudit({
         gebruiker: sessie.naam,
@@ -113,12 +128,14 @@ export async function activeerBoekjaar(
     if (!boekjaar) return { fout: "Dit boekjaar bestaat niet meer." };
 
     await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
       await tx.boekjaar.updateMany({
         where: { actief: true },
         data: { actief: false },
       });
       await tx.boekjaar.update({ where: { id }, data: { actief: true } });
     });
+    (await cookies()).set(BOEKJAAR_COOKIE, id, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 31536000 });
 
     await logAudit({
       gebruiker: sessie.naam,

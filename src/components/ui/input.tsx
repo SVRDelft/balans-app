@@ -91,11 +91,17 @@ function Veld({
           </span>
         ) : null}
       </Label>
-      {children}
+      {React.Children.map(children, (kind) => {
+        if (!htmlFor || !React.isValidElement<React.ComponentProps<"input">>(kind) || kind.props.id !== htmlFor) return kind;
+        return React.cloneElement(kind, {
+          "aria-invalid": fout ? true : undefined,
+          "aria-describedby": [toelichting ? `${htmlFor}-hulp` : "", fout ? `${htmlFor}-fout` : ""].filter(Boolean).join(" ") || undefined,
+        });
+      })}
       {toelichting ? (
-        <p className="text-xs text-muted-foreground">{toelichting}</p>
+        <p id={htmlFor ? `${htmlFor}-hulp` : undefined} className="text-xs text-muted-foreground">{toelichting}</p>
       ) : null}
-      {fout ? <p className="text-xs text-destructive">{fout}</p> : null}
+      {fout ? <p id={htmlFor ? `${htmlFor}-fout` : undefined} role="alert" className="text-xs text-destructive">{fout}</p> : null}
     </div>
   );
 }

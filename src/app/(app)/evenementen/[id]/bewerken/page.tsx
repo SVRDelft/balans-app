@@ -13,10 +13,10 @@ export const metadata: Metadata = { title: "Evenement bewerken" };
 export default async function BewerkEvenementPagina({
   params,
 }: PageProps<"/evenementen/[id]/bewerken">) {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/evenementen");
   const { id } = await params;
 
-  const evenement = await db.evenement.findUnique({ where: { id } });
+  const evenement = await db.evenement.findUnique({ where: { id, boekjaarId: boekjaar.id } });
   if (!evenement) notFound();
 
   const posten = await db.begrotingspost.findMany({

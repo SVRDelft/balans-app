@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { Paginakop } from "@/components/paginakop";
+import { Zoekveld } from "@/components/zoekveld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,7 @@ export default async function RelatiesPagina({
   searchParams,
 }: PageProps<"/relaties">) {
   const parameters = await searchParams;
+  const zoekterm = typeof parameters.q === "string" ? parameters.q.trim().slice(0, 120) : "";
   const gekozenType =
     typeof parameters.type === "string" &&
     RELATIE_TYPES.includes(parameters.type as RelatieType)
@@ -35,6 +37,7 @@ export default async function RelatiesPagina({
     where: {
       ...(gekozenType ? { type: gekozenType } : {}),
       ...(toonInactief ? {} : { actief: true }),
+      ...(zoekterm ? { OR: ["naam", "contactpersoon", "email", "plaats", "kvkNummer"].map((veld) => ({ [veld]: { contains: zoekterm, mode: "insensitive" } })) } : {}),
     },
     orderBy: [{ type: "asc" }, { naam: "asc" }],
     include: { _count: { select: { facturen: true } } },
@@ -55,9 +58,16 @@ export default async function RelatiesPagina({
         }
       />
 
+      <form key={`${zoekterm}|${gekozenType}|${toonInactief}`} method="get" className="mb-3 flex flex-wrap items-end gap-3 niet-afdrukken">
+        <Zoekveld waarde={zoekterm} placeholder="Naam, e-mail, plaats of KvK" />
+        {gekozenType ? <input type="hidden" name="type" value={gekozenType} /> : null}
+        {toonInactief ? <input type="hidden" name="inactief" value="1" /> : null}
+        <Button type="submit" variant="secondary">Zoeken</Button>
+        {zoekterm ? <Button variant="ghost" asChild><Link href="/relaties">Wis filters</Link></Button> : null}
+      </form>
       <div className="mb-4 flex flex-wrap gap-2 niet-afdrukken">
         <FilterKnop
-          href={`/relaties${toonInactief ? "?inactief=1" : ""}`}
+          href={`/relaties?${new URLSearchParams({ ...(toonInactief ? { inactief: "1" } : {}), ...(zoekterm ? { q: zoekterm } : {}) })}`}
           actief={gekozenType === null}
         >
           Alle
@@ -65,14 +75,14 @@ export default async function RelatiesPagina({
         {RELATIE_TYPES.map((soort) => (
           <FilterKnop
             key={soort}
-            href={`/relaties?type=${soort}${toonInactief ? "&inactief=1" : ""}`}
+            href={`/relaties?type=${soort}${toonInactief ? "&inactief=1" : ""}${zoekterm ? `&q=${encodeURIComponent(zoekterm)}` : ""}`}
             actief={gekozenType === soort}
           >
             {RELATIE_TYPE_LABEL[soort]}
           </FilterKnop>
         ))}
         <FilterKnop
-          href={`/relaties?${gekozenType ? `type=${gekozenType}&` : ""}${toonInactief ? "" : "inactief=1"}`}
+          href={`/relaties?${gekozenType ? `type=${gekozenType}&` : ""}${toonInactief ? "" : "inactief=1"}${zoekterm ? `&q=${encodeURIComponent(zoekterm)}` : ""}`}
           actief={toonInactief}
         >
           Ook niet-actieve
@@ -81,8 +91,7 @@ export default async function RelatiesPagina({
 
       {relaties.length === 0 ? (
         <Leeg titel="Geen relaties gevonden">
-          Maak er een aan, of draai <code>npm run db:seed</code> voor de
-          startgegevens.
+          {zoekterm || gekozenType ? "Probeer een andere zoekterm of wis de filters." : "Voeg je eerste vereniging, persoon of leverancier toe met Nieuwe relatie."}
         </Leeg>
       ) : (
         <Card>
@@ -124,8 +133,9 @@ export default async function RelatiesPagina({
                       <div>{relatie.contactpersoon}</div>
                     ) : null}
                     {relatie.email ? (
-                      <div className="text-xs">{relatie.email}</div>
+                      <a href={`mailto:${relatie.email}`} className="block text-xs text-primary hover:underline">{relatie.email}</a>
                     ) : null}
+                    {relatie.telefoon ? <a href={`tel:${relatie.telefoon.replace(/[^+\d]/g, "")}`} className="block text-xs hover:underline">{relatie.telefoon}</a> : null}
                   </TableCell>
                   <TableCell className="cijfers text-right text-muted-foreground">
                     {relatie._count.facturen}

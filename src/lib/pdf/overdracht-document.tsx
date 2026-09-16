@@ -457,8 +457,9 @@ export function OverdrachtDocument({
         <Text style={{ marginTop: 16, color: "#5b6472" }}>
           Uitgangspunt is het baten-lastenstelsel: een factuur telt mee zodra
           hij verstuurd is en een uitgave zodra hij geregistreerd is, ongeacht
-          of er al betaald is. Concepten, oninbare en gecrediteerde facturen
-          tellen niet mee als opbrengst.
+          of er al betaald is. Concepten tellen niet mee. Verstuurde credits
+          corrigeren de oorspronkelijke opbrengst; bij oninbaar blijft alleen
+          het ontvangen deel meetellen.
         </Text>
 
         <View style={stijl.voet} fixed>

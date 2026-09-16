@@ -6,11 +6,13 @@ import { revalidatePath } from "next/cache";
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
+import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
 import { datumUitInvoer } from "@/lib/datum";
 import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
 import { leesTekst, leesVinkje, voerUit, type ActieStaat } from "@/lib/acties";
 import { BIJLAGE_TE_GROOT, MAX_BIJLAGE_BYTES } from "@/lib/bijlagen";
+import type { Prisma } from "@/generated/prisma/client";
 
 const TOEGESTANE_TYPES = [
   "image/jpeg",
@@ -24,7 +26,7 @@ const TOEGESTANE_TYPES = [
 async function leesBijlage(
   formulier: FormData,
   gebruiker: string,
-): Promise<{ bijlageId?: string; fout?: string }> {
+): Promise<{ data?: Prisma.BijlageCreateInput; fout?: string }> {
   const bestand = formulier.get("bijlage");
   if (!(bestand instanceof File) || bestand.size === 0) return {};
 
@@ -37,7 +39,7 @@ async function leesBijlage(
     };
   }
 
-  const bijlage = await db.bijlage.create({
+  return {
     data: {
       bestandsnaam: bestand.name,
       mimeType: bestand.type,
@@ -45,10 +47,7 @@ async function leesBijlage(
       data: Buffer.from(await bestand.arrayBuffer()),
       geuploadDoor: gebruiker,
     },
-    select: { id: true },
-  });
-
-  return { bijlageId: bijlage.id };
+  };
 }
 
 export async function bewaarUitgave(
@@ -83,6 +82,9 @@ export async function bewaarUitgave(
       return { fout: "Controleer de ingevulde gegevens.", veldfouten };
     }
 
+    await controleerKoppelingen(boekjaar.id, [begrotingspostId!], leesTekst(formulier, "evenementId"));
+    if (id && !await db.uitgave.findFirst({ where: { id, boekjaarId: boekjaar.id } })) return { fout: "Deze uitgave hoort niet bij het actieve boekjaar." };
+
     const bijlage = await leesBijlage(formulier, sessie.naam);
     if (bijlage.fout) return { fout: bijlage.fout, veldfouten };
 
@@ -106,24 +108,34 @@ export async function bewaarUitgave(
     };
 
     if (id) {
-      const bestaand = await db.uitgave.findUnique({ where: { id } });
+      const bestaand = await db.uitgave.findUnique({ where: { id, boekjaarId: boekjaar.id }, include: { bankmutatie: true } });
       if (!bestaand) return { fout: "Deze uitgave bestaat niet meer." };
+      if (bestaand.bankmutatie && (gegevens.bedragCenten !== bestaand.bedragCenten || gegevens.betaald !== bestaand.betaald || gegevens.betaaldOp?.getTime() !== bestaand.betaaldOp?.getTime())) return { fout: "Deze uitgave is gekoppeld aan een bankregel. Ontkoppel die eerst bij Bankafschriften voordat je bedrag of betaling wijzigt." };
 
       if (
         bestaand.omslagrondeId &&
-        bestaand.bedragCenten !== gegevens.bedragCenten
+        (bestaand.bedragCenten !== gegevens.bedragCenten || bestaand.evenementId !== gegevens.evenementId || bestaand.begrotingspostId !== gegevens.begrotingspostId || !gegevens.bedragDefinitief)
       ) {
         return {
-          fout: "Deze uitgave is al in een omslag verdeeld. Het bedrag wijzigen zou de al verstuurde facturen laten kloppen noch de afstemming. Boek het verschil als een nieuwe uitgave.",
+          fout: "Deze uitgave is al in een omslag verdeeld. Bedrag, evenement en begrotingspost staan daarom vast. Boek een correctie als nieuwe uitgave.",
         };
       }
 
-      const uitgave = await db.uitgave.update({
-        where: { id },
+      const uitgave = await db.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Uitgave" WHERE id = ${id} AND "boekjaarId" = ${boekjaar.id} FOR UPDATE`;
+      const actueel = await tx.uitgave.findUniqueOrThrow({ where: { id, boekjaarId: boekjaar.id }, include: { bankmutatie: true } });
+      if (actueel.bankmutatie && (gegevens.bedragCenten !== actueel.bedragCenten || gegevens.betaald !== actueel.betaald || gegevens.betaaldOp?.getTime() !== actueel.betaaldOp?.getTime())) throw new Error("Ontkoppel de bankregel eerst voordat je bedrag of betaling wijzigt.");
+      if (actueel.omslagrondeId && (actueel.bedragCenten !== gegevens.bedragCenten || actueel.evenementId !== gegevens.evenementId || actueel.begrotingspostId !== gegevens.begrotingspostId || !gegevens.bedragDefinitief)) throw new Error("Deze uitgave is al in een omslag verdeeld en kan zo niet meer worden gewijzigd.");
+      const nieuw = bijlage.data ? await tx.bijlage.create({ data: bijlage.data }) : null;
+      const opgeslagen = await tx.uitgave.update({
+        where: { id, boekjaarId: boekjaar.id },
         data: {
           ...gegevens,
-          ...(bijlage.bijlageId ? { bijlageId: bijlage.bijlageId } : {}),
+          ...(nieuw ? { bijlageId: nieuw.id } : {}),
         },
+      });
+      if (nieuw && actueel.bijlageId) await tx.bijlage.delete({ where: { id: actueel.bijlageId } });
+      return opgeslagen;
       });
 
       await logAudit({
@@ -140,12 +152,15 @@ export async function bewaarUitgave(
       return;
     }
 
-    const uitgave = await db.uitgave.create({
+    const uitgave = await db.$transaction(async (tx) => {
+    const nieuw = bijlage.data ? await tx.bijlage.create({ data: bijlage.data }) : null;
+    return tx.uitgave.create({
       data: {
         ...gegevens,
         boekjaarId: boekjaar.id,
-        bijlageId: bijlage.bijlageId ?? null,
+        bijlageId: nieuw?.id ?? null,
       },
+    });
     });
 
     await logAudit({
@@ -178,7 +193,7 @@ export async function verwijderUitgave(
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende uitgave." };
 
-    const uitgave = await db.uitgave.findUnique({ where: { id } });
+    const uitgave = await db.uitgave.findUnique({ where: { id, boekjaarId: boekjaar.id } });
     if (!uitgave) return { fout: "Deze uitgave bestaat niet meer." };
 
     if (uitgave.omslagrondeId) {
@@ -188,7 +203,7 @@ export async function verwijderUitgave(
     }
 
     await db.$transaction(async (tx) => {
-      await tx.uitgave.delete({ where: { id } });
+      await tx.uitgave.delete({ where: { id, boekjaarId: boekjaar.id } });
       if (uitgave.bijlageId) {
         await tx.bijlage.delete({ where: { id: uitgave.bijlageId } });
       }
@@ -222,12 +237,13 @@ export async function zetBedragDefinitief(
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende uitgave." };
 
-    const uitgave = await db.uitgave.findUnique({ where: { id } });
+    const uitgave = await db.uitgave.findUnique({ where: { id, boekjaarId: boekjaar.id } });
     if (!uitgave) return { fout: "Deze uitgave bestaat niet meer." };
 
     const nieuweWaarde = !uitgave.bedragDefinitief;
+    if (!nieuweWaarde && uitgave.omslagrondeId) return { fout: "Een uitgave in een berekende omslag blijft definitief." };
     await db.uitgave.update({
-      where: { id },
+      where: { id, boekjaarId: boekjaar.id },
       data: { bedragDefinitief: nieuweWaarde },
     });
 
@@ -259,12 +275,12 @@ export async function zetBetaald(
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende uitgave." };
 
-    const uitgave = await db.uitgave.findUnique({ where: { id } });
+    const uitgave = await db.uitgave.findUnique({ where: { id, boekjaarId: boekjaar.id } });
     if (!uitgave) return { fout: "Deze uitgave bestaat niet meer." };
 
     const nieuweWaarde = !uitgave.betaald;
     await db.uitgave.update({
-      where: { id },
+      where: { id, boekjaarId: boekjaar.id },
       data: {
         betaald: nieuweWaarde,
         betaaldOp: nieuweWaarde ? new Date() : null,

@@ -25,9 +25,11 @@ export interface BoekjaarWaarden {
 export function BoekjaarFormulier({
   waarden,
   knoptekst = "Opslaan",
+  boekjaren = [],
 }: {
   waarden: BoekjaarWaarden;
   knoptekst?: string;
+  boekjaren?: { id: string; naam: string }[];
 }) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(
     bewaarBoekjaar,
@@ -110,6 +112,7 @@ export function BoekjaarFormulier({
 
           <Veld
             label="Beginsaldo bank"
+            fout={staat.veldfouten?.beginsaldoBank}
             htmlFor={`bank-${waarden.id ?? "nieuw"}`}
             toelichting="Het banksaldo op de startdatum van het boekjaar."
           >
@@ -122,6 +125,7 @@ export function BoekjaarFormulier({
 
           <Veld
             label="Beginsaldo eigen vermogen"
+            fout={staat.veldfouten?.beginsaldoEigenVermogen}
             htmlFor={`ev-${waarden.id ?? "nieuw"}`}
             toelichting="Meestal gelijk aan het banksaldo, tenzij er nog vorderingen of schulden uit het vorige jaar openstaan."
           >
@@ -132,6 +136,14 @@ export function BoekjaarFormulier({
             />
           </Veld>
 
+          {!waarden.id && boekjaren.length > 0 ? (
+            <Veld label="Begroting overnemen" htmlFor="kopieerVan" className="sm:col-span-2" toelichting="Neem de posten en begrote bedragen over. Je kunt ze daarna aanpassen; boekingen blijven in hun eigen jaar.">
+              <select id="kopieerVan" name="kopieerVan" defaultValue="" className="veld">
+                <option value="">Begin met een lege begroting</option>
+                {boekjaren.map((jaar) => <option key={jaar.id} value={jaar.id}>{jaar.naam}</option>)}
+              </select>
+            </Veld>
+          ) : null}
           <Veld
             label="Notities"
             htmlFor={`notities-${waarden.id ?? "nieuw"}`}

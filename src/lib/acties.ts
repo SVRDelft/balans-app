@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 
 /** Wat een server action teruggeeft aan het formulier. */
 export interface ActieStaat {
@@ -12,14 +13,6 @@ export interface ActieStaat {
  * redirect() en notFound() werken door een speciale fout te gooien. Die mag een
  * catch nooit opslokken.
  */
-function isFrameworkFout(fout: unknown): boolean {
-  if (typeof fout !== "object" || fout === null) return false;
-  const digest = (fout as { digest?: unknown }).digest;
-  return (
-    typeof digest === "string" &&
-    (digest.startsWith("NEXT_REDIRECT") || digest === "NEXT_NOT_FOUND")
-  );
-}
 
 /**
  * Voert een mutatie uit en zet een onverwachte fout om in een nette melding,
@@ -31,7 +24,7 @@ export async function voerUit(
   try {
     return (await taak()) ?? {};
   } catch (fout) {
-    if (isFrameworkFout(fout)) throw fout;
+    unstable_rethrow(fout);
 
     const bericht =
       fout instanceof Error ? fout.message : "Er ging iets mis bij het opslaan.";
@@ -48,6 +41,9 @@ export async function voerUit(
     }
 
     console.error(fout);
+    if (fout instanceof Error && (fout.name.startsWith("Prisma") || "code" in fout)) {
+      return { fout: "Opslaan is niet gelukt. Vernieuw de pagina en probeer het opnieuw." };
+    }
     return { fout: bericht };
   }
 }

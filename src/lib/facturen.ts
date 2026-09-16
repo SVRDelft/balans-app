@@ -1,14 +1,27 @@
 import "server-only";
 
-import { bepaalFactuurStatus } from "@/lib/finance/factuurstatus";
 import type { FactuurStatus } from "@/lib/domein";
 import type { Prisma } from "@/generated/prisma/client";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
+import { factuurStandStatus } from "@/lib/finance/factuurstanden";
 
 /**
  * Werkt zowel met de gewone client als binnen een transactie: de gewone client
  * is toewijsbaar aan dit type.
  */
 export type DbClient = Prisma.TransactionClient;
+
+/** Lock the original first for every mutation of an invoice/credit pair. */
+export async function vergrendelFactuur(
+  tx: DbClient,
+  factuurId: string,
+  boekjaarId: string,
+) {
+  await tx.$queryRaw`SELECT id FROM "Factuur" WHERE id = (
+    SELECT COALESCE("crediteertFactuurId", id) FROM "Factuur"
+    WHERE id = ${factuurId} AND "boekjaarId" = ${boekjaarId}
+  ) FOR UPDATE`;
+}
 
 /**
  * Geeft het volgende factuurnummer van een boekjaar uit, bijvoorbeeld
@@ -42,10 +55,15 @@ export async function volgendFactuurnummer(
 export async function hertelFactuur(
   tx: DbClient,
   factuurId: string,
-): Promise<{ totaalCenten: number; betaaldCenten: number; status: FactuurStatus }> {
+  herberekenGerelateerde = true,
+): Promise<{
+  totaalCenten: number;
+  betaaldCenten: number;
+  status: FactuurStatus;
+}> {
   const factuur = await tx.factuur.findUniqueOrThrow({
     where: { id: factuurId },
-    include: { regels: true, betalingen: true },
+    include: { regels: true, betalingen: true, ...factuurStandRelaties },
   });
 
   const totaalCenten = factuur.regels.reduce(
@@ -57,16 +75,17 @@ export async function hertelFactuur(
     0,
   );
 
-  const status = bepaalFactuurStatus({
-    huidigeStatus: factuur.status as FactuurStatus,
-    totaalCenten,
-    betaaldCenten,
-  });
+  const status = factuurStandStatus({ ...factuur, totaalCenten });
 
   await tx.factuur.update({
     where: { id: factuurId },
     data: { totaalCenten, status },
   });
+  if (herberekenGerelateerde) {
+    const gerelateerdeId =
+      factuur.crediteertFactuur?.id ?? factuur.creditfactuur?.id;
+    if (gerelateerdeId) await hertelFactuur(tx, gerelateerdeId, false);
+  }
 
   return { totaalCenten, betaaldCenten, status };
 }
@@ -97,7 +116,7 @@ export function maakHerinneringstekst(gegevens: {
 
   const zin =
     gegevens.dagenOver > 0
-      ? `Onze factuur ${gegevens.nummer} van ${gegevens.factuurdatum} staat inmiddels ${gegevens.dagenOver} dagen open; de vervaldatum was ${gegevens.vervaldatum}.`
+      ? `Onze factuur ${gegevens.nummer} van ${gegevens.factuurdatum} is inmiddels ${gegevens.dagenOver} dagen over de betaaltermijn; de vervaldatum was ${gegevens.vervaldatum}.`
       : `Onze factuur ${gegevens.nummer} van ${gegevens.factuurdatum} vervalt op ${gegevens.vervaldatum}.`;
 
   return [

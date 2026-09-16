@@ -78,6 +78,8 @@ model Boekjaar {
   evenementen      Evenement[]
   banksaldi        Banksaldo[]
   voorraadposten   Voorraadpost[]
+  bankimports      Bankimport[]
+  bankmutaties     Bankmutatie[]
 }
 
 // ---------------------------------------------------------------------------
@@ -234,6 +236,7 @@ model Betaling {
 
   geregistreerdOp   DateTime @default(now())
   geregistreerdDoor String?
+  bankmutatie Bankmutatie?
 
   @@index([factuurId])
 }
@@ -287,6 +290,7 @@ model Uitgave {
 
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt
+  bankmutatie Bankmutatie?
 
   @@index([boekjaarId])
   @@index([evenementId])
@@ -434,8 +438,59 @@ model Banksaldo {
   notitie      String?
   ingevoerdOp  DateTime @default(now())
   ingevoerdDoor String?
+  bankimport Bankimport?
 
   @@index([boekjaarId, datum])
+}
+
+/// Het originele afschrift blijft controleerbaar, zonder de upload zelf te bewaren.
+model Bankimport {
+  id String @id @default(cuid())
+  boekjaarId String
+  boekjaar Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+  bestandHash String @unique
+  bestandsnaam String
+  rekening String
+  beginDatum DateTime
+  eindDatum DateTime
+  beginSaldoCenten Int
+  eindSaldoCenten Int
+  aantalRegels Int
+  duplicaten Int @default(0)
+  bevestigdOp DateTime?
+  banksaldoId String? @unique
+  banksaldo Banksaldo? @relation(fields: [banksaldoId], references: [id], onDelete: Restrict)
+  aangemaaktOp DateTime @default(now())
+  aangemaaktDoor String
+  mutaties Bankmutatie[]
+  @@index([boekjaarId, aangemaaktOp])
+}
+
+model Bankmutatie {
+  id String @id @default(cuid())
+  boekjaarId String
+  boekjaar Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+  importId String
+  bankimport Bankimport @relation(fields: [importId], references: [id], onDelete: Cascade)
+  /// Rekening + bankreferentie, of inhoud met voorkomen-teller bij ontbrekende referentie.
+  sleutel String @unique
+  rekening String
+  datum DateTime
+  bedragCenten Int
+  omschrijving String
+  tegenpartijNaam String @default("")
+  tegenpartijIban String @default("")
+  bankReferentie String?
+  /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | genegeerd
+  verwerking String @default("open")
+  notitie String?
+  betalingId String? @unique
+  betaling Betaling? @relation(fields: [betalingId], references: [id], onDelete: Restrict)
+  uitgaveId String? @unique
+  uitgave Uitgave? @relation(fields: [uitgaveId], references: [id], onDelete: Restrict)
+  verwerktOp DateTime?
+  verwerktDoor String?
+  @@index([boekjaarId, verwerking, datum])
 }
 
 /// Aantallen en boekwaarden van spullen per boekjaar.

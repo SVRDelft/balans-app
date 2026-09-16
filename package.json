@@ -9,14 +9,15 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run src",
+    "test:e2e": "node scripts/e2e.mjs",
     "test:watch": "vitest",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "node scripts/migrate.mjs dev",
+    "db:deploy": "node scripts/migrate.mjs",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "setup": "prisma migrate deploy && prisma db seed",
+    "setup": "npm run db:deploy && prisma db seed",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/pg": "^8.23.1",

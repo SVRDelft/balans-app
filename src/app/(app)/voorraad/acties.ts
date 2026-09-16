@@ -83,6 +83,8 @@ export async function boekVerbruik(
 
     let melding = "";
     await db.$transaction(async (tx) => {
+      // Serialize withdrawals for the same stock item before reading its count.
+      await tx.$queryRaw`SELECT id FROM "Voorraadpost" WHERE id = ${id} AND "boekjaarId" = ${boekjaar.id} FOR UPDATE`;
       const post = await tx.voorraadpost.findFirst({
         where: { id, boekjaarId: boekjaar.id },
         include: { begrotingspost: { select: { code: true, naam: true } } },
@@ -271,10 +273,11 @@ export async function neemVoorraadOver(): Promise<ActieStaat> {
       const vorig = await tx.boekjaar.findFirst({
         where: { eindDatum: { lt: boekjaar.startDatum } },
         orderBy: { eindDatum: "desc" },
-        include: { voorraadposten: true },
+        include: { voorraadposten: { include: { begrotingspost: true } } },
       });
       if (!vorig?.voorraadposten.length)
         throw new Error("In het vorige boekjaar zijn geen spullen gevonden.");
+      const posten = await tx.begrotingspost.findMany({ where: { boekjaarId: boekjaar.id, soort: "uitgave" } });
       await tx.voorraadpost.createMany({
         data: vorig.voorraadposten.map((post) => ({
           boekjaarId: boekjaar.id,
@@ -286,6 +289,7 @@ export async function neemVoorraadOver(): Promise<ActieStaat> {
           waardePerStukCenten: post.waardePerStukCenten,
           locatie: post.locatie,
           notities: post.notities,
+          begrotingspostId: posten.find((nieuw) => nieuw.code === post.begrotingspost?.code)?.id ?? null,
         })),
       });
       await logAudit(

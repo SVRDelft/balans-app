@@ -25,7 +25,7 @@ export default async function UitgavePagina({
   const { id } = await params;
 
   const uitgave = await db.uitgave.findUnique({
-    where: { id },
+    where: { id, boekjaarId: boekjaar.id },
     include: {
       bijlage: { select: { id: true, bestandsnaam: true, mimeType: true, grootte: true } },
       evenement: { select: { id: true, naam: true } },

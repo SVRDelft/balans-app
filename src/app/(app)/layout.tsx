@@ -2,7 +2,6 @@ import Link from "next/link";
 import { LogOut, Lock } from "lucide-react";
 
 import { Navigatie } from "@/components/navigatie";
-import { Melding } from "@/components/ui/melding";
 import { Button } from "@/components/ui/button";
 import { vereisSessie } from "@/lib/auth/server";
 import { haalBoekjaarContext } from "@/lib/boekjaar";
@@ -21,17 +20,23 @@ export default async function AppLayout({
 
   return (
     <div className="min-h-dvh lg:flex">
-      <aside className="border-b border-border bg-card lg:h-dvh lg:w-60 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-b-0">
+      <a href="#inhoud" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3 focus:text-white">Naar de inhoud</a>
+      <aside className="niet-afdrukken border-b border-border bg-card lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0">
         <div className="flex items-center justify-between px-4 py-3 lg:block lg:py-4">
-          <Link href="/" className="block">
+          <Link href="/" className="flex items-center gap-3">
+            {/* The authenticated logo endpoint also supplies the built-in SVR logo. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/api/logo" alt="" className="size-10 rounded-lg object-contain" />
+            <div>
             <p className="text-[0.68rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               SVR Delft
             </p>
             <p className="text-sm font-semibold">Administratie</p>
+            </div>
           </Link>
         </div>
         <Navigatie />
-        <div className="hidden px-4 py-4 lg:block">
+        <div className="mt-auto hidden border-t border-border px-4 py-4 lg:block">
           <p className="text-xs text-muted-foreground">Ingelogd als</p>
           <p className="truncate text-sm font-medium">{sessie.naam}</p>
           <form action={uitloggen} className="mt-2">
@@ -43,8 +48,8 @@ export default async function AppLayout({
         </div>
       </aside>
 
-      <div className="min-w-0 flex-1 lg:h-dvh lg:overflow-y-auto">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-2.5 lg:px-8">
+      <div className="min-w-0 flex-1">
+        <header className="niet-afdrukken flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 lg:px-8">
           {context ? (
             <>
               <div className="flex flex-wrap items-center gap-3">
@@ -81,21 +86,8 @@ export default async function AppLayout({
           </form>
         </header>
 
-        <main className="px-4 py-6 lg:px-8 lg:py-8">
-          {context ? (
-            children
-          ) : (
-            <Melding toon="waarschuwing" titel="Er is nog geen boekjaar">
-              <p>
-                Draai <code className="font-mono">npm run db:seed</code> om de
-                startgegevens te laden, of maak zelf een boekjaar aan bij{" "}
-                <Link href="/boekjaren" className="underline">
-                  Beheer › Boekjaren
-                </Link>
-                .
-              </p>
-            </Melding>
-          )}
+        <main key={context?.boekjaar.id ?? "begin"} id="inhoud" tabIndex={-1} className="mx-auto max-w-[1600px] px-4 py-6 outline-none lg:px-8 lg:py-8">
+          {children}
         </main>
       </div>
     </div>

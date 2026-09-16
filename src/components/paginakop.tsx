@@ -21,7 +21,7 @@ export function Paginakop({
       )}
     >
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold tracking-tight">{titel}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">{titel}</h1>
         {beschrijving ? (
           <div className="mt-1 max-w-2xl text-sm text-muted-foreground">
             {beschrijving}
@@ -29,7 +29,7 @@ export function Paginakop({
         ) : null}
       </div>
       {acties ? (
-        <div className="flex shrink-0 flex-wrap gap-2 niet-afdrukken">
+        <div className="flex max-w-full flex-wrap gap-2 niet-afdrukken">
           {acties}
         </div>
       ) : null}
@@ -56,9 +56,9 @@ export function Kerngetal({
   }[toon];
 
   return (
-    <div className="rounded-xl border border-border bg-card px-4 py-3.5">
+    <div className="rounded-xl border border-border bg-card px-5 py-4 shadow-xs">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className={cn("cijfers mt-1 text-xl font-semibold", kleur)}>{waarde}</p>
+      <p className={cn("cijfers mt-2 text-2xl font-semibold tracking-tight", kleur)}>{waarde}</p>
       {toelichting ? (
         <p className="mt-0.5 text-xs text-muted-foreground">{toelichting}</p>
       ) : null}

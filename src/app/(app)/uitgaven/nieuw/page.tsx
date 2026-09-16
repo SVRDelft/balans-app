@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Nieuwe uitgave" };
 export default async function NieuweUitgavePagina({
   searchParams,
 }: PageProps<"/uitgaven/nieuw">) {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/uitgaven");
   const parameters = await searchParams;
 
   const [posten, leveranciers, evenementen] = await Promise.all([

@@ -85,10 +85,10 @@ export function FactuurFormulier({
   const berekend = useMemo(
     () =>
       regels.map((regel) => {
-        const aantal = Number.parseInt(regel.aantal, 10);
+        const aantal = Number(regel.aantal);
         const prijsCenten = parseerBedragNaarCenten(regel.prijs);
         const geldig =
-          Number.isFinite(aantal) && aantal > 0 && prijsCenten !== null;
+          Number.isInteger(aantal) && aantal > 0 && prijsCenten !== null;
         return {
           aantal: geldig ? aantal : 0,
           prijsPerStukCenten: prijsCenten ?? 0,
@@ -239,6 +239,7 @@ export function FactuurFormulier({
                   Omschrijving
                 </label>
                 <Input
+                  aria-label={`Omschrijving regel ${index + 1}`}
                   value={regel.omschrijving}
                   onChange={(gebeurtenis) =>
                     wijzigRegel(index, { omschrijving: gebeurtenis.target.value })
@@ -252,6 +253,7 @@ export function FactuurFormulier({
                   Begrotingspost
                 </label>
                 <Select
+                  aria-label={`Begrotingspost regel ${index + 1}`}
                   value={regel.begrotingspostId}
                   onChange={(gebeurtenis) =>
                     wijzigRegel(index, {
@@ -273,6 +275,7 @@ export function FactuurFormulier({
                   Aantal
                 </label>
                 <Input
+                  aria-label={`Aantal regel ${index + 1}`}
                   value={regel.aantal}
                   inputMode="numeric"
                   className="cijfers text-right"
@@ -287,6 +290,7 @@ export function FactuurFormulier({
                   Prijs per stuk
                 </label>
                 <Input
+                  aria-label={`Prijs per stuk regel ${index + 1}`}
                   value={regel.prijs}
                   inputMode="decimal"
                   placeholder="0,00"

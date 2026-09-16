@@ -7,23 +7,40 @@ import { z } from "zod";
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
+import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
 import { datumUitInvoer, telDagenOp, vandaag } from "@/lib/datum";
 import { isVergrendeld } from "@/lib/domein";
 import {
   betaaldBedrag,
   hertelFactuur,
+  vergrendelFactuur,
   volgendFactuurnummer,
 } from "@/lib/facturen";
-import { formatteerEuro, parseerBedragNaarCenten, verdeelCenten } from "@/lib/geld";
+import {
+  formatteerEuro,
+  parseerBedragNaarCenten,
+  verdeelCenten,
+} from "@/lib/geld";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
+import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
 
-const regelSchema = z.object({
-  omschrijving: z.string().trim().min(1, "Elke regel heeft een omschrijving."),
-  aantal: z.number().int().min(1, "Een aantal is minimaal 1.").max(100_000),
-  prijsPerStukCenten: z.number().int(),
-  begrotingspostId: z.string().min(1, "Kies een begrotingspost."),
-});
+const regelSchema = z
+  .object({
+    omschrijving: z
+      .string()
+      .trim()
+      .min(1, "Elke regel heeft een omschrijving."),
+    aantal: z.number().int().min(1, "Een aantal is minimaal 1.").max(100_000),
+    prijsPerStukCenten: z.number().int(),
+    begrotingspostId: z.string().min(1, "Kies een begrotingspost."),
+  })
+  .refine(
+    (regel) =>
+      Math.abs(regel.aantal * regel.prijsPerStukCenten) <= 2_147_483_647,
+    "Het regelbedrag is te groot.",
+  );
 
 function leesRegels(formulier: FormData) {
   const ruw = String(formulier.get("regelsJson") ?? "[]");
@@ -42,6 +59,15 @@ function leesRegels(formulier: FormData) {
         "Voeg minstens één factuurregel toe.",
     };
   }
+  if (
+    Math.abs(
+      uitkomst.data.reduce(
+        (som, regel) => som + regel.aantal * regel.prijsPerStukCenten,
+        0,
+      ),
+    ) > 2_147_483_647
+  )
+    return { fout: "Het factuurtotaal is te groot." };
   return { regels: uitkomst.data };
 }
 
@@ -59,8 +85,12 @@ export async function bewaarFactuur(
     const id = leesTekst(formulier, "id");
     const relatieId = leesTekst(formulier, "relatieId");
     const omschrijving = leesTekst(formulier, "omschrijving");
-    const factuurdatum = datumUitInvoer(String(formulier.get("factuurdatum") ?? ""));
-    const vervaldatum = datumUitInvoer(String(formulier.get("vervaldatum") ?? ""));
+    const factuurdatum = datumUitInvoer(
+      String(formulier.get("factuurdatum") ?? ""),
+    );
+    const vervaldatum = datumUitInvoer(
+      String(formulier.get("vervaldatum") ?? ""),
+    );
     const evenementId = leesTekst(formulier, "evenementId") ?? null;
 
     const veldfouten: Record<string, string> = {};
@@ -80,6 +110,12 @@ export async function bewaarFactuur(
       return { fout: "Controleer de ingevulde gegevens.", veldfouten };
     }
 
+    await controleerKoppelingen(
+      boekjaar.id,
+      regelsUitkomst.regels.map((regel) => regel.begrotingspostId),
+      evenementId,
+    );
+
     const regels = regelsUitkomst.regels.map((regel, volgorde) => ({
       omschrijving: regel.omschrijving,
       aantal: regel.aantal,
@@ -90,19 +126,41 @@ export async function bewaarFactuur(
     }));
 
     if (id) {
-      const bestaand = await db.factuur.findUnique({ where: { id } });
+      const bestaand = await db.factuur.findUnique({
+        where: { id, boekjaarId: boekjaar.id },
+        include: { crediteertFactuur: true },
+      });
       if (!bestaand) return { fout: "Deze factuur bestaat niet meer." };
       if (isVergrendeld(bestaand.status)) {
         return {
-          fout:
-            "Deze factuur is al verstuurd en kan niet meer inhoudelijk gewijzigd worden. Maak een creditfactuur om te corrigeren.",
+          fout: "Deze factuur is al verstuurd en kan niet meer inhoudelijk gewijzigd worden. Maak een creditfactuur om te corrigeren.",
+        };
+      }
+      if (
+        bestaand.crediteertFactuur &&
+        (relatieId !== bestaand.crediteertFactuur.relatieId ||
+          evenementId !== bestaand.crediteertFactuur.evenementId)
+      ) {
+        return {
+          fout: "Een creditfactuur houdt dezelfde relatie en hetzelfde evenement als de oorspronkelijke factuur.",
+        };
+      }
+      if (
+        bestaand.crediteertFactuur &&
+        (regels.reduce((som, regel) => som + regel.bedragCenten, 0) > 0 ||
+          regels.reduce((som, regel) => som + regel.bedragCenten, 0) <
+            -bestaand.crediteertFactuur.totaalCenten)
+      ) {
+        return {
+          fout: "Het creditbedrag ligt tussen nul en het negatieve bedrag van de oorspronkelijke factuur.",
         };
       }
 
       await db.$transaction(async (tx) => {
+        await vergrendelFactuur(tx, id, boekjaar.id);
         await tx.factuurregel.deleteMany({ where: { factuurId: id } });
         await tx.factuur.update({
-          where: { id },
+          where: { id, boekjaarId: boekjaar.id, status: "concept" },
           data: {
             relatieId: relatieId!,
             omschrijving: omschrijving!,
@@ -130,7 +188,10 @@ export async function bewaarFactuur(
     }
 
     const nieuweId = await db.$transaction(async (tx) => {
-      const { nummer, volgnummer } = await volgendFactuurnummer(tx, boekjaar.id);
+      const { nummer, volgnummer } = await volgendFactuurnummer(
+        tx,
+        boekjaar.id,
+      );
       const factuur = await tx.factuur.create({
         data: {
           boekjaarId: boekjaar.id,
@@ -183,7 +244,7 @@ export async function verstuurFactuur(
     if (!id) return { fout: "Onbekende factuur." };
 
     const factuur = await db.factuur.findUnique({
-      where: { id },
+      where: { id, boekjaarId: boekjaar.id },
       include: { regels: true },
     });
     if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
@@ -194,9 +255,32 @@ export async function verstuurFactuur(
       return { fout: "Een factuur zonder regels kan niet verstuurd worden." };
     }
 
-    await db.factuur.update({
-      where: { id },
-      data: { status: "verstuurd", verstuurdOp: new Date() },
+    await db.$transaction(async (tx) => {
+      await vergrendelFactuur(tx, id, boekjaar.id);
+      const actueel = await tx.factuur.findUniqueOrThrow({
+        where: { id, boekjaarId: boekjaar.id },
+        include: { crediteertFactuur: true },
+      });
+      if (actueel.crediteertFactuur?.status === "oninbaar")
+        throw new Error(
+          "Herstel de oorspronkelijke factuur voordat je de credit verstuurt.",
+        );
+      if (
+        actueel.crediteertFactuur &&
+        (actueel.relatieId !== actueel.crediteertFactuur.relatieId ||
+          actueel.evenementId !== actueel.crediteertFactuur.evenementId ||
+          actueel.totaalCenten > 0 ||
+          actueel.totaalCenten < -actueel.crediteertFactuur.totaalCenten)
+      ) {
+        throw new Error(
+          "Controleer het creditconcept: relatie, evenement en bedrag moeten aansluiten op de oorspronkelijke factuur.",
+        );
+      }
+      await tx.factuur.update({
+        where: { id, boekjaarId: boekjaar.id, status: "concept" },
+        data: { status: "verstuurd", verstuurdOp: new Date() },
+      });
+      await hertelFactuur(tx, id);
     });
 
     await logAudit({
@@ -226,7 +310,7 @@ export async function registreerBetaling(
     if (!factuurId) return { fout: "Onbekende factuur." };
 
     const factuur = await db.factuur.findUnique({
-      where: { id: factuurId },
+      where: { id: factuurId, boekjaarId: boekjaar.id },
       include: { betalingen: true },
     });
     if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
@@ -247,6 +331,7 @@ export async function registreerBetaling(
     if (!datum) return { fout: "Vul een geldige datum in." };
 
     await db.$transaction(async (tx) => {
+      await vergrendelFactuur(tx, factuurId, boekjaar.id);
       await tx.betaling.create({
         data: {
           factuurId,
@@ -271,7 +356,9 @@ export async function registreerBetaling(
 
     revalidatePath("/facturen");
     revalidatePath(`/facturen/${factuurId}`);
-    return { melding: `Betaling van ${formatteerEuro(bedragCenten)} vastgelegd.` };
+    return {
+      melding: `Betaling van ${formatteerEuro(bedragCenten)} vastgelegd.`,
+    };
   });
 }
 
@@ -287,13 +374,16 @@ export async function verwijderBetaling(
     if (!id) return { fout: "Onbekende betaling." };
 
     const betaling = await db.betaling.findUnique({
-      where: { id },
+      where: { id, factuur: { boekjaarId: boekjaar.id } },
       include: { factuur: true },
     });
     if (!betaling) return { fout: "Deze betaling bestaat niet meer." };
 
     await db.$transaction(async (tx) => {
-      await tx.betaling.delete({ where: { id } });
+      await vergrendelFactuur(tx, betaling.factuurId, boekjaar.id);
+      await tx.betaling.delete({
+        where: { id, factuur: { boekjaarId: boekjaar.id } },
+      });
       await hertelFactuur(tx, betaling.factuurId);
     });
 
@@ -327,21 +417,35 @@ export async function zetStatus(
       return { fout: "Deze status kan niet handmatig gezet worden." };
     }
 
-    const factuur = await db.factuur.findUnique({ where: { id } });
+    const factuur = await db.factuur.findUnique({
+      where: { id, boekjaarId: boekjaar.id },
+      include: { betalingen: true, ...factuurStandRelaties },
+    });
     if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
     if (factuur.status === "concept") {
       return { fout: "Een concept heeft nog geen status om te wijzigen." };
     }
-    if (factuur.status === "gecrediteerd") {
-      return { fout: "Een gecrediteerde factuur blijft gecrediteerd." };
-    }
-
     await db.$transaction(async (tx) => {
-      await tx.factuur.update({ where: { id }, data: { status: nieuweStatus } });
-      if (nieuweStatus === "verstuurd") {
-        // Terugzetten: de status moet weer uit de betalingen volgen.
-        await hertelFactuur(tx, id);
+      await vergrendelFactuur(tx, id, boekjaar.id);
+      const actueel = await tx.factuur.findUniqueOrThrow({
+        where: { id, boekjaarId: boekjaar.id },
+        include: { betalingen: true, ...factuurStandRelaties },
+      });
+      if (
+        nieuweStatus === "oninbaar" &&
+        (actueel.crediteertFactuurId || factuurOpenstaand(actueel) <= 0)
+      ) {
+        throw new Error(
+          "Alleen een nog te ontvangen bedrag op de oorspronkelijke factuur kan oninbaar worden afgeboekt.",
+        );
       }
+      if (nieuweStatus === "verstuurd" && actueel.status !== "oninbaar")
+        throw new Error("Alleen een oninbare factuur kan worden hersteld.");
+      await tx.factuur.update({
+        where: { id, boekjaarId: boekjaar.id },
+        data: { status: nieuweStatus },
+      });
+      await hertelFactuur(tx, id);
     });
 
     await logAudit({
@@ -373,10 +477,18 @@ export async function maakCreditfactuur(
     if (!id) return { fout: "Onbekende factuur." };
 
     const origineel = await db.factuur.findUnique({
-      where: { id },
+      where: { id, boekjaarId: boekjaar.id },
       include: { regels: true, creditfactuur: true },
     });
     if (!origineel) return { fout: "Deze factuur bestaat niet meer." };
+    if (origineel.totaalCenten <= 0)
+      return {
+        fout: "Maak een credit voor een factuur met een positief totaal.",
+      };
+    if (origineel.soort === "credit" || origineel.status === "oninbaar")
+      return {
+        fout: "Crediteer een gewone factuur. Herstel een oninbare factuur eerst.",
+      };
     if (origineel.status === "concept") {
       return {
         fout: "Een concept hoef je niet te crediteren; je kunt het gewoon aanpassen of verwijderen.",
@@ -387,7 +499,11 @@ export async function maakCreditfactuur(
     }
 
     const creditId = await db.$transaction(async (tx) => {
-      const { nummer, volgnummer } = await volgendFactuurnummer(tx, boekjaar.id);
+      const { nummer, volgnummer } = await volgendFactuurnummer(
+        tx,
+        boekjaar.id,
+      );
+      await vergrendelFactuur(tx, origineel.id, boekjaar.id);
       const credit = await tx.factuur.create({
         data: {
           boekjaarId: boekjaar.id,
@@ -413,11 +529,6 @@ export async function maakCreditfactuur(
             })),
           },
         },
-      });
-
-      await tx.factuur.update({
-        where: { id: origineel.id },
-        data: { status: "gecrediteerd" },
       });
 
       await hertelFactuur(tx, credit.id);
@@ -453,7 +564,9 @@ export async function verwijderConcept(
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende factuur." };
 
-    const factuur = await db.factuur.findUnique({ where: { id } });
+    const factuur = await db.factuur.findUnique({
+      where: { id, boekjaarId: boekjaar.id },
+    });
     if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
     if (factuur.status !== "concept") {
       return {
@@ -461,7 +574,14 @@ export async function verwijderConcept(
       };
     }
 
-    await db.factuur.delete({ where: { id } });
+    await db.$transaction(async (tx) => {
+      await vergrendelFactuur(tx, id, boekjaar.id);
+      await tx.factuur.delete({
+        where: { id, boekjaarId: boekjaar.id, status: "concept" },
+      });
+      if (factuur.crediteertFactuurId)
+        await hertelFactuur(tx, factuur.crediteertFactuurId);
+    });
 
     await logAudit({
       gebruiker: sessie.naam,
@@ -503,10 +623,14 @@ export async function genereerJaarfacturen(
       return { fout: "Deze begrotingspost hoort niet bij dit boekjaar." };
     }
 
-    const factuurdatum = datumUitInvoer(String(formulier.get("factuurdatum") ?? ""));
+    const factuurdatum = datumUitInvoer(
+      String(formulier.get("factuurdatum") ?? ""),
+    );
     if (!factuurdatum) return { fout: "Vul een geldige factuurdatum in." };
 
-    const instellingen = await db.instellingen.findUnique({ where: { id: "svr" } });
+    const instellingen = await db.instellingen.findUnique({
+      where: { id: "svr" },
+    });
     const vervaldatum = telDagenOp(
       factuurdatum,
       instellingen?.betaaltermijnDagen ?? 30,
@@ -517,7 +641,9 @@ export async function genereerJaarfacturen(
       orderBy: { naam: "asc" },
     });
     if (verenigingen.length === 0) {
-      return { fout: "Er zijn geen actieve bijdrageplichtige studieverenigingen." };
+      return {
+        fout: "Er zijn geen actieve bijdrageplichtige studieverenigingen.",
+      };
     }
 
     const alBestaand = await db.factuur.findMany({

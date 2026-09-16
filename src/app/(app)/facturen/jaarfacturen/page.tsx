@@ -12,7 +12,7 @@ import { JaarfactuurFormulier } from "./formulier";
 export const metadata: Metadata = { title: "Jaarfacturen bijdrage" };
 
 export default async function JaarfacturenPagina() {
-  const boekjaar = await vereisSchrijfbaarBoekjaar();
+  const boekjaar = await vereisSchrijfbaarBoekjaar("/facturen");
 
   const [posten, verenigingen] = await Promise.all([
     db.begrotingspost.findMany({

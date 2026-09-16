@@ -2,12 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { vandaag } from "@/lib/datum";
-import {
-  OPENSTAANDE_STATUSSEN,
-  TELLENDE_STATUSSEN,
-  type PostCategorie,
-  type PostSoort,
-} from "@/lib/domein";
+import { type PostCategorie, type PostSoort } from "@/lib/domein";
 import { berekenBalans, type Balans } from "@/lib/finance/balans";
 import {
   maakExploitatie,
@@ -19,7 +14,11 @@ import {
   type Ouderdomsanalyse,
 } from "@/lib/finance/debiteuren";
 import { berekenAfstemming, type Afstemming } from "@/lib/finance/omslag";
-import { openstaandBedrag } from "@/lib/finance/factuurstatus";
+import {
+  factuurOpenstaand,
+  factuurRegelRealisaties,
+} from "@/lib/finance/factuurstanden";
+import { factuurStandRelaties } from "@/lib/factuur-includes";
 import { berekenVoorraad } from "@/lib/finance/voorraad";
 import { rekenVoorraadToe } from "@/lib/finance/voorraadtoerekening";
 import type { Voorraadpost } from "@/generated/prisma/client";
@@ -98,6 +97,7 @@ export async function haalBoekjaarCijfers(
     db.factuur.findMany({
       where: { boekjaarId },
       include: {
+        ...factuurStandRelaties,
         regels: true,
         betalingen: true,
         relatie: { select: { id: true, naam: true } },
@@ -133,10 +133,14 @@ export async function haalBoekjaarCijfers(
   const uitgavenPerPost = new Map<string, number>();
 
   for (const factuur of facturen) {
-    if (!TELLENDE_STATUSSEN.includes(factuur.status as never)) continue;
-    for (const regel of factuur.regels) {
+    if (factuur.status === "concept") continue;
+    const bedragen = factuurRegelRealisaties(
+      factuur,
+      factuur.regels.map((regel) => regel.bedragCenten),
+    );
+    for (const [index, regel] of factuur.regels.entries()) {
       const huidig = inkomstenPerPost.get(regel.begrotingspostId) ?? 0;
-      inkomstenPerPost.set(regel.begrotingspostId, huidig + regel.bedragCenten);
+      inkomstenPerPost.set(regel.begrotingspostId, huidig + bedragen[index]);
     }
   }
 
@@ -201,12 +205,7 @@ export async function haalBoekjaarCijfers(
       ontvangenBetalingenCenten += betaaldCenten;
     }
 
-    if (!OPENSTAANDE_STATUSSEN.includes(factuur.status as never)) continue;
-
-    const openstaandCenten = openstaandBedrag(
-      factuur.totaalCenten,
-      betaaldCenten,
-    );
+    const openstaandCenten = factuurOpenstaand(factuur);
     if (openstaandCenten === 0) continue;
 
     openstaandeFacturen.push({

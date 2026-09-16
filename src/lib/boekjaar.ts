@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
@@ -50,9 +51,7 @@ export async function haalBoekjaarContext(): Promise<BoekjaarContext | null> {
 export async function vereisBoekjaarContext(): Promise<BoekjaarContext> {
   const context = await haalBoekjaarContext();
   if (!context) {
-    throw new Error(
-      "Er is nog geen boekjaar. Draai `npm run db:seed` of maak er een aan bij Beheer › Boekjaren.",
-    );
+    redirect("/boekjaren");
   }
   return context;
 }
@@ -61,9 +60,10 @@ export async function vereisBoekjaarContext(): Promise<BoekjaarContext> {
  * Voor elke mutatie: er mag alleen in het actieve boekjaar geschreven worden.
  * Gooit een fout die de aanroepende action als melding kan tonen.
  */
-export async function vereisSchrijfbaarBoekjaar(): Promise<Boekjaar> {
+export async function vereisSchrijfbaarBoekjaar(terugNaar?: string): Promise<Boekjaar> {
   const context = await vereisBoekjaarContext();
   if (!context.schrijfbaar) {
+    if (terugNaar) redirect(terugNaar);
     throw new Error(
       `Boekjaar ${context.boekjaar.naam} is afgesloten en kan niet meer gewijzigd worden. Schakel eerst over naar het actieve boekjaar.`,
     );
