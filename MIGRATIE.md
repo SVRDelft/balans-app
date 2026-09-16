@@ -89,6 +89,42 @@ voor de Production-omgeving in. Publiceer daarna bewust met
 `npx vercel deploy --prod`. Preview- en ontwikkelversies mogen niet naar de
 productiedatabase schrijven.
 
+## Als een push niet vanzelf deployt
+
+De repository is privé en het Vercel-project draait op het Hobby-plan. Die
+combinatie stelt één eis: Vercel bouwt alleen commits waarvan het e-mailadres
+van de **auteur** bekend is op het Vercel-account. Commit je vanaf een ander
+adres, dan blijft de deployment hangen met:
+
+> The deployment was blocked because the commit author did not have contributing
+> access to the project on Vercel. The Hobby Plan does not support collaboration
+> for private repositories.
+
+Dat is geen storing en het betekent ook niet dat je moet upgraden. Er zijn drie
+uitwegen, en de eerste twee kosten niets:
+
+1. Commit vanaf het adres dat op het Vercel-account staat. Voor deze repository
+   staat dat al ingesteld:
+
+   ```bash
+   git config user.email "bestuur-svr@tudelft.nl"
+   ```
+
+   Dit geldt alleen in deze map; je andere projecten houden je eigen adres. Doet
+   een volgend bestuur dit vanaf een eigen laptop, dan moet het daar opnieuw.
+
+2. Voeg je eigen e-mailadres toe aan het Vercel-account bij de
+   accountinstellingen. Vercel vergelijkt de commit-auteur met alle geverifieerde
+   adressen op dat account, dus daarna werken je eigen commits ook.
+
+3. Publiceer met de hand: `npx vercel deploy --prod`. Zo'n deploy staat op naam
+   van wie er is ingelogd en wordt dus nooit geblokkeerd. Handig als noodgreep,
+   maar je moet het dan elke keer zelf doen.
+
+De repository openbaar maken lost het ook op, omdat Vercel deze controle dan
+overslaat. Doe dat niet: het zet de hele administratie te grabbel om een
+instelling die in een minuut te regelen is.
+
 ## Bijlagen en back-ups
 
 Bijlagen staan in Postgres. Uploads zijn beperkt tot 4 MB, zodat het bestand
