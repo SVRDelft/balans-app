@@ -20,6 +20,8 @@ export interface MutatieFormulierProps {
   voorstel?: { waarde: string; reden: string };
   opties: { waarde: string; label: string }[];
   posten: { id: string; code: string; naam: string }[];
+  inkomstenposten: { id: string; code: string; naam: string }[];
+  relaties: { id: string; naam: string }[];
 }
 
 export function MutatieFormulier({
@@ -30,6 +32,8 @@ export function MutatieFormulier({
   voorstel,
   opties,
   posten,
+  inkomstenposten,
+  relaties,
 }: MutatieFormulierProps) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(
     verwerkBankmutatie,
@@ -42,6 +46,10 @@ export function MutatieFormulier({
   );
   const prefix = `bankmutatie-${id}`;
   const nieuweUitgave = doel === "nieuw" && bedragCenten < 0;
+  const nieuweInkomst = doel === "inkomst" && bedragCenten > 0;
+  // Staat de naam van de betaler als relatie in de app, dan die alvast kiezen.
+  const tegenpartijKort = tegenpartij.toLowerCase();
+  const bekendeRelatie = relaties.find((r) => r.naam.length >= 2 && tegenpartijKort.includes(r.naam.toLowerCase()))?.id ?? "";
 
   return (
     <form action={actie} className="space-y-3" aria-busy={bezig}>
@@ -69,6 +77,9 @@ export function MutatieFormulier({
             {bedragCenten < 0 ? (
               <option value="nieuw">Nieuwe uitgave aanmaken</option>
             ) : null}
+            {bedragCenten > 0 ? (
+              <option value="inkomst">Inkomst zonder factuur boeken</option>
+            ) : null}
             <option value="negeren">Niet verwerken in de administratie</option>
           </Select>
         </Veld>
@@ -81,7 +92,9 @@ export function MutatieFormulier({
 
         {bedragCenten > 0 && doel === "" ? (
           <p className="text-sm text-muted-foreground">
-            Staat de bijbehorende factuur er nog niet tussen?{" "}
+            Geen factuur voor dit geld, zoals een sponsorbijdrage? Kies dan{" "}
+            <strong>Inkomst zonder factuur boeken</strong>. Staat een factuur er
+            nog niet tussen?{" "}
             <Link
               href="/facturen/nieuw"
               className="font-medium text-primary underline underline-offset-2"
@@ -157,6 +170,35 @@ export function MutatieFormulier({
                 rows={2}
                 required
               />
+            </Veld>
+          </div>
+        ) : null}
+
+        {nieuweInkomst ? (
+          <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-sm">
+              Je boekt <strong>{formatteerEuro(bedragCenten)}</strong> als ontvangen
+              inkomst. De app maakt er een betaalde factuur van, zodat het meetelt
+              in de exploitatie.
+            </p>
+            <Veld label="Van wie" htmlFor={`${prefix}-relatieId`} verplicht toelichting="Staat de betaler er niet tussen? Voeg hem eerst toe bij Relaties.">
+              <Select id={`${prefix}-relatieId`} name="relatieId" defaultValue={bekendeRelatie} required>
+                <option value="">Kies een relatie</option>
+                {relaties.map((relatie) => (
+                  <option key={relatie.id} value={relatie.id}>{relatie.naam}</option>
+                ))}
+              </Select>
+            </Veld>
+            <Veld label="Inkomstenpost" htmlFor={`${prefix}-inkomstenpost`} verplicht>
+              <Select id={`${prefix}-inkomstenpost`} name="begrotingspostId" defaultValue="" required>
+                <option value="">Kies een inkomstenpost</option>
+                {inkomstenposten.map((post) => (
+                  <option key={post.id} value={post.id}>{post.code} - {post.naam}</option>
+                ))}
+              </Select>
+            </Veld>
+            <Veld label="Omschrijving" htmlFor={`${prefix}-inkomstomschrijving`} verplicht>
+              <Textarea id={`${prefix}-inkomstomschrijving`} name="omschrijving" defaultValue={omschrijving} rows={2} required />
             </Veld>
           </div>
         ) : null}

@@ -270,7 +270,10 @@ export default async function EvenementPagina({
               <p className="text-warning-foreground">
                 {formatteerEuro(afstemming.conceptCenten)} staat nog op concept.
                 Die facturen zijn wel aangemaakt, maar tellen pas mee in de
-                exploitatie zodra je ze op verstuurd zet.
+                exploitatie zodra je ze op verstuurd zet.{" "}
+                <Link className="underline" href={`/facturen?status=concept&evenement=${evenement.id}`}>
+                  In één keer versturen
+                </Link>
               </p>
             ) : null}
             {afstemming.nogNietVerdeeldCenten !== 0 ? (

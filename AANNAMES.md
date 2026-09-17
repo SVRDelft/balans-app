@@ -155,6 +155,21 @@ Maar het is wel degelijk "eromheen ontworpen": er zijn twee modellen bijgekomen
 onderhouden moet worden. Wie dit niet wil, kan het scherm uit de navigatie halen;
 de rest van de administratie werkt er niet van afhankelijk.
 
+### Bankbetalingen herkennen op naam en bedrag
+
+Een betaling zonder factuurnummer wordt voorgesteld als de naam van de relatie
+als los woord bij de betaler of in de omschrijving staat en het bedrag precies
+gelijk is aan wat er openstaat. Algemene woorden als *Studievereniging*,
+*Stichting* en *Delft* tellen daarbij niet mee. Heeft dezelfde vereniging
+meerdere open facturen van dat bedrag, dan wordt de oudste voorgesteld, maar niet
+aangevinkt. Staat er iets in de omschrijving dat op een ander factuurnummer lijkt,
+dan gokt de app niet. Een voorstel op alleen het bedrag staat nooit vooraf
+aangevinkt.
+
+Een ontvangst die als *inkomst zonder factuur* geboekt wordt, krijgt een eigen
+factuurnummer en staat meteen op betaald. Zo blijft elke ontvangst op één plek
+(facturen) terug te vinden en klopt de nummerreeks.
+
 ### Betalingen kunnen hard verwijderd worden
 
 Een factuur kan alleen weg zolang hij concept is, en een uitgave alleen zolang

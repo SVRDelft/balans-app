@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { datumUitInvoer, telDagenOp, vandaag } from "@/lib/datum";
 import { isVergrendeld } from "@/lib/domein";
 import {
+  type DbClient,
   betaaldBedrag,
   hertelFactuur,
   vergrendelFactuur,
@@ -83,7 +84,18 @@ export async function bewaarFactuur(
     const boekjaar = await vereisSchrijfbaarBoekjaar();
 
     const id = leesTekst(formulier, "id");
-    const relatieId = leesTekst(formulier, "relatieId");
+    // Een nieuwe factuur mag voor meerdere relaties tegelijk: dan krijgt elke
+    // relatie een eigen factuur met dezelfde regels, zoals bij een LBG.
+    const relatieIds = [
+      ...new Set(
+        formulier
+          .getAll("relatieId")
+          .filter((waarde): waarde is string => typeof waarde === "string" && waarde.trim() !== "")
+          .map((waarde) => waarde.trim()),
+      ),
+    ];
+    const relatieId = relatieIds[0];
+    const verstuurNu = !id && formulier.get("verstuurNu") === "aan";
     const omschrijving = leesTekst(formulier, "omschrijving");
     const factuurdatum = datumUitInvoer(
       String(formulier.get("factuurdatum") ?? ""),
@@ -95,6 +107,8 @@ export async function bewaarFactuur(
 
     const veldfouten: Record<string, string> = {};
     if (!relatieId) veldfouten.relatieId = "Kies een relatie.";
+    if (id && relatieIds.length > 1) veldfouten.relatieId = "Een bestaand concept hoort bij één relatie.";
+    if (relatieIds.length > 200) veldfouten.relatieId = "Kies maximaal 200 relaties tegelijk.";
     if (!omschrijving) veldfouten.omschrijving = "Vul een omschrijving in.";
     if (!factuurdatum) veldfouten.factuurdatum = "Vul een geldige datum in.";
     if (!vervaldatum) veldfouten.vervaldatum = "Vul een geldige datum in.";
@@ -187,49 +201,155 @@ export async function bewaarFactuur(
       return;
     }
 
-    const nieuweId = await db.$transaction(async (tx) => {
-      const { nummer, volgnummer } = await volgendFactuurnummer(
-        tx,
-        boekjaar.id,
-      );
-      const factuur = await tx.factuur.create({
-        data: {
-          boekjaarId: boekjaar.id,
-          nummer,
-          volgnummer,
-          relatieId: relatieId!,
-          omschrijving: omschrijving!,
-          factuurdatum: factuurdatum!,
-          vervaldatum: vervaldatum!,
-          evenementId,
-          notities: leesTekst(formulier, "notities") ?? null,
-          status: "concept",
-          regels: { create: regels },
-        },
+    const bestaandeRelaties = await db.relatie.count({ where: { id: { in: relatieIds } } });
+    if (bestaandeRelaties !== relatieIds.length) {
+      return { fout: "Een van de gekozen relaties bestaat niet meer. Ververs de pagina." };
+    }
+
+    const gemaakt = await db.$transaction(
+      async (tx) => {
+        const facturen: { id: string; nummer: string; totaalCenten: number }[] = [];
+        for (const voorRelatie of relatieIds) {
+          const { nummer, volgnummer } = await volgendFactuurnummer(
+            tx,
+            boekjaar.id,
+          );
+          const factuur = await tx.factuur.create({
+            data: {
+              boekjaarId: boekjaar.id,
+              nummer,
+              volgnummer,
+              relatieId: voorRelatie,
+              omschrijving: omschrijving!,
+              factuurdatum: factuurdatum!,
+              vervaldatum: vervaldatum!,
+              evenementId,
+              notities: leesTekst(formulier, "notities") ?? null,
+              status: "concept",
+              regels: { create: regels },
+            },
+          });
+          await hertelFactuur(tx, factuur.id);
+          if (verstuurNu) await zetOpVerstuurd(tx, factuur.id, boekjaar.id);
+          const totaal = regels.reduce((som, regel) => som + regel.bedragCenten, 0);
+          facturen.push({ id: factuur.id, nummer, totaalCenten: totaal });
+        }
+        return facturen;
+      },
+      { timeout: 120_000 },
+    );
+
+    for (const factuur of gemaakt) {
+      await logAudit({
+        gebruiker: sessie.naam,
+        entiteit: "Factuur",
+        entiteitId: factuur.id,
+        actie: verstuurNu ? "aangemaakt en verstuurd" : "aangemaakt",
+        samenvatting: `Factuur ${factuur.nummer} aangemaakt${verstuurNu ? " en op verstuurd gezet" : ""} voor ${formatteerEuro(factuur.totaalCenten)}`,
+        boekjaarId: boekjaar.id,
       });
-      await hertelFactuur(tx, factuur.id);
-      return factuur.id;
-    });
+    }
 
-    const gemaakt = await db.factuur.findUniqueOrThrow({
-      where: { id: nieuweId },
-    });
-    await logAudit({
-      gebruiker: sessie.naam,
-      entiteit: "Factuur",
-      entiteitId: nieuweId,
-      actie: "aangemaakt",
-      samenvatting: `Factuur ${gemaakt.nummer} aangemaakt voor ${formatteerEuro(gemaakt.totaalCenten)}`,
-      boekjaarId: boekjaar.id,
-    });
-
-    doel = `/facturen/${nieuweId}`;
+    doel =
+      gemaakt.length === 1
+        ? `/facturen/${gemaakt[0].id}`
+        : `/facturen?q=${encodeURIComponent(omschrijving!)}`;
   });
 
   if (resultaat.fout) return resultaat;
 
   revalidatePath("/facturen");
   redirect(doel);
+}
+
+/** Zet één concept op verstuurd, met dezelfde controles als de losse knop. */
+async function zetOpVerstuurd(tx: DbClient, id: string, boekjaarId: string) {
+  await vergrendelFactuur(tx, id, boekjaarId);
+  const actueel = await tx.factuur.findUniqueOrThrow({
+    where: { id, boekjaarId },
+    include: { crediteertFactuur: true },
+  });
+  if (actueel.crediteertFactuur?.status === "oninbaar")
+    throw new Error(
+      "Herstel de oorspronkelijke factuur voordat je de credit verstuurt.",
+    );
+  if (
+    actueel.crediteertFactuur &&
+    (actueel.relatieId !== actueel.crediteertFactuur.relatieId ||
+      actueel.evenementId !== actueel.crediteertFactuur.evenementId ||
+      actueel.totaalCenten > 0 ||
+      actueel.totaalCenten < -actueel.crediteertFactuur.totaalCenten)
+  ) {
+    throw new Error(
+      "Controleer het creditconcept: relatie, evenement en bedrag moeten aansluiten op de oorspronkelijke factuur.",
+    );
+  }
+  await tx.factuur.update({
+    where: { id, boekjaarId, status: "concept" },
+    data: { status: "verstuurd", verstuurdOp: new Date() },
+  });
+  await hertelFactuur(tx, id);
+}
+
+/**
+ * Zet een reeks concepten in één keer op verstuurd, bijvoorbeeld de facturen
+ * van een omslag of een LBG. Creditconcepten en lege concepten blijven staan.
+ */
+export async function verstuurConcepten(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisSessie();
+
+  return voerUit(async () => {
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
+    const ids = [
+      ...new Set(
+        formulier
+          .getAll("factuurId")
+          .filter((waarde): waarde is string => typeof waarde === "string" && waarde !== ""),
+      ),
+    ];
+    if (ids.length === 0) return { fout: "Kies minstens één concept." };
+
+    const concepten = await db.factuur.findMany({
+      where: {
+        id: { in: ids },
+        boekjaarId: boekjaar.id,
+        status: "concept",
+        crediteertFactuurId: null,
+        regels: { some: {} },
+      },
+      select: { id: true, nummer: true, totaalCenten: true },
+      orderBy: { volgnummer: "asc" },
+    });
+    if (concepten.length === 0) {
+      return { fout: "Geen van deze facturen kan nog op verstuurd; ververs de pagina." };
+    }
+
+    await db.$transaction(
+      async (tx) => {
+        for (const concept of concepten) await zetOpVerstuurd(tx, concept.id, boekjaar.id);
+      },
+      { timeout: 120_000 },
+    );
+
+    const totaal = concepten.reduce((som, concept) => som + concept.totaalCenten, 0);
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Factuur",
+      actie: "verstuurd",
+      samenvatting: `${concepten.length} concepten op verstuurd gezet (${formatteerEuro(totaal)})`,
+      details: { nummers: concepten.map((concept) => concept.nummer) },
+      boekjaarId: boekjaar.id,
+    });
+
+    revalidatePath("/facturen");
+    const overgeslagen = ids.length - concepten.length;
+    return {
+      melding: `${concepten.length} ${concepten.length === 1 ? "factuur staat" : "facturen staan"} nu op verstuurd (${formatteerEuro(totaal)}).${overgeslagen ? ` ${overgeslagen} overgeslagen: creditconcept, leeg of al verstuurd.` : ""}`,
+    };
+  });
 }
 
 export async function verstuurFactuur(
@@ -255,33 +375,7 @@ export async function verstuurFactuur(
       return { fout: "Een factuur zonder regels kan niet verstuurd worden." };
     }
 
-    await db.$transaction(async (tx) => {
-      await vergrendelFactuur(tx, id, boekjaar.id);
-      const actueel = await tx.factuur.findUniqueOrThrow({
-        where: { id, boekjaarId: boekjaar.id },
-        include: { crediteertFactuur: true },
-      });
-      if (actueel.crediteertFactuur?.status === "oninbaar")
-        throw new Error(
-          "Herstel de oorspronkelijke factuur voordat je de credit verstuurt.",
-        );
-      if (
-        actueel.crediteertFactuur &&
-        (actueel.relatieId !== actueel.crediteertFactuur.relatieId ||
-          actueel.evenementId !== actueel.crediteertFactuur.evenementId ||
-          actueel.totaalCenten > 0 ||
-          actueel.totaalCenten < -actueel.crediteertFactuur.totaalCenten)
-      ) {
-        throw new Error(
-          "Controleer het creditconcept: relatie, evenement en bedrag moeten aansluiten op de oorspronkelijke factuur.",
-        );
-      }
-      await tx.factuur.update({
-        where: { id, boekjaarId: boekjaar.id, status: "concept" },
-        data: { status: "verstuurd", verstuurdOp: new Date() },
-      });
-      await hertelFactuur(tx, id);
-    });
+    await db.$transaction((tx) => zetOpVerstuurd(tx, id, boekjaar.id));
 
     await logAudit({
       gebruiker: sessie.naam,

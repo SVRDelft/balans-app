@@ -28,6 +28,7 @@ export interface KeuzePost {
 export interface KeuzeRelatie {
   id: string;
   naam: string;
+  type?: string;
 }
 
 export interface KeuzeEvenement {
@@ -69,6 +70,11 @@ export function FactuurFormulier({
     bewaarFactuur,
     {},
   );
+  const nieuw = !waarden.id;
+  const [gekozenRelaties, setGekozenRelaties] = useState<string[]>(
+    waarden.relatieId ? [waarden.relatieId] : [],
+  );
+  const [verstuurNu, setVerstuurNu] = useState(false);
   const [regels, setRegels] = useState<RegelWaarden[]>(
     waarden.regels.length > 0
       ? waarden.regels
@@ -127,24 +133,34 @@ export function FactuurFormulier({
       <Card>
         <CardContent className="grid gap-4 pt-5 sm:grid-cols-2">
           <Veld
-            label="Relatie"
-            htmlFor="relatieId"
+            label={nieuw ? "Voor wie" : "Relatie"}
+            htmlFor={nieuw ? "relatieZoeken" : "relatieId"}
+            className={nieuw ? "sm:col-span-2" : undefined}
+            toelichting={nieuw ? "Kies je meerdere relaties, dan krijgt elk een eigen factuur met dezelfde regels." : undefined}
             verplicht
             fout={staat.veldfouten?.relatieId}
           >
-            <Select
-              id="relatieId"
-              name="relatieId"
-              defaultValue={waarden.relatieId}
-              required
-            >
-              <option value="">Kies een relatie…</option>
-              {relaties.map((relatie) => (
-                <option key={relatie.id} value={relatie.id}>
-                  {relatie.naam}
-                </option>
-              ))}
-            </Select>
+            {nieuw ? (
+              <RelatieKiezer
+                relaties={relaties}
+                gekozen={gekozenRelaties}
+                onChange={setGekozenRelaties}
+              />
+            ) : (
+              <Select
+                id="relatieId"
+                name="relatieId"
+                defaultValue={waarden.relatieId}
+                required
+              >
+                <option value="">Kies een relatie…</option>
+                {relaties.map((relatie) => (
+                  <option key={relatie.id} value={relatie.id}>
+                    {relatie.naam}
+                  </option>
+                ))}
+              </Select>
+            )}
           </Veld>
 
           <Veld
@@ -353,9 +369,36 @@ export function FactuurFormulier({
 
       {staat.fout ? <Melding toon="fout">{staat.fout}</Melding> : null}
 
-      <div className="flex gap-2">
-        <Button type="submit" disabled={bezig}>
-          {bezig ? "Bezig…" : "Opslaan als concept"}
+      {nieuw ? (
+        <label className="flex items-start gap-2 text-sm">
+          <input
+            type="checkbox"
+            name="verstuurNu"
+            value="aan"
+            className="mt-0.5 size-4"
+            checked={verstuurNu}
+            onChange={(gebeurtenis) => setVerstuurNu(gebeurtenis.target.checked)}
+          />
+          <span>
+            Meteen op verstuurd zetten
+            <span className="block text-xs text-muted-foreground">
+              Dan telt de factuur direct mee en kan een bankbetaling er meteen aan gekoppeld worden. Wijzigen kan daarna alleen nog via een creditfactuur.
+            </span>
+          </span>
+        </label>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={bezig || (nieuw && gekozenRelaties.length === 0)}>
+          {bezig
+            ? "Bezig…"
+            : !nieuw
+              ? "Opslaan als concept"
+              : gekozenRelaties.length > 1
+                ? `${gekozenRelaties.length} facturen ${verstuurNu ? "aanmaken en versturen" : "als concept opslaan"} (${formatteerEuro(totaalCenten * gekozenRelaties.length)})`
+                : verstuurNu
+                  ? "Aanmaken en op verstuurd zetten"
+                  : "Opslaan als concept"}
         </Button>
         <Button type="button" variant="outline" asChild>
           <Link href={waarden.id ? `/facturen/${waarden.id}` : "/facturen"}>
@@ -364,5 +407,86 @@ export function FactuurFormulier({
         </Button>
       </div>
     </form>
+  );
+}
+
+/** Eén of meer relaties kiezen, met snelkeuzes per soort relatie. */
+function RelatieKiezer({
+  relaties,
+  gekozen,
+  onChange,
+}: {
+  relaties: KeuzeRelatie[];
+  gekozen: string[];
+  onChange: (ids: string[]) => void;
+}) {
+  const [zoek, setZoek] = useState("");
+  const aan = new Set(gekozen);
+  const zichtbaar = relaties.filter((relatie) =>
+    relatie.naam.toLowerCase().includes(zoek.trim().toLowerCase()),
+  );
+  const verenigingen = relaties.filter((relatie) => relatie.type === "studievereniging");
+
+  const zet = (id: string, waarde: boolean) => {
+    const volgende = new Set(aan);
+    if (waarde) volgende.add(id);
+    else volgende.delete(id);
+    // Volgorde van de lijst aanhouden, zodat de nummers alfabetisch oplopen.
+    onChange(relaties.filter((relatie) => volgende.has(relatie.id)).map((relatie) => relatie.id));
+  };
+
+  return (
+    <div className="space-y-2">
+      {gekozen.map((id) => (
+        <input key={id} type="hidden" name="relatieId" value={id} />
+      ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          id="relatieZoeken"
+          value={zoek}
+          onChange={(gebeurtenis) => setZoek(gebeurtenis.target.value)}
+          placeholder="Zoek een relatie…"
+          className="min-w-0 flex-1"
+        />
+        {verenigingen.length > 0 ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange(relaties.filter((relatie) => aan.has(relatie.id) || relatie.type === "studievereniging").map((relatie) => relatie.id))}
+          >
+            Alle studieverenigingen
+          </Button>
+        ) : null}
+        {gekozen.length > 0 ? (
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange([])}>
+            Wissen
+          </Button>
+        ) : null}
+      </div>
+      <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-lg border border-border">
+        {zichtbaar.map((relatie) => (
+          <li key={relatie.id}>
+            <label className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted/40">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={aan.has(relatie.id)}
+                onChange={(gebeurtenis) => zet(relatie.id, gebeurtenis.target.checked)}
+              />
+              {relatie.naam}
+            </label>
+          </li>
+        ))}
+        {zichtbaar.length === 0 ? (
+          <li className="px-3 py-2 text-sm text-muted-foreground">Geen relatie gevonden.</li>
+        ) : null}
+      </ul>
+      <p className="text-xs text-muted-foreground">
+        {gekozen.length === 0
+          ? "Nog niemand gekozen."
+          : `${gekozen.length} gekozen: ${relaties.filter((relatie) => aan.has(relatie.id)).map((relatie) => relatie.naam).join(", ")}`}
+      </p>
+    </div>
   );
 }

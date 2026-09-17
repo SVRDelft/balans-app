@@ -30,6 +30,8 @@ import {
 import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 
+import { ConceptenVersturen } from "./concepten-versturen";
+
 export const metadata: Metadata = { title: "Facturen" };
 
 export default async function FacturenPagina({
@@ -93,6 +95,9 @@ export default async function FacturenPagina({
     (som, factuur) => som + factuur.totaalCenten,
     0,
   );
+  const verstuurbaar = facturen
+    .filter((factuur) => factuur.status === "concept" && factuur.soort !== "credit")
+    .map((factuur) => ({ id: factuur.id, totaalCenten: factuur.totaalCenten }));
   const totaalOpenstaand = facturen.reduce((som, factuur) => som + factuurOpenstaand(factuur), 0);
 
   return (
@@ -177,6 +182,8 @@ export default async function FacturenPagina({
           </Button>
         ) : null}
       </form>
+
+      {schrijfbaar ? <ConceptenVersturen concepten={verstuurbaar} /> : null}
 
       {facturen.length === 0 ? (
         <Leeg titel="Geen facturen gevonden">

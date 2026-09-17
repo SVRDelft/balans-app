@@ -13,7 +13,7 @@ import { bankKeuzes } from "@/lib/bank/gegevens";
 import { bankVoorstellen, normaliseerRekening } from "@/lib/bank/koppelen";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
-import { hertelFactuur, vergrendelFactuur, type DbClient } from "@/lib/facturen";
+import { hertelFactuur, vergrendelFactuur, volgendFactuurnummer, type DbClient } from "@/lib/facturen";
 import { formatteerEuro } from "@/lib/geld";
 
 const hash = (tekst: string) => createHash("sha256").update(tekst).digest("hex");
@@ -76,8 +76,15 @@ export async function importeerBankbestand(_staat: ActieStaat, formulier: FormDa
 async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: string, gebruiker: string, formulier?: FormData) {
   const regel = await tx.bankmutatie.findUnique({ where: { id: mutatieId, boekjaarId: jaarId }, include: { bankimport: true } });
   if (!regel || regel.verwerking !== "open") throw new Error("Deze bankregel is niet meer beschikbaar. Vernieuw de pagina.");
-  if (!regel.bankimport.bevestigdOp) throw new Error("Bevestig eerst de import en het banksaldo bovenaan deze pagina.");
   const [soort, id] = doel.split(":");
+  const tegenIban = normaliseerRekening(regel.tegenpartijIban);
+  // Het rekeningnummer van de betaler onthouden bij de relatie, zodat de
+  // volgende betaling van dezelfde rekening zeker herkend wordt. Een al
+  // ingevuld IBAN wordt nooit overschreven.
+  const onthoudIban = async (relatieId: string | null | undefined) => {
+    if (!relatieId || !tegenIban) return;
+    await tx.relatie.updateMany({ where: { id: relatieId, iban: "" }, data: { iban: tegenIban } });
+  };
   let verwerking = "", betalingId: string | undefined, uitgaveId: string | undefined;
   const notitie = formulier ? leesTekst(formulier, "notitie") : undefined;
   if (soort === "factuur" && id) {
@@ -89,6 +96,7 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
     betalingId = (await tx.betaling.create({ data: { factuurId: id, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
     verwerking = "nieuwe_betaling";
     await hertelFactuur(tx, id);
+    if (regel.bedragCenten > 0) await onthoudIban(factuur.relatieId);
   } else if (soort === "betaling" && id) {
     const betaling = await tx.betaling.findUnique({ where: { id, factuur: { boekjaarId: jaarId }, bankmutatie: null } });
     if (!betaling || betaling.bedragCenten !== regel.bedragCenten || betaling.datum.toISOString().slice(0, 10) !== regel.datum.toISOString().slice(0, 10)) throw new Error("Deze bestaande betaling past niet bij bedrag en datum van de bankregel, of is al gekoppeld.");
@@ -100,6 +108,29 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
     if (!uitgave || regel.bedragCenten >= 0 || uitgave.bedragCenten !== -regel.bedragCenten) throw new Error("Kies een ongekoppelde uitgave met hetzelfde bedrag als deze afschrijving.");
     uitgaveId = id; verwerking = uitgave.betaald ? "bestaande_uitgave" : "uitgave_betaald";
     if (!uitgave.betaald) await tx.uitgave.update({ where: { id }, data: { betaald: true, betaaldOp: regel.datum } });
+    await onthoudIban(uitgave.relatieId);
+  } else if (soort === "inkomst" && formulier && regel.bedragCenten > 0) {
+    // Geld dat binnenkomt zonder factuur, zoals een sponsorbijdrage. In deze
+    // administratie telt opbrengst via facturen, dus de import maakt er een
+    // betaalde factuur van op de gekozen inkomstenpost.
+    const postId = leesTekst(formulier, "begrotingspostId");
+    const relatieId = leesTekst(formulier, "relatieId");
+    const omschrijving = leesTekst(formulier, "omschrijving");
+    if (!postId || !relatieId || !omschrijving) throw new Error("Kies een relatie en een inkomstenpost, en vul een omschrijving in.");
+    if (!await tx.begrotingspost.findUnique({ where: { id: postId, boekjaarId: jaarId, soort: "inkomst" } })) throw new Error("Kies een inkomstenpost uit dit boekjaar.");
+    if (!await tx.relatie.findUnique({ where: { id: relatieId } })) throw new Error("Deze relatie bestaat niet meer.");
+    const { nummer, volgnummer } = await volgendFactuurnummer(tx, jaarId);
+    const factuur = await tx.factuur.create({ data: {
+      boekjaarId: jaarId, nummer, volgnummer, relatieId, omschrijving,
+      factuurdatum: regel.datum, vervaldatum: regel.datum, status: "verstuurd", verstuurdOp: regel.datum,
+      notities: `Aangemaakt vanuit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
+      regels: { create: [{ omschrijving, aantal: 1, prijsPerStukCenten: regel.bedragCenten, bedragCenten: regel.bedragCenten, begrotingspostId: postId, volgorde: 0 }] },
+    } });
+    await hertelFactuur(tx, factuur.id);
+    betalingId = (await tx.betaling.create({ data: { factuurId: factuur.id, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
+    await hertelFactuur(tx, factuur.id);
+    await onthoudIban(relatieId);
+    verwerking = "nieuwe_inkomst";
   } else if (soort === "nieuw" && formulier && regel.bedragCenten < 0) {
     const postId = leesTekst(formulier, "begrotingspostId");
     const leverancierNaam = leesTekst(formulier, "leverancierNaam");
@@ -113,12 +144,17 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
   await logAudit({ gebruiker, boekjaarId: jaarId, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "gekoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} verwerkt: ${verwerking}.`, details: { betalingId, uitgaveId, notitie } }, tx);
 }
 
-async function voorstellenVerwerken(tx: DbClient, jaarId: string, importId: string, gebruiker: string) {
+/**
+ * Verwerkt de voorstellen van de aangevinkte bankregels. De voorstellen worden
+ * hier opnieuw berekend, zodat er alleen geboekt wordt wat nu nog klopt.
+ */
+async function voorstellenVerwerken(tx: DbClient, jaarId: string, importId: string, gebruiker: string, gekozen: Set<string>) {
   const regels = await tx.bankmutatie.findMany({ where: { importId, boekjaarId: jaarId, verwerking: "open" }, orderBy: [{ datum: "asc" }, { id: "asc" }] });
   const keuzes = await bankKeuzes(jaarId, tx);
   const voorstellen = bankVoorstellen(regels, keuzes.facturen, keuzes.betalingen, keuzes.uitgaven);
   let verwerkt = 0;
-  for (const [id, voorstel] of [...voorstellen].slice(0, 50)) {
+  for (const [id, voorstel] of voorstellen) {
+    if (!gekozen.has(id)) continue;
     await koppel(tx, jaarId, id, voorstel.waarde, gebruiker);
     verwerkt++;
   }
@@ -137,22 +173,25 @@ export async function bevestigBankimport(_staat: ActieStaat, formulier: FormData
       if (bankimport.bevestigdOp) throw new Error("Deze import is al bevestigd. Het banksaldo wordt niet nogmaals opgeslagen.");
       const saldo = await tx.banksaldo.create({ data: { boekjaarId: jaar.id, datum: bankimport.eindDatum, saldoCenten: bankimport.eindSaldoCenten, notitie: `MT940: ${bankimport.bestandsnaam}`, ingevoerdDoor: sessie.naam } });
       await tx.bankimport.update({ where: { id: bankimport.id }, data: { bevestigdOp: new Date(), banksaldoId: saldo.id } });
-      const aantal = await voorstellenVerwerken(tx, jaar.id, bankimport.id, sessie.naam);
-      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: bankimport.id, actie: "bevestigd", samenvatting: `Afschrift bevestigd; banksaldo ${formatteerEuro(bankimport.eindSaldoCenten)} en ${aantal} koppelingen verwerkt.` }, tx);
-      return aantal;
+      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: bankimport.id, actie: "bevestigd", samenvatting: `Afschrift bevestigd; banksaldo ${formatteerEuro(bankimport.eindSaldoCenten)} overgenomen.` }, tx);
+      return bankimport.eindSaldoCenten;
     }, { timeout: 60_000 });
-    vernieuw(); return { melding: `Banksaldo overgenomen en ${verwerkt} voorgestelde koppelingen verwerkt.` };
+    vernieuw(); return { melding: `Banksaldo van ${formatteerEuro(verwerkt)} overgenomen.` };
   });
 }
 
-export async function bevestigVoorstellen(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
+export async function koppelSelectie(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
   const sessie = await vereisSessie();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "importId");
     if (!id) throw new Error("Kies een bankimport.");
-    const aantal = await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); return voorstellenVerwerken(tx, jaar.id, id, sessie.naam); }, { timeout: 60_000 });
-    vernieuw(); return { melding: `${aantal} koppelingen verwerkt.` };
+    const gekozen = new Set(formulier.getAll("mutatieId").map(String));
+    if (gekozen.size === 0) return { fout: "Vink minstens één voorstel aan." };
+    const aantal = await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); return voorstellenVerwerken(tx, jaar.id, id, sessie.naam, gekozen); }, { timeout: 120_000 });
+    vernieuw();
+    const overgeslagen = gekozen.size - aantal;
+    return { melding: `${aantal} ${aantal === 1 ? "bankregel" : "bankregels"} gekoppeld.${overgeslagen > 0 ? ` ${overgeslagen} voorstel${overgeslagen === 1 ? " klopte" : "len klopten"} inmiddels niet meer en ${overgeslagen === 1 ? "is" : "zijn"} overgeslagen.` : ""}` };
   });
 }
 
@@ -172,12 +211,34 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
     const id = leesTekst(formulier, "mutatieId");
     await db.$transaction(async tx => {
       await vergrendelJaar(tx, jaar.id);
-      const regel = id ? await tx.bankmutatie.findUnique({ where: { id, boekjaarId: jaar.id }, include: { betaling: true, uitgave: true } }) : null;
+      const regel = id ? await tx.bankmutatie.findUnique({ where: { id, boekjaarId: jaar.id }, include: { betaling: { include: { factuur: { select: { relatieId: true } } } }, uitgave: true } }) : null;
       if (!regel || regel.verwerking === "open") throw new Error("Deze bankregel is niet gekoppeld.");
+      // Een rekeningnummer dat door deze koppeling is geleerd, hoort bij een
+      // verkeerde keuze ook weer weg; anders koppelt de app die rekening
+      // voortaan zeker aan de verkeerde relatie. Het blijft staan als een andere,
+      // nog gekoppelde bankregel van dezelfde rekening het bevestigt.
+      const relatieId = regel.betaling?.factuur.relatieId ?? regel.uitgave?.relatieId ?? null;
+      const geleerd = normaliseerRekening(regel.tegenpartijIban);
+      if (relatieId && geleerd) {
+        const bevestigd = await tx.bankmutatie.count({
+          where: {
+            id: { not: regel.id },
+            tegenpartijIban: regel.tegenpartijIban,
+            verwerking: { not: "open" },
+            OR: [{ betaling: { factuur: { relatieId } } }, { uitgave: { relatieId } }],
+          },
+        });
+        if (bevestigd === 0) await tx.relatie.updateMany({ where: { id: relatieId, iban: geleerd }, data: { iban: "" } });
+      }
       if (regel.verwerking === "nieuwe_uitgave" && (regel.uitgave?.omslagrondeId || regel.uitgave?.bijlageId)) throw new Error("Aan deze uitgave is een bonnetje of omslag gekoppeld. Verwijder die koppeling eerst of boek een correctie.");
       if (regel.betaling) await vergrendelFactuur(tx, regel.betaling.factuurId, jaar.id);
       if (regel.uitgaveId) await tx.$queryRaw`SELECT id FROM "Uitgave" WHERE id = ${regel.uitgaveId} FOR UPDATE`;
       await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
+      if (regel.verwerking === "nieuwe_inkomst" && regel.betaling) {
+        // De factuur is door de import zelf aangemaakt; die gaat mee terug.
+        await tx.betaling.delete({ where: { id: regel.betaling.id } });
+        await tx.factuur.delete({ where: { id: regel.betaling.factuurId } });
+      }
       if (regel.verwerking === "nieuwe_betaling" && regel.betaling) {
         await tx.betaling.delete({ where: { id: regel.betaling.id } });
         await hertelFactuur(tx, regel.betaling.factuurId);

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Download, Pencil } from "lucide-react";
+import { Copy, Download, Pencil } from "lucide-react";
 
 import { BevestigKnop } from "@/components/bevestigknop";
 import { Paginakop } from "@/components/paginakop";
@@ -127,6 +127,14 @@ export default async function FactuurPagina({
                 PDF
               </a>
             </Button>
+            {schrijfbaar && factuur.soort !== "credit" ? (
+              <Button variant="outline" asChild>
+                <Link href={`/facturen/nieuw?van=${factuur.id}`}>
+                  <Copy />
+                  Kopiëren
+                </Link>
+              </Button>
+            ) : null}
             {isConcept && schrijfbaar ? (
               <Button variant="outline" asChild>
                 <Link href={`/facturen/${factuur.id}/bewerken`}>

@@ -5,19 +5,24 @@ import { Melding } from "@/components/ui/melding";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import { datumNaarInvoer, telDagenOp, vandaag } from "@/lib/datum";
+import { centenNaarInvoer } from "@/lib/geld";
 
 import { FactuurFormulier } from "../formulier";
 
 export const metadata: Metadata = { title: "Nieuwe factuur" };
 
-export default async function NieuweFactuurPagina() {
+export default async function NieuweFactuurPagina({
+  searchParams,
+}: PageProps<"/facturen/nieuw">) {
   const boekjaar = await vereisSchrijfbaarBoekjaar("/facturen");
+  const parameters = await searchParams;
+  const vanId = typeof parameters.van === "string" ? parameters.van : "";
 
   const [relaties, posten, evenementen, instellingen] = await Promise.all([
     db.relatie.findMany({
       where: { actief: true },
       orderBy: [{ type: "asc" }, { naam: "asc" }],
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
     db.begrotingspost.findMany({
       where: { boekjaarId: boekjaar.id },
@@ -31,6 +36,15 @@ export default async function NieuweFactuurPagina() {
     }),
     db.instellingen.findUnique({ where: { id: "svr" } }),
   ]);
+
+  // "Kopiëren": dezelfde omschrijving en regels, nieuwe datums en nog geen
+  // relatie gekozen, zodat je hem makkelijk voor iemand anders maakt.
+  const bron = vanId
+    ? await db.factuur.findUnique({
+        where: { id: vanId, boekjaarId: boekjaar.id },
+        include: { regels: { orderBy: { volgorde: "asc" } } },
+      })
+    : null;
 
   const vandaagDatum = vandaag();
   const termijn = instellingen?.betaaltermijnDagen ?? 30;
@@ -57,7 +71,9 @@ export default async function NieuweFactuurPagina() {
     <>
       <Paginakop
         titel="Nieuwe factuur"
-        beschrijving="De factuur wordt als concept opgeslagen. Pas als je hem op verstuurd zet, telt hij mee en wordt hij vergrendeld."
+        beschrijving={bron
+          ? `Kopie van ${bron.nummer}. Kies voor wie de nieuwe factuur is.`
+          : "Kies één of meer relaties. De factuur wordt als concept opgeslagen, tenzij je hem meteen op verstuurd zet."}
       />
       <FactuurFormulier
         relaties={relaties}
@@ -65,12 +81,22 @@ export default async function NieuweFactuurPagina() {
         evenementen={evenementen}
         waarden={{
           relatieId: "",
-          omschrijving: "",
+          omschrijving: bron?.omschrijving ?? "",
           factuurdatum: datumNaarInvoer(vandaagDatum),
           vervaldatum: datumNaarInvoer(telDagenOp(vandaagDatum, termijn)),
-          evenementId: "",
+          evenementId:
+            bron?.evenementId && evenementen.some((evenement) => evenement.id === bron.evenementId)
+              ? bron.evenementId
+              : "",
           notities: "",
-          regels: [],
+          regels: bron && bron.soort !== "credit"
+            ? bron.regels.map((regel) => ({
+                omschrijving: regel.omschrijving,
+                aantal: String(regel.aantal),
+                prijs: centenNaarInvoer(regel.prijsPerStukCenten),
+                begrotingspostId: regel.begrotingspostId,
+              }))
+            : [],
         }}
       />
     </>

@@ -137,6 +137,14 @@ werkelijke vervaldatum. Ook uitgaven en relaties hebben een zoekveld.
 Met **Jaarfacturen bijdrage** maak je in één klik voor alle bijdrageplichtige
 studieverenigingen een conceptfactuur met het bedrag uit de begroting.
 
+Bij **Nieuwe factuur** kun je meerdere relaties aanvinken (of *Alle
+studieverenigingen*). Elke relatie krijgt dan een eigen factuur met dezelfde
+regels, bijvoorbeeld de LBG-factuur voor vijftien verenigingen. Vink *Meteen op
+verstuurd zetten* aan als je ze niet eerst als concept wilt nakijken. Met
+**Kopiëren** op een factuur begin je een nieuwe met dezelfde omschrijving en
+regels. Staan er concepten in het overzicht, dan zet je die met één knop allemaal
+op verstuurd; filter eerst op evenement of zoekterm als het maar een deel is.
+
 Bij een openstaande factuur staat een knop die de tekst voor een
 herinneringsmail op je klembord zet. Versturen doe je zelf.
 
@@ -192,6 +200,25 @@ iets vergeten is.**
 Onder *Banksaldo › Bankafschriften* lees je een MT940-bestand in dat je bij ABN
 AMRO downloadt. De app stelt koppelingen voor tussen de mutaties en je openstaande
 facturen en uitgaven; je bevestigt die zelf voordat er iets geboekt wordt.
+
+De app herkent een betaling op, van zeker naar minder zeker:
+
+- **Zeker**: het factuurnummer staat in de omschrijving, of het rekeningnummer
+  van de relatie is bekend en het openstaande bedrag klopt precies.
+- **Naam en bedrag**: de naam van de vereniging staat bij de betaler of in de
+  omschrijving, en het bedrag is precies wat er nog openstaat. Zo worden tien
+  betaalde LBG-facturen van de vijftien vanzelf herkend, ook als niemand het
+  factuurnummer vermeldt.
+- **Alleen bedrag**: er is precies één open factuur of uitgave met dit bedrag.
+  Dit staat niet aangevinkt; vink het zelf aan als het klopt.
+
+Zekere voorstellen en naam-plus-bedrag staan alvast aangevinkt; met één knop
+koppel je ze allemaal. Wat niet herkend is koppel je per regel, of boek je als
+nieuwe uitgave of als *inkomst zonder factuur* (dan maakt de app een betaalde
+factuur aan, zodat de ontvangst in de administratie staat). Na een koppeling
+onthoudt de app het rekeningnummer van de relatie, zodat die de volgende keer
+zeker herkend wordt. Draai je de koppeling terug, dan vergeet hij dat nummer weer.
+Het banksaldo overnemen is een aparte knop en boekt niets.
 
 Dit is een **handmatige import van een bestand dat jij downloadt**, geen
 koppeling met de bank: de app praat nooit zelf met ABN AMRO en heeft geen

@@ -26,8 +26,8 @@ describe('herkennen van facturen zonder gokken op alleen het bedrag', () => {
     expect(voorstel({ tegenpartijIban: iban, bedragCenten: 3000 })).toBeUndefined();
     expect(voorstel({ tegenpartijIban: iban }, [factuur, { ...factuur, id: 'tweede', nummer: 'SVR62-2026-0002' }])).toBeUndefined();
   });
-  it('gebruikt nooit uitsluitend bedrag of naam', () => {
-    expect(voorstel()).toBeUndefined();
+  it('stelt op alleen het bedrag hooguit een twijfelgeval voor, nooit een zeker voorstel', () => {
+    expect(voorstel()?.zekerheid).toBe('bedrag');
   });
   it('geeft geen voorstel voor meerdere vermelde facturen', () => {
     expect(voorstel({ omschrijving: `${factuur.nummer} en SVR62-2026-0002`, tegenpartijIban: iban }, [factuur, { ...factuur, id: 'tweede', nummer: 'SVR62-2026-0002' }])).toBeUndefined();
@@ -60,7 +60,7 @@ describe('bestaande betalingen koppelen zonder dubbelboeken', () => {
 describe('uitgaven en reserveren bij meerdere bankregels', () => {
   it('herkent een ongekoppelde kostenpost op exact leverancier en bedrag', () => {
     expect(voorstel({ bedragCenten: -10000, tegenpartijNaam: 'CAFE DELFT' }, [], [uitgave])?.waarde).toBe('uitgave:uitgave');
-    expect(voorstel({ bedragCenten: -10000, tegenpartijNaam: 'Café Delft BV' }, [], [uitgave])).toBeUndefined();
+    expect(voorstel({ bedragCenten: -10000, tegenpartijNaam: 'Café Delft BV' }, [], [uitgave])?.zekerheid).toBe('bedrag');
   });
   it('matcht een al betaalde uitgave alleen op dezelfde betaal-datum', () => {
     const bank = { bedragCenten: -10000, tegenpartijIban: iban };
