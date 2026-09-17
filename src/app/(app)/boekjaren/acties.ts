@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
+import { BOEKJAAR_COOKIE, controleerWachtwoord } from "@/lib/auth/sessie";
 
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
@@ -170,11 +170,11 @@ export async function wisBoekingen(
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
-    const bevestiging = leesTekst(formulier, "bevestiging");
-    if (bevestiging !== boekjaar.naam) {
-      return {
-        fout: `Typ precies "${boekjaar.naam}" om te bevestigen dat je alle boekingen wilt wissen.`,
-      };
+    // Het inlogwachtwoord in plaats van de boekjaarnaam overtypen: die naam
+    // bevat een middenpunt dat op een toetsenbord lastig te typen is.
+    const wachtwoord = String(formulier.get("wachtwoord") ?? "");
+    if (!controleerWachtwoord(wachtwoord)) {
+      return { fout: "Het wachtwoord klopt niet. Er is niets gewist." };
     }
 
     const jaar = boekjaar.id;

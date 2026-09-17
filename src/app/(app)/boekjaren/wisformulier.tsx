@@ -12,7 +12,7 @@ import { wisBoekingen } from "./acties";
 
 export function WisFormulier({ naam }: { naam: string }) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(wisBoekingen, {});
-  const [invoer, setInvoer] = useState("");
+  const [wachtwoord, setWachtwoord] = useState("");
 
   return (
     <form
@@ -25,21 +25,22 @@ export function WisFormulier({ naam }: { naam: string }) {
       }}
     >
       <Veld
-        label={`Typ "${naam}" om te bevestigen`}
-        htmlFor="wisBevestiging"
-        toelichting="Zo gebeurt dit nooit per ongeluk."
+        label="Wachtwoord"
+        htmlFor="wisWachtwoord"
+        toelichting="Hetzelfde wachtwoord als bij het inloggen. Zo gebeurt dit nooit per ongeluk."
       >
         <Input
-          id="wisBevestiging"
-          name="bevestiging"
-          autoComplete="off"
-          value={invoer}
-          onChange={(gebeurtenis) => setInvoer(gebeurtenis.target.value)}
+          id="wisWachtwoord"
+          name="wachtwoord"
+          type="password"
+          autoComplete="current-password"
+          value={wachtwoord}
+          onChange={(gebeurtenis) => setWachtwoord(gebeurtenis.target.value)}
         />
       </Veld>
       {staat.fout ? <Melding toon="fout">{staat.fout}</Melding> : null}
       {staat.melding ? <Melding toon="goed">{staat.melding}</Melding> : null}
-      <Button type="submit" variant="destructive" disabled={bezig || invoer !== naam}>
+      <Button type="submit" variant="destructive" disabled={bezig || wachtwoord === ""}>
         <Trash2 />
         {bezig ? "Bezig…" : "Alle boekingen wissen"}
       </Button>
