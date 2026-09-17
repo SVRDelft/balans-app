@@ -26,6 +26,7 @@ import { haalBoekjaarContext } from "@/lib/boekjaar";
 
 import { activeerBoekjaar } from "./acties";
 import { BoekjaarFormulier } from "./formulier";
+import { WisFormulier } from "./wisformulier";
 
 export const metadata: Metadata = { title: "Boekjaren" };
 
@@ -141,6 +142,28 @@ export default async function BoekjarenPagina() {
               }}
               knoptekst="Wijzigingen opslaan"
             />
+          </div>
+        </Card>
+      ) : null}
+
+      {huidig && context?.schrijfbaar ? (
+        <Card className="mb-6 border-destructive/40">
+          <CardHeader>
+            <CardTitle>Opnieuw beginnen met testen</CardTitle>
+            <CardDescription>
+              Wist alle facturen, betalingen, uitgaven, bonnetjes, banksaldi,
+              bankimports, deelnemers en omslagrondes van {huidig.naam}.
+              Evenementen gaan terug naar open en de spullen naar hun
+              beginstand. De begroting, evenementen, relaties en instellingen
+              blijven staan.
+            </CardDescription>
+          </CardHeader>
+          <div className="px-5 pb-5">
+            <Melding toon="waarschuwing" className="mb-4">
+              Gebruik dit alleen zolang je aan het testen bent. Zodra de echte
+              administratie begint, wis je hiermee echte boekingen.
+            </Melding>
+            <WisFormulier naam={huidig.naam} />
           </div>
         </Card>
       ) : null}

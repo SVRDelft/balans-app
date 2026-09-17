@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { datumUitInvoer } from "@/lib/datum";
 import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
+import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 
 export async function bewaarBoekjaar(
   _vorigeStaat: ActieStaat,
@@ -149,5 +150,86 @@ export async function activeerBoekjaar(
     revalidatePath("/boekjaren");
     revalidatePath("/", "layout");
     return { melding: `${boekjaar.naam} is nu het actieve boekjaar.` };
+  });
+}
+
+/**
+ * Wist alle boekingen van het actieve boekjaar, zodat je opnieuw kunt testen.
+ *
+ * De inrichting blijft staan: begrotingsposten, evenementen, relaties,
+ * instellingen en de soorten spullen. Weg gaan facturen met hun regels en
+ * betalingen, uitgaven met bonnetjes, banksaldi, bankimports, deelnemers en
+ * omslagrondes. Evenementen gaan terug naar open en de voorraad terug naar de
+ * beginstand. Het auditlog blijft bewaard, met een regel over het wissen.
+ */
+export async function wisBoekingen(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisSessie();
+
+  return voerUit(async () => {
+    const boekjaar = await vereisSchrijfbaarBoekjaar();
+    const bevestiging = leesTekst(formulier, "bevestiging");
+    if (bevestiging !== boekjaar.naam) {
+      return {
+        fout: `Typ precies "${boekjaar.naam}" om te bevestigen dat je alle boekingen wilt wissen.`,
+      };
+    }
+
+    const jaar = boekjaar.id;
+    const telling = await db.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
+
+        // Volgorde telt: bankmutaties verwijzen naar betalingen en uitgaven,
+        // en een bankimport naar een banksaldo.
+        await tx.bankmutatie.deleteMany({ where: { boekjaarId: jaar } });
+        await tx.bankimport.deleteMany({ where: { boekjaarId: jaar } });
+        const banksaldi = await tx.banksaldo.deleteMany({ where: { boekjaarId: jaar } });
+
+        const facturen = await tx.factuur.deleteMany({ where: { boekjaarId: jaar } });
+
+        const bijlagen = await tx.uitgave.findMany({
+          where: { boekjaarId: jaar, bijlageId: { not: null } },
+          select: { bijlageId: true },
+        });
+        const uitgaven = await tx.uitgave.deleteMany({ where: { boekjaarId: jaar } });
+        await tx.bijlage.deleteMany({
+          where: { id: { in: bijlagen.map((u) => u.bijlageId!) } },
+        });
+
+        await tx.omslagronde.deleteMany({ where: { evenement: { boekjaarId: jaar } } });
+        await tx.deelnemer.deleteMany({ where: { evenement: { boekjaarId: jaar } } });
+        await tx.evenement.updateMany({ where: { boekjaarId: jaar }, data: { status: "open" } });
+
+        const spullen = await tx.voorraadpost.findMany({ where: { boekjaarId: jaar } });
+        for (const post of spullen) {
+          await tx.voorraadpost.update({
+            where: { id: post.id },
+            data: { aantal: post.beginAantal, waardePerStukCenten: post.beginWaardePerStukCenten },
+          });
+        }
+
+        // Er bestaat geen enkel factuurnummer meer, dus er kan niets dubbel
+        // uitgegeven worden.
+        await tx.boekjaar.update({ where: { id: jaar }, data: { factuurTeller: 0 } });
+
+        const samenvatting =
+          `Alle boekingen van ${boekjaar.naam} gewist: ${facturen.count} facturen, ` +
+          `${uitgaven.count} uitgaven, ${banksaldi.count} banksaldi. Inrichting behouden.`;
+        await logAudit(
+          { gebruiker: sessie.naam, entiteit: "Boekjaar", entiteitId: jaar, actie: "boekingen gewist", samenvatting, boekjaarId: jaar },
+          tx,
+        );
+        return { facturen: facturen.count, uitgaven: uitgaven.count };
+      },
+      { timeout: 60_000 },
+    );
+
+    revalidatePath("/", "layout");
+    return {
+      melding: `Gewist: ${telling.facturen} facturen en ${telling.uitgaven} uitgaven, plus banksaldi, bankimports en deelnemers. Begroting, evenementen en relaties staan er nog.`,
+    };
   });
 }
