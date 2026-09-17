@@ -36,6 +36,8 @@ const regelSchema = z
     aantal: z.number().int().min(1, "Een aantal is minimaal 1.").max(100_000),
     prijsPerStukCenten: z.number().int(),
     begrotingspostId: z.string().min(1, "Kies een begrotingspost."),
+    /** Bij facturen voor meerdere relaties: aantal = aantal personen van die relatie. */
+    perPersoon: z.boolean().optional(),
   })
   .refine(
     (regel) =>
@@ -72,6 +74,21 @@ function leesRegels(formulier: FormData) {
   return { regels: uitkomst.data };
 }
 
+/** Aantal personen per relatie, als dat per relatie verschilt. */
+function leesAantallen(formulier: FormData) {
+  const ruw = formulier.get("aantallenJson");
+  if (typeof ruw !== "string" || ruw === "") return { aantallen: null };
+  try {
+    const uitkomst = z
+      .record(z.string(), z.number().int().min(0).max(100_000))
+      .safeParse(JSON.parse(ruw));
+    if (uitkomst.success) return { aantallen: uitkomst.data };
+  } catch {
+    // valt door naar de foutmelding
+  }
+  return { fout: "Vul per relatie een geheel aantal personen in (0 of meer)." };
+}
+
 export async function bewaarFactuur(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
@@ -94,6 +111,16 @@ export async function bewaarFactuur(
           .map((waarde) => waarde.trim()),
       ),
     ];
+    const aantallenUitkomst = id ? { aantallen: null } : leesAantallen(formulier);
+    if ("fout" in aantallenUitkomst) return { fout: aantallenUitkomst.fout };
+    const aantallen = aantallenUitkomst.aantallen;
+    // Een relatie met 0 personen krijgt geen factuur.
+    if (aantallen) {
+      const zonderAantal = relatieIds.filter((kandidaat) => aantallen[kandidaat] === undefined);
+      if (zonderAantal.length > 0) return { fout: "Vul bij elke gekozen relatie een aantal personen in." };
+      relatieIds.splice(0, relatieIds.length, ...relatieIds.filter((kandidaat) => aantallen[kandidaat] > 0));
+      if (relatieIds.length === 0) return { fout: "Bij geen enkele relatie staat een aantal personen groter dan 0." };
+    }
     const relatieId = relatieIds[0];
     const verstuurNu = !id && formulier.get("verstuurNu") === "aan";
     const omschrijving = leesTekst(formulier, "omschrijving");
@@ -130,14 +157,30 @@ export async function bewaarFactuur(
       evenementId,
     );
 
-    const regels = regelsUitkomst.regels.map((regel, volgorde) => ({
-      omschrijving: regel.omschrijving,
-      aantal: regel.aantal,
-      prijsPerStukCenten: regel.prijsPerStukCenten,
-      bedragCenten: regel.aantal * regel.prijsPerStukCenten,
-      begrotingspostId: regel.begrotingspostId,
-      volgorde,
-    }));
+    const regelsVoor = (voorRelatie?: string) =>
+      regelsUitkomst.regels.map((regel, volgorde) => {
+        const aantal =
+          aantallen && voorRelatie && regel.perPersoon ? aantallen[voorRelatie] : regel.aantal;
+        return {
+          omschrijving: regel.omschrijving,
+          aantal,
+          prijsPerStukCenten: regel.prijsPerStukCenten,
+          bedragCenten: aantal * regel.prijsPerStukCenten,
+          begrotingspostId: regel.begrotingspostId,
+          volgorde,
+        };
+      });
+    const regels = regelsVoor();
+    if (
+      aantallen &&
+      relatieIds.some(
+        (voorRelatie) =>
+          Math.abs(regelsVoor(voorRelatie).reduce((som, regel) => som + regel.bedragCenten, 0)) >
+          2_147_483_647,
+      )
+    ) {
+      return { fout: "Een van de factuurtotalen is te groot." };
+    }
 
     if (id) {
       const bestaand = await db.factuur.findUnique({
@@ -226,12 +269,12 @@ export async function bewaarFactuur(
               evenementId,
               notities: leesTekst(formulier, "notities") ?? null,
               status: "concept",
-              regels: { create: regels },
+              regels: { create: regelsVoor(voorRelatie) },
             },
           });
           await hertelFactuur(tx, factuur.id);
           if (verstuurNu) await zetOpVerstuurd(tx, factuur.id, boekjaar.id);
-          const totaal = regels.reduce((som, regel) => som + regel.bedragCenten, 0);
+          const totaal = regelsVoor(voorRelatie).reduce((som, regel) => som + regel.bedragCenten, 0);
           facturen.push({ id: factuur.id, nummer, totaalCenten: totaal });
         }
         return facturen;
