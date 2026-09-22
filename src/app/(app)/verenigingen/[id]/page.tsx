@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { Kerngetal, Paginakop } from "@/components/paginakop";
 import { FactuurStatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Bedrag,
   Table,
@@ -70,6 +70,52 @@ export default async function VerenigingPagina({
       0,
     );
 
+  const website = vereniging.website
+    ? /^https?:\/\//i.test(vereniging.website)
+      ? vereniging.website
+      : `https://${vereniging.website}`
+    : "";
+  const adres = [
+    vereniging.adres,
+    [vereniging.postcode, vereniging.plaats].filter(Boolean).join(" "),
+  ]
+    .filter(Boolean)
+    .join(", ");
+  // Alleen ingevulde velden tonen.
+  const gegevens = (
+    [
+      ["Contactpersoon", vereniging.contactpersoon],
+      [
+        "E-mail",
+        vereniging.email ? (
+          <a className="text-primary underline" href={`mailto:${vereniging.email}`}>
+            {vereniging.email}
+          </a>
+        ) : null,
+      ],
+      [
+        "Telefoon",
+        vereniging.telefoon ? (
+          <a className="text-primary underline" href={`tel:${vereniging.telefoon.replace(/[^+\d]/g, "")}`}>
+            {vereniging.telefoon}
+          </a>
+        ) : null,
+      ],
+      [
+        "Website",
+        website ? (
+          <a className="text-primary underline" href={website} target="_blank" rel="noopener noreferrer">
+            {vereniging.website.replace(/^https?:\/\//i, "").replace(/\/$/, "")}
+          </a>
+        ) : null,
+      ],
+      ["Adres", adres || null],
+      ["KvK-nummer", vereniging.kvkNummer],
+      ["Btw-nummer", vereniging.btwNummer],
+      ["IBAN", vereniging.iban],
+    ] as [string, React.ReactNode][]
+  ).filter(([, inhoud]) => Boolean(inhoud));
+
   return (
     <>
       <Paginakop
@@ -91,6 +137,37 @@ export default async function VerenigingPagina({
           toon={openstaand > 0 ? "fout" : "goed"}
         />
       </div>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Gegevens</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {gegevens.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nog geen contactgegevens. Vul ze in via{" "}
+              <Link className="underline" href={`/relaties/${vereniging.id}`}>
+                Gegevens bewerken
+              </Link>
+              .
+            </p>
+          ) : (
+            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+              {gegevens.map(([label, inhoud]) => (
+                <div key={label} className="min-w-0">
+                  <dt className="text-xs text-muted-foreground">{label}</dt>
+                  <dd className="break-words">{inhoud}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {vereniging.notities ? (
+            <p className="mt-4 whitespace-pre-wrap border-t pt-3 text-sm text-muted-foreground">
+              {vereniging.notities}
+            </p>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
