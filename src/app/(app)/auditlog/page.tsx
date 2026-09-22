@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Paginakop } from "@/components/paginakop";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Leeg } from "@/components/ui/melding";
+import { Leeg, Melding } from "@/components/ui/melding";
 import {
   Table,
   TableBody,
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/lib/db";
 import { formatteerTijdstempel } from "@/lib/datum";
+
+import { AuditlogWissen } from "./wisformulier";
 
 export const metadata: Metadata = { title: "Auditlog" };
 
@@ -105,6 +107,20 @@ export default async function AuditlogPagina({
           ) : null}
         </>
       )}
+
+      {totaal > 0 ? (
+        <details className="mt-8 rounded-xl border border-destructive/40 bg-card p-5">
+          <summary className="cursor-pointer font-medium">Auditlog wissen</summary>
+          <div className="mt-4 space-y-4">
+            <Melding toon="waarschuwing">
+              Bedoeld voor na het testen. Zodra de echte administratie loopt, is
+              dit log het spoor dat een kascommissie wil zien. Na het wissen
+              blijft één regel staan met wie het log wanneer gewist heeft.
+            </Melding>
+            <AuditlogWissen aantal={totaal} />
+          </div>
+        </details>
+      ) : null}
     </>
   );
 }

@@ -49,6 +49,10 @@ De app draait nu op <http://localhost:3000>. Log in met je eigen naam en het
 wachtwoord uit `APP_WACHTWOORD`. Die naam komt bij elke wijziging in het auditlog te staan,
 zodat achteraf te zien is wie wat gedaan heeft.
 
+Na het testen kun je onderaan de pagina *Auditlog* het log wissen met hetzelfde
+wachtwoord. Er blijft dan één regel staan met wie het log wanneer gewist heeft.
+Boekingen wissen doe je apart bij *Boekjaren*, ook met het wachtwoord.
+
 ---
 
 ## Testen zonder iets te installeren
