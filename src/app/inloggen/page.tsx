@@ -2,14 +2,17 @@ import type { Metadata } from "next";
 
 import { InlogFormulier } from "./formulier";
 
-export const metadata: Metadata = { title: "Inloggen" };
+export const metadata: Metadata = {
+  title: "Inloggen",
+  robots: { index: false, follow: false },
+};
 
 export default async function InloggenPagina({
   searchParams,
 }: PageProps<"/inloggen">) {
   const parameters = await searchParams;
   const verder =
-    typeof parameters.verder === "string" ? parameters.verder : "/";
+    typeof parameters.verder === "string" ? parameters.verder : "/beheer";
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-muted/40 px-4 py-10">

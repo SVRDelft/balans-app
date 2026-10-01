@@ -51,7 +51,7 @@ export async function haalBoekjaarContext(): Promise<BoekjaarContext | null> {
 export async function vereisBoekjaarContext(): Promise<BoekjaarContext> {
   const context = await haalBoekjaarContext();
   if (!context) {
-    redirect("/boekjaren");
+    redirect("/beheer/boekjaren");
   }
   return context;
 }

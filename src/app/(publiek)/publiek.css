@@ -1,0 +1,483 @@
+/* De publieke site. Eén bestand, geen Tailwind en geen shadcn: dit deel staat
+   los van de administratie achter het slot.
+
+   Het motief komt van de SVR-das: diagonale strepen in navy met cyaan en wit. */
+
+.publiek {
+  --navy: #0f1a45;
+  --navy-licht: #1b2c6b;
+  --cyaan: #00a6d6;
+  --cyaan-donker: #00789b;
+  --geel: #ffc845;
+  --grond: #f4f7fb;
+  --wit: #ffffff;
+  --rand: #dbe3f0;
+  --grijs: #4a5673;
+
+  background: var(--grond);
+  color: var(--navy);
+  font-family: var(--lettertype-tekst), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.publiek *,
+.publiek *::before,
+.publiek *::after {
+  box-sizing: border-box;
+}
+
+.publiek h1,
+.publiek h2,
+.publiek h3 {
+  font-family: var(--lettertype-kop), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.publiek h1 {
+  font-size: clamp(2.2rem, 6vw, 3.9rem);
+  letter-spacing: -0.015em;
+}
+.publiek h2 {
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  margin-bottom: 0.75rem;
+}
+.publiek h3 {
+  font-size: 1.22rem;
+  margin-bottom: 0.3rem;
+}
+
+.publiek p {
+  margin: 0 0 1rem;
+  max-width: 40rem;
+}
+.publiek a {
+  color: var(--cyaan-donker);
+}
+.publiek a:hover {
+  color: var(--navy);
+}
+.publiek :focus-visible {
+  outline: 3px solid var(--geel);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.binnen {
+  width: 100%;
+  max-width: 70rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ----- het dasmotief ----------------------------------------------------- */
+
+.strepen {
+  background-color: var(--navy);
+  background-image: repeating-linear-gradient(
+    115deg,
+    var(--cyaan) 0 10px,
+    transparent 10px 26px,
+    var(--wit) 26px 30px,
+    transparent 30px 68px
+  );
+}
+.streeprand {
+  height: 7px;
+  flex: none;
+}
+
+/* ----- kop --------------------------------------------------------------- */
+
+.kop {
+  background: var(--wit);
+  border-bottom: 1px solid var(--rand);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.kop .binnen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+}
+.merk {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--navy);
+}
+.merk img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+.merk .teken {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  border-radius: 0.4rem;
+  display: grid;
+  place-items: center;
+  color: var(--wit);
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.merk strong {
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+  display: block;
+  line-height: 1.1;
+}
+.merk span {
+  font-size: 0.78rem;
+  color: var(--grijs);
+}
+
+.menuknop {
+  display: none;
+  font: inherit;
+  font-size: 0.95rem;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--wit);
+  border: 1.5px solid var(--rand);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem 1.4rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.menu a {
+  color: var(--navy);
+  text-decoration: none;
+  font-size: 0.97rem;
+  padding: 0.35rem 0;
+}
+.menu a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}
+.knop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--navy);
+  color: var(--wit) !important;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.97rem;
+}
+.knop:hover {
+  background: var(--navy-licht);
+  color: var(--wit) !important;
+}
+.knop.licht {
+  background: var(--wit);
+  color: var(--navy) !important;
+  border: 1.5px solid var(--navy);
+}
+.knop.licht:hover {
+  background: var(--grond);
+}
+
+/* ----- hero -------------------------------------------------------------- */
+
+.hero {
+  background: var(--wit);
+  border-bottom: 1px solid var(--rand);
+}
+.hero .binnen {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2.5rem;
+  align-items: center;
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+.hero p.lead {
+  font-size: 1.18rem;
+  margin-top: 1.1rem;
+  color: var(--grijs);
+}
+.hero .acties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+.ring {
+  width: 100%;
+  max-width: 28rem;
+  justify-self: center;
+}
+.ring .tafel {
+  fill: var(--grond);
+  stroke: var(--navy);
+  stroke-width: 1.5;
+}
+.ring .stoel {
+  fill: var(--wit);
+  stroke: var(--cyaan-donker);
+  stroke-width: 2;
+}
+.ring .naam {
+  font-family: var(--lettertype-tekst), sans-serif;
+  font-size: 14px;
+  fill: var(--navy);
+}
+.ring .midden {
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-size: 42px;
+  fill: var(--navy);
+}
+.ring .onder {
+  font-size: 13px;
+  fill: var(--grijs);
+}
+
+/* ----- secties ----------------------------------------------------------- */
+
+.vlak {
+  padding: 3.5rem 0;
+  border-top: 1px solid var(--rand);
+}
+.vlak.wit {
+  background: var(--wit);
+}
+.vlak > .binnen > p {
+  color: var(--grijs);
+}
+
+.kaarten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.kaart {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-radius: 0.75rem;
+  padding: 1.4rem;
+}
+.vlak.wit .kaart {
+  background: var(--grond);
+}
+.kaart h3 {
+  color: var(--navy);
+}
+.kaart p {
+  margin-bottom: 0;
+  color: var(--grijs);
+}
+.kaart p + p {
+  margin-top: 0.75rem;
+}
+
+.verenigingen {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+.verenigingen li {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-left: 4px solid var(--cyaan);
+  border-radius: 0.5rem;
+  padding: 0.8rem 1rem;
+}
+.verenigingen strong {
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-weight: 400;
+  font-size: 1.1rem;
+  display: block;
+  line-height: 1.2;
+}
+.verenigingen span {
+  font-size: 0.82rem;
+  color: var(--grijs);
+}
+
+.personen {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+}
+.personen li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.personen img,
+.personen .geenfoto {
+  width: 5rem;
+  height: 5rem;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.personen .geenfoto {
+  display: grid;
+  place-items: center;
+  color: var(--wit);
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-size: 1.4rem;
+}
+.personen strong {
+  font-family: var(--lettertype-kop), Georgia, serif;
+  font-weight: 400;
+  font-size: 1.25rem;
+  display: block;
+}
+.personen span {
+  color: var(--grijs);
+  font-size: 0.95rem;
+}
+
+.tekst {
+  max-width: 44rem;
+}
+.tekst ul {
+  max-width: 40rem;
+  padding-left: 1.2rem;
+}
+.tekst li {
+  margin-bottom: 0.4rem;
+}
+.tekst h2 {
+  margin-top: 2.5rem;
+}
+.tekst h3 {
+  margin-top: 1.75rem;
+}
+
+.contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.contact address {
+  font-style: normal;
+  line-height: 1.9;
+}
+
+/* ----- voet -------------------------------------------------------------- */
+
+.voet {
+  margin-top: auto;
+  background: var(--navy);
+  color: var(--wit);
+  padding: 2.25rem 0;
+  font-size: 0.92rem;
+}
+.voet .binnen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+}
+.voet a {
+  color: var(--wit);
+}
+.voet ul {
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+/* ----- smal scherm ------------------------------------------------------- */
+
+@media (max-width: 60rem) {
+  .hero .binnen {
+    grid-template-columns: 1fr;
+    padding-top: 2.5rem;
+  }
+  .ring {
+    max-width: 22rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .menuknop {
+    display: inline-flex;
+  }
+  .menu {
+    display: none;
+    width: 100%;
+    border-top: 1px solid var(--rand);
+    padding: 0.5rem 0 1rem;
+  }
+  .menu[data-open="ja"] {
+    display: block;
+  }
+  .menu ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .menu li {
+    border-bottom: 1px solid var(--rand);
+  }
+  .menu li:last-child {
+    border-bottom: 0;
+    padding-top: 0.75rem;
+  }
+  .menu a {
+    display: block;
+    padding: 0.8rem 0;
+  }
+  .kop .binnen {
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .vlak {
+    padding: 2.5rem 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ring .stoel,
+  .ring .naam {
+    opacity: 0;
+    animation: zitten 0.5s ease-out forwards;
+    animation-delay: var(--wacht);
+  }
+  @keyframes zitten {
+    to {
+      opacity: 1;
+    }
+  }
+}

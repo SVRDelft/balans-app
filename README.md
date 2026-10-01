@@ -10,6 +10,20 @@ betalingen en het banksaldo voer je handmatig in.
 
 ---
 
+## Wat er in deze app zit
+
+| Pad | Voor wie | Wat |
+|---|---|---|
+| `/`, `/bestuur-worden`, `/privacy` | iedereen | de publieke site van de SVR |
+| `/portaal` | ingelogde studieverenigingen | agenda's, notulen en mededelingen (in aanbouw) |
+| `/beheer` | ingelogd SVR-bestuur | de financiële administratie |
+
+De teksten van de publieke pagina's staan in `content/`; hoe je die aanpast
+staat in [BEWERKEN.md](BEWERKEN.md). De publieke pagina's zijn statisch en raken
+de database niet, zodat ze blijven staan als de database er even uit ligt.
+
+---
+
 ## Starten
 
 Gebruik [Node.js 20.9 of hoger](https://nodejs.org) (de webserver van de TU
@@ -318,5 +332,6 @@ ze te testen zijn. Draai `npm test` na elke wijziging daaraan.
 
 ## Verder lezen
 
+- [BEWERKEN.md](BEWERKEN.md) — teksten en foto's van de website aanpassen
 - [MIGRATIE.md](MIGRATIE.md) — de database en het publiceren van de app
 - [AANNAMES.md](AANNAMES.md) — de aannames die tijdens het bouwen zijn gedaan

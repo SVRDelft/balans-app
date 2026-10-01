@@ -40,7 +40,7 @@ export async function inloggen(
   koekjes.set(SESSIE_COOKIE, await maakSessieCookie(naam), SESSIE_COOKIE_OPTIES);
 
   // Alleen paden binnen de app, nooit een adres van buiten.
-  const doel = verder.startsWith("/") && !verder.startsWith("//") ? verder : "/";
+  const doel = verder.startsWith("/") && !verder.startsWith("//") ? verder : "/beheer";
   redirect(doel);
 }
 

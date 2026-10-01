@@ -47,7 +47,7 @@ async function balance(expected: Record<string, number> = {}) {
   for (const [name, value] of Object.entries(expected)) expect(values[name], name).toBe(value);
 }
 async function invoice(name: string, amount: string, due = '2026-09-07') {
-  await go('/facturen/nieuw');
+  await go('/beheer/facturen/nieuw');
   await field('Relatie').selectOption(ids.relatie);
   await field('Omschrijving').fill(name);
   await field('Factuurdatum').fill('2026-09-01');
@@ -70,7 +70,7 @@ async function pay(amount: string) {
   await expect(page.getByText(/Betaling van .* vastgelegd/)).toBeVisible();
 }
 async function expense(name: string, amount: string, event?: string) {
-  await go('/uitgaven/nieuw');
+  await go('/beheer/uitgaven/nieuw');
   await field('Datum').fill('2026-09-15');
   await field('Bedrag').fill(amount);
   await field('Leverancier').fill('Testleverancier');
@@ -125,7 +125,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
   });
 
   test('organisatie, logo, relaties, contactgegevens en zoeken', async () => {
-    await go('/instellingen');
+    await go('/beheer/instellingen');
     await page.locator('[name="organisatieNaam"]').fill('SVR Testadministratie');
     await page.locator('[name="adres"]').fill('Teststraat 1');
     await page.locator('[name="postcode"]').fill('2628 CD');
@@ -140,7 +140,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     expect(logo.status()).toBe(200);
     expect(logo.headers()['content-type']).toMatch(/image/);
 
-    await go('/relaties/nieuw');
+    await go('/beheer/relaties/nieuw');
     await page.locator('[name="naam"]').fill('Testvereniging Bèta');
     await page.locator('[name="contactpersoon"]').fill('Penningmeester');
     await page.locator('[name="email"]').fill('beta@example.org');
@@ -159,7 +159,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await page.getByRole('searchbox').fill('onvindbaar');
     await save('Zoeken');
     await expect(page.getByText('Geen relaties gevonden')).toBeVisible();
-    await go('/relaties');
+    await go('/beheer/relaties');
   });
 
   test('begroting aanmaken, voorraad verbruiken en waardering op de balans', async () => {
@@ -169,7 +169,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
       ['eventkosten', 'U2', 'Evenementkosten', 'uitgave', 'omslag'],
       ['eventinkomst', 'I2', 'Evenementbijdragen', 'inkomst', 'omslag'],
     ]) {
-      await go('/begroting/nieuw');
+      await go('/beheer/begroting/nieuw');
       await field('Code').fill(code);
       await field('Naam').fill(naam);
       await field('Soort').selectOption(soort);
@@ -179,13 +179,13 @@ test.describe.serial('Volledige SVR-administratie', () => {
       await expect(page).toHaveURL(/\/begroting$/);
       ids[key] = (await row('SELECT id FROM "Begrotingspost" WHERE code=$1', [code])).id;
     }
-    await go('/voorraad?nieuw=1');
+    await go('/beheer/voorraad?nieuw=1');
     for (const [name, value] of Object.entries({ naam: 'Dassen', beginAantal: '10', beginWaardePerStukCenten: '5,00', aantal: '10', waardePerStukCenten: '5,00', locatie: 'SVR-kast' })) await page.locator(`[name="${name}"]`).fill(value);
     await field('Begrotingspost').selectOption(ids.uitgave);
     await save();
     await expect(page).toHaveURL(/\/voorraad$/);
     ids.voorraad = (await row('SELECT id FROM "Voorraadpost" WHERE naam=$1', ['Dassen'])).id;
-    await go(`/voorraad?verbruik=${ids.voorraad}`);
+    await go(`/beheer/voorraad?verbruik=${ids.voorraad}`);
     await page.locator('[name="aantal"]').fill('11');
     await expect(page.getByRole('button', { name: 'Verbruik boeken', exact: true })).toBeDisabled();
     await page.locator('[name="aantal"]').fill('2');
@@ -210,7 +210,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     const bon = await page.request.get(`/api/bijlagen/${ids.bijlage}`);
     expect(bon.status()).toBe(200);
     expect((await bon.body()).length).toBeGreaterThan(100);
-    await go('/uitgaven?q=kantoor');
+    await go('/beheer/uitgaven?q=kantoor');
     await expect(page.getByRole('link', { name: 'Kantoorbenodigdheden', exact: true })).toBeVisible();
     await balance({ 'Banksaldo volgens de administratie': 974.5, 'Resultaat lopend boekjaar': -35.5 });
   });
@@ -229,15 +229,15 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await balance({ 'Openstaande debiteuren': 70, 'Resultaat lopend boekjaar': 64.5 });
     ids.lang = await invoice('Bijdrage lange termijn', '50,00', '2026-11-01');
     await send();
-    await go('/facturen?status=vervallen');
+    await go('/beheer/facturen?status=vervallen');
     await expect(page.getByText('Bijdrage korte termijn', { exact: true })).toBeVisible();
     await expect(page.getByText('Bijdrage lange termijn', { exact: true })).toHaveCount(0);
-    await go('/facturen?q=LANGE');
+    await go('/beheer/facturen?q=LANGE');
     await expect(page.getByText('Bijdrage lange termijn', { exact: true })).toBeVisible();
   });
 
   test('creditconcept, verrekenen, terugbetalen en oninbaar herstellen', async () => {
-    await go(`/facturen/${ids.factuur}`);
+    await go(`/beheer/facturen/${ids.factuur}`);
     await save('Crediteren');
     await expect(page).not.toHaveURL(new RegExp(`${ids.factuur}$`));
     ids.credit = (await row('SELECT id FROM "Factuur" WHERE "crediteertFactuurId"=$1', [ids.factuur])).id;
@@ -247,7 +247,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await pay('-30,00');
     await expect(page.getByText('Betaald', { exact: true })).toBeVisible();
     await balance({ 'Openstaande debiteuren': 50 });
-    await go(`/facturen/${ids.lang}`);
+    await go(`/beheer/facturen/${ids.lang}`);
     await pay('10,00');
     await save('Oninbaar afboeken');
     await expect(page.getByText('Oninbaar', { exact: true })).toBeVisible();
@@ -258,7 +258,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
   });
 
   test('evenement, deelnemers, voorlopige kosten, omslag en naheffing', async () => {
-    await go('/evenementen/nieuw');
+    await go('/beheer/evenementen/nieuw');
     await field('Naam').fill('Bestuursdiner');
     await field('Datum').fill('2026-09-15');
     await field('Kostenpost').selectOption(ids.eventkosten);
@@ -272,7 +272,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await save('Toevoegen');
     await expect.poll(async () => (await row('SELECT COUNT(*)::int AS n FROM "Deelnemer"')).n).toBe(1);
     ids.eventuitgave = await expense('Dinerkosten', '100,00', ids.event);
-    await go(`/evenementen/${ids.event}`);
+    await go(`/beheer/evenementen/${ids.event}`);
     await expect(page.getByRole('button', { name: 'Omslag berekenen en facturen maken', exact: true })).toBeDisabled();
     await page.getByRole('button', { name: 'Bedrag definitief', exact: true }).click();
     await page.locator('[name="bevestigLeveranciers"]').check();
@@ -286,16 +286,16 @@ test.describe.serial('Volledige SVR-administratie', () => {
     const naheffing = await expense('Nakomende kosten', '9,00', ids.event);
     await page.locator('[name="bedragDefinitief"]').check();
     await save();
-    await go(`/evenementen/${ids.event}`);
+    await go(`/beheer/evenementen/${ids.event}`);
     await page.locator('[name="bevestigLeveranciers"]').check();
     await page.locator('[name="bevestigDeelnemers"]').check();
     await save('Naheffing berekenen en facturen maken');
     await expect.poll(async () => (await row('SELECT COUNT(*)::int AS n FROM "Omslagronde"')).n).toBe(2);
     expect((await row('SELECT "omslagrondeId" FROM "Uitgave" WHERE id=$1', [naheffing])).omslagrondeId).toBeTruthy();
     for (const f of (await db.query('SELECT id, "totaalCenten" FROM "Factuur" WHERE "evenementId"=$1', [ids.event])).rows) {
-      await go(`/facturen/${f.id}`); await send(); await pay((f.totaalCenten / 100).toFixed(2));
+      await go(`/beheer/facturen/${f.id}`); await send(); await pay((f.totaalCenten / 100).toFixed(2));
     }
-    await go(`/evenementen/${ids.event}`);
+    await go(`/beheer/evenementen/${ids.event}`);
     await save('Evenement afsluiten');
     await expect(page.getByRole('button', { name: 'Heropenen', exact: true })).toBeVisible();
     await save('Heropenen');
@@ -309,7 +309,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     const pages = [await page.context().newPage(), await page.context().newPage()];
     try {
       for (const tab of pages) {
-        await tab.goto(`/voorraad?verbruik=${stockId}`);
+        await tab.goto(`/beheer/voorraad?verbruik=${stockId}`);
         await tab.locator('[name="aantal"]').fill('4');
         await tab.locator('[name="reden"]').fill('Gelijktijdige controle');
       }
@@ -344,17 +344,17 @@ test.describe.serial('Volledige SVR-administratie', () => {
   });
 
   test('jaarfacturen exact verdelen, dubbele generatie blokkeren en ongebruikte gegevens verwijderen', async () => {
-    await go('/relaties/nieuw');
+    await go('/beheer/relaties/nieuw');
     await field('Naam').fill('Testvereniging Gamma');
     await save();
     await expect(page).toHaveURL(/\/relaties$/);
     const relatie = (await row('SELECT id FROM "Relatie" WHERE naam=$1', ['Testvereniging Gamma'])).id;
-    await go(`/relaties/${relatie}`);
+    await go(`/beheer/relaties/${relatie}`);
     await field('Contactpersoon').fill('Nieuw bestuur');
     await save();
     await expect(page).toHaveURL(/\/relaties$/);
     expect((await row('SELECT contactpersoon FROM "Relatie" WHERE id=$1', [relatie])).contactpersoon).toBe('Nieuw bestuur');
-    await go('/begroting/nieuw');
+    await go('/beheer/begroting/nieuw');
     await field('Code').fill('I3');
     await field('Naam').fill('Jaarbijdrage test');
     await field('Soort').selectOption('inkomst');
@@ -363,7 +363,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await save();
     await expect(page).toHaveURL(/\/begroting$/);
     const post = (await row('SELECT id FROM "Begrotingspost" WHERE code=$1', ['I3'])).id;
-    await go('/facturen/jaarfacturen');
+    await go('/beheer/facturen/jaarfacturen');
     await field('Begrotingspost').selectOption(post);
     await field('Factuurdatum').fill('2026-09-15');
     await save('2 conceptfacturen aanmaken');
@@ -374,11 +374,11 @@ test.describe.serial('Volledige SVR-administratie', () => {
     await page.reload();
     await field('Begrotingspost').selectOption(post);
     await expect(page.getByRole('button', { name: '0 conceptfacturen aanmaken', exact: true })).toBeDisabled();
-    for (const f of facturen) { await go(`/facturen/${f.id}`); await save('Concept verwijderen'); await expect(page).toHaveURL(/\/facturen$/); }
-    await go(`/begroting/${post}`);
+    for (const f of facturen) { await go(`/beheer/facturen/${f.id}`); await save('Concept verwijderen'); await expect(page).toHaveURL(/\/facturen$/); }
+    await go(`/beheer/begroting/${post}`);
     await save('Verwijderen');
     await expect(page).toHaveURL(/\/begroting$/);
-    await go(`/relaties/${relatie}`);
+    await go(`/beheer/relaties/${relatie}`);
     await save('Verwijderen');
     await expect(page).toHaveURL(/\/relaties$/);
     expect(await row('SELECT id FROM "Relatie" WHERE id=$1', [relatie])).toBeUndefined();
@@ -390,11 +390,11 @@ test.describe.serial('Volledige SVR-administratie', () => {
   });
 
   test('banksaldo, alle overzichten en exports laden zonder browserfouten', async () => {
-    await go('/bank');
+    await go('/beheer/bank');
     await page.getByLabel('Saldo volgens de bankapp').fill('1093,52');
     await save('Saldo vastleggen');
     await expect(page.getByText('Banksaldo vastgelegd.')).toBeVisible();
-    for (const route of ['/', '/facturen', '/uitgaven', '/evenementen', '/bank', '/voorraad', '/verenigingen', `/verenigingen/${ids.relatie}`, '/relaties', `/relaties/${ids.relatie}`, '/begroting', '/exploitatie', '/balans', '/overdracht', '/boekjaren', '/auditlog', '/instellingen']) {
+    for (const route of ['/', '/beheer/facturen', '/beheer/uitgaven', '/beheer/evenementen', '/beheer/bank', '/beheer/voorraad', '/beheer/verenigingen', `/beheer/verenigingen/${ids.relatie}`, '/beheer/relaties', `/beheer/relaties/${ids.relatie}`, '/beheer/begroting', '/beheer/exploitatie', '/beheer/balans', '/beheer/overdracht', '/beheer/boekjaren', '/beheer/auditlog', '/beheer/instellingen']) {
       await go(route);
       await expect(page.locator('[data-nextjs-dialog]')).toHaveCount(0);
     }
@@ -412,7 +412,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
   });
 
   test('nieuw boekjaar, begroting kopiëren, voorraad overnemen en historie beschermen', async () => {
-    await go('/boekjaren');
+    await go('/beheer/boekjaren');
     const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Boekjaar aanmaken', exact: true }) });
     await form.locator('[name="naam"]').fill('SVR Test 2027-2028');
     await form.locator('[name="factuurPrefix"]').fill('TEST-2027');
@@ -427,7 +427,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     expect((await row('SELECT COUNT(*)::int AS n FROM "Begrotingspost" WHERE "boekjaarId"=$1', [next.id])).n).toBe(4);
     await page.getByRole('row').filter({ hasText: 'SVR Test 2027-2028' }).getByRole('button', { name: 'Activeren' }).click();
     await expect(page.getByRole('combobox', { name: 'Boekjaar' })).toHaveValue(next.id);
-    await go('/voorraad');
+    await go('/beheer/voorraad');
     await save('Neem vorig boekjaar over');
     await expect.poll(async () => (await row('SELECT COUNT(*)::int AS n FROM "Voorraadpost" WHERE "boekjaarId"=$1', [next.id])).n).toBe(1);
     const stock = await row('SELECT * FROM "Voorraadpost" WHERE "boekjaarId"=$1', [next.id]);
@@ -436,7 +436,7 @@ test.describe.serial('Volledige SVR-administratie', () => {
     expect(stock.begrotingspostId).toBeTruthy();
     expect(stock.begrotingspostId).not.toBe(ids.uitgave);
     // Forge an old expense ID while viewing the active new year: the server must reject it.
-    await go('/uitgaven/nieuw');
+    await go('/beheer/uitgaven/nieuw');
     await field('Datum').fill('2027-09-15');
     await field('Leverancier').fill('Mag niet opslaan');
     await field('Omschrijving').fill('Mag niet wijzigen');
@@ -450,17 +450,17 @@ test.describe.serial('Volledige SVR-administratie', () => {
     expect((await row('SELECT "bedragCenten" FROM "Uitgave" WHERE id=$1', [ids.uitgaveBoeking])).bedragCenten).toBe(2550);
     await page.getByRole('combobox', { name: 'Boekjaar' }).selectOption(ids.jaar);
     await expect(page.getByText('Alleen lezen — dit boekjaar is niet actief')).toBeVisible();
-    await go('/boekjaren');
+    await go('/beheer/boekjaren');
     await expect(page.getByRole('button', { name: 'Wijzigingen opslaan' })).toHaveCount(0);
-    await go('/voorraad');
+    await go('/beheer/voorraad');
     await expect(page.getByRole('link', { name: 'Spullen toevoegen' })).toHaveCount(0);
-    await go(`/facturen/${ids.lang}`);
+    await go(`/beheer/facturen/${ids.lang}`);
     await expect(page.getByRole('button', { name: 'Betaling vastleggen' })).toHaveCount(0);
   });
 
   test('mobiel menu, geen horizontale pagina-overloop en uitloggen', async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const route of ['/', '/relaties', '/voorraad', '/facturen', '/boekjaren']) {
+    for (const route of ['/', '/beheer/relaties', '/beheer/voorraad', '/beheer/facturen', '/beheer/boekjaren']) {
       await go(route);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), route).toBe(true);
     }

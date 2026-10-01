@@ -1,0 +1,17 @@
+[
+  { "naam": "Christiaan Huygens", "kort": "CH", "faculteit": "EWI" },
+  { "naam": "Curius", "kort": "Curius", "faculteit": "TBM" },
+  { "naam": "ETV", "kort": "ETV", "faculteit": "EWI" },
+  { "naam": "Froude", "kort": "Froude", "faculteit": "ME" },
+  { "naam": "Hooke", "kort": "Hooke", "faculteit": "TNW" },
+  { "naam": "i.d", "kort": "i.d", "faculteit": "IO" },
+  { "naam": "Leeghwater", "kort": "Leeghwater", "faculteit": "ME" },
+  { "naam": "LIFE", "kort": "LIFE", "faculteit": "TNW" },
+  { "naam": "MV", "kort": "MV", "faculteit": "CiTG" },
+  { "naam": "PS", "kort": "PS", "faculteit": "CiTG" },
+  { "naam": "Stylos", "kort": "Stylos", "faculteit": "BK" },
+  { "naam": "TG", "kort": "TG", "faculteit": "TNW" },
+  { "naam": "Variscopic", "kort": "Variscopic", "faculteit": "ME" },
+  { "naam": "VSV 'Leonardo da Vinci'", "kort": "VSV", "faculteit": "LR" },
+  { "naam": "VvTP", "kort": "VvTP", "faculteit": "TNW" }
+]

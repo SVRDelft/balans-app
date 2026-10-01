@@ -1,0 +1,8 @@
+{
+  "nummer": 62,
+  "startdatum": "2026-08-25",
+  "leden": [
+    { "naam": "Itai Givony", "functie": "Voorzitter", "foto": "bestuur-itai.jpg" },
+    { "naam": "Teun van den Corput", "functie": "Secretaris en penningmeester", "foto": "bestuur-teun.jpg" }
+  ]
+}
