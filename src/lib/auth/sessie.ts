@@ -7,6 +7,8 @@
 // De opzet laat ruimte voor echte accounts later: alleen controleerWachtwoord
 // en de inhoud van Sessie hoeven dan te veranderen.
 
+import { cookieAlleenOverHttps } from "@/lib/beveiliging";
+
 export const SESSIE_COOKIE = "svr_sessie";
 export const BOEKJAAR_COOKIE = "svr_boekjaar";
 
@@ -142,5 +144,7 @@ export const SESSIE_COOKIE_OPTIES = {
   sameSite: "lax",
   path: "/",
   maxAge: SESSIE_DUUR_MS / 1000,
-  secure: process.env.NODE_ENV === "production",
+  // Zonder https zou een `Secure`-cookie nooit meegestuurd worden; dan kun je
+  // dus ook niet inloggen. Zie src/lib/beveiliging.ts.
+  secure: cookieAlleenOverHttps(),
 } as const;

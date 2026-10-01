@@ -78,6 +78,22 @@ Afspraken die daaruit volgen en die in de code gelden:
 - Niets wat gedeeld moet zijn in het geheugen van het proces bewaren: Passenger
   draait meerdere processen naast elkaar.
 
+## Zolang er nog geen https is
+
+De publieke pagina's werken gewoon over http; daar staat niets gevoeligs op.
+Inloggen weigert de app standaard zonder https, want dan gaan het wachtwoord en
+het sessiecookie leesbaar over het netwerk. Wie meekijkt op hetzelfde netwerk
+kan het cookie overnemen en zit daarmee in de administratie.
+
+Wil je toch alvast inloggen, zet dan in Plesk bij *Custom environment variables*:
+
+    ZONDER_HTTPS_INLOGGEN = ja
+
+Dan kan er ingelogd worden, krijgt het sessiecookie geen `Secure`-vlag (anders
+stuurt de browser het niet mee) en staat er op de inlogpagina en bovenin de
+administratie een waarschuwing. Haal de variabele weg zodra het certificaat
+werkt; dan is alles weer zoals het hoort.
+
 ## Uitweg terug naar Vercel
 
 Als ICT de app op de TU-server niet toestaat, kan hij terug naar Vercel. Er zit

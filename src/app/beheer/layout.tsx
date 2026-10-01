@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { LogOut, Lock } from "lucide-react";
 
 import { Navigatie } from "@/components/navigatie";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { vereisSessie } from "@/lib/auth/server";
 import { haalBoekjaarContext } from "@/lib/boekjaar";
 import { formatteerDatum } from "@/lib/datum";
+import { onbeveiligdMaarToegestaan } from "@/lib/beveiliging";
 
 import { uitloggen } from "../inloggen/acties";
 import { Boekjaarkiezer } from "./boekjaarkiezer";
@@ -23,9 +25,15 @@ export default async function AppLayout({
 }) {
   const sessie = await vereisSessie();
   const context = await haalBoekjaarContext();
+  const onbeveiligd = onbeveiligdMaarToegestaan(await headers());
 
   return (
     <div className="min-h-dvh lg:flex">
+      {onbeveiligd ? (
+        <p className="fixed inset-x-0 top-0 z-50 bg-destructive px-4 py-1.5 text-center text-xs text-white niet-afdrukken">
+          Onbeveiligde verbinding (http): gegevens gaan leesbaar over het netwerk.
+        </p>
+      ) : null}
       <a href="#inhoud" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-3 focus:text-white">Naar de inhoud</a>
       <aside className="niet-afdrukken border-b border-border bg-card lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-60 lg:shrink-0 lg:flex-col lg:overflow-y-auto lg:border-r lg:border-b-0">
         <div className="flex items-center justify-between px-4 py-3 lg:block lg:py-4">

@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+
+import { Melding } from "@/components/ui/melding";
+import { mageInloggen, onbeveiligdMaarToegestaan } from "@/lib/beveiliging";
 
 import { InlogFormulier } from "./formulier";
 
@@ -11,6 +15,9 @@ export default async function InloggenPagina({
   searchParams,
 }: PageProps<"/inloggen">) {
   const parameters = await searchParams;
+  const kopregels = await headers();
+  const kanInloggen = mageInloggen(kopregels);
+  const onbeveiligd = onbeveiligdMaarToegestaan(kopregels);
   const verder =
     typeof parameters.verder === "string" ? parameters.verder : "/beheer";
 
@@ -24,7 +31,22 @@ export default async function InloggenPagina({
           <h1 className="mt-1 text-2xl font-semibold">Financiële administratie</h1>
         </div>
 
-        <InlogFormulier verder={verder} />
+        {onbeveiligd ? (
+          <Melding toon="waarschuwing" className="mb-4" titel="Geen beveiligde verbinding">
+            Deze verbinding is niet versleuteld (http). Je wachtwoord en je
+            sessie gaan leesbaar over het netwerk. Log alleen in op een netwerk
+            dat je vertrouwt, tot https is ingesteld.
+          </Melding>
+        ) : null}
+
+        {kanInloggen ? (
+          <InlogFormulier verder={verder} />
+        ) : (
+          <Melding toon="fout" titel="Inloggen kan nog niet">
+            Inloggen kan zodra de beveiligde verbinding (https) is ingesteld.
+            De publieke pagina&apos;s werken gewoon.
+          </Melding>
+        )}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Het bestuur deelt één wachtwoord. Je naam wordt bij elke wijziging

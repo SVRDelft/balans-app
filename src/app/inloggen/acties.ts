@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
@@ -10,6 +10,7 @@ import {
   maakSessieCookie,
 } from "@/lib/auth/sessie";
 import type { ActieStaat } from "@/lib/acties";
+import { mageInloggen } from "@/lib/beveiliging";
 
 export async function inloggen(
   _vorigeStaat: ActieStaat,
@@ -18,6 +19,12 @@ export async function inloggen(
   const naam = String(formulier.get("naam") ?? "").trim();
   const wachtwoord = String(formulier.get("wachtwoord") ?? "");
   const verder = String(formulier.get("verder") ?? "");
+
+  if (!mageInloggen(await headers())) {
+    return {
+      fout: "Inloggen kan zodra de beveiligde verbinding (https) is ingesteld. De publieke pagina's werken wel.",
+    };
+  }
 
   if (naam.length < 2) {
     return { fout: "Vul je naam in, zodat wijzigingen herleidbaar blijven." };
