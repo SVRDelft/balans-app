@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 
-import { heeftLogo, leesSvr } from "@/lib/content";
+import { leesSvr, logoBestand } from "@/lib/content";
 
 import { Menu } from "./menu";
 import "./publiek.css";
@@ -48,7 +48,7 @@ export default function PubliekeLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const logo = heeftLogo();
+  const logo = logoBestand();
 
   return (
     <div className={`publiek ${kop.variable} ${tekst.variable}`}>
@@ -60,7 +60,7 @@ export default function PubliekeLayout({
           <Link className="merk" href="/">
             {logo ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src="/img/logo.png" alt="" width={40} height={40} />
+              <img src={`/img/${logo}`} alt="" width={40} height={40} />
             ) : (
               <span className="teken strepen" aria-hidden>
                 SVR

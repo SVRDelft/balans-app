@@ -134,6 +134,21 @@ export default function Home() {
             })}
             .
           </p>
+          <div className="bestuurblok">
+            {bestuur.samenFoto ? (
+              <figure className="samenfoto">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/img/${bestuur.samenFoto}`}
+                  alt={bestuur.samenBijschrift ?? `Het bestuur van de ${svr.afkorting}`}
+                  width={1000}
+                  height={1499}
+                />
+                {bestuur.samenBijschrift ? (
+                  <figcaption>{bestuur.samenBijschrift}</figcaption>
+                ) : null}
+              </figure>
+            ) : null}
           <ul className="personen">
             {bestuur.leden.map((lid) => (
               <li key={lid.naam}>
@@ -152,6 +167,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          </div>
         </div>
       </section>
 

@@ -25,6 +25,9 @@ export interface Bestuur {
   nummer: number;
   startdatum: string;
   leden: Bestuurslid[];
+  /** Grote foto van het hele bestuur, in public/img. */
+  samenFoto?: string;
+  samenBijschrift?: string;
 }
 
 export interface Vereniging {
@@ -63,6 +66,10 @@ export function leesBestuur(): Bestuur {
       // Tijdens de build bepalen of de foto er is; anders komen er initialen.
       foto: lid.foto && existsSync(afbeeldingspad(lid.foto)) ? lid.foto : undefined,
     })),
+    samenFoto:
+      bestuur.samenFoto && existsSync(afbeeldingspad(bestuur.samenFoto))
+        ? bestuur.samenFoto
+        : undefined,
   };
 }
 
@@ -75,4 +82,10 @@ export const initialen = (naam: string) =>
     .join("")
     .slice(0, 2) || "SVR";
 
-export const heeftLogo = () => existsSync(afbeeldingspad("logo.png"));
+/** Het logo mag een SVG of een PNG zijn; zonder bestand tonen we het dasmotief. */
+export function logoBestand(): string | undefined {
+  for (const naam of ["logo.svg", "logo.png"]) {
+    if (existsSync(afbeeldingspad(naam))) return naam;
+  }
+  return undefined;
+}

@@ -5,10 +5,13 @@ de site zoekt precies deze bestanden en toont iets anders als ze er niet zijn.
 
 | Bestand | Waarvoor | Formaat | Advies |
 |---|---|---|---|
-| `logo.png` | logo linksboven in de kop | PNG met doorzichtige achtergrond | vierkant, 256 × 256 pixels |
+| `logo.svg` of `logo.png` | logo linksboven in de kop | SVG (het mooiste) of PNG met doorzichtige achtergrond | vierkant; een SVG schaalt vanzelf mee |
 | `bestuur-<naam>.jpg` | portret van een bestuurslid | JPG | vierkant, 400 × 400 pixels, max 300 kB |
+| `bestuur-samen.jpg` | foto van het hele bestuur op de voorpagina | JPG | staand, ongeveer 1000 pixels breed, max 300 kB |
 
-De bestandsnaam van een portret zet je in `content/bestuur.json` bij `foto`.
+De bestandsnaam van een portret zet je in `content/bestuur.json` bij `foto`; die
+van de groepsfoto bij `samenFoto`, met de tekst eronder bij `samenBijschrift`.
+Staat er een `logo.svg` én een `logo.png`, dan wint de SVG.
 
 **Ontbreekt een bestand?** Dan is er geen fout: in plaats van het logo komt het
 dasmotief met "SVR" te staan, en in plaats van een portret de initialen van het
