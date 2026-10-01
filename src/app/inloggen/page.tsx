@@ -28,7 +28,7 @@ export default async function InloggenPagina({
           <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
             StudieVerenigingenRaad Delft
           </p>
-          <h1 className="mt-1 text-2xl font-semibold">Financiële administratie</h1>
+          <h1 className="mt-1 text-2xl font-semibold">Inloggen</h1>
         </div>
 
         {onbeveiligd ? (
@@ -49,8 +49,8 @@ export default async function InloggenPagina({
         )}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Het bestuur deelt één wachtwoord. Je naam wordt bij elke wijziging
-          vastgelegd.
+          Accounts worden door het SVR-bestuur aangemaakt. Geen wachtwoord meer?
+          Vraag het bestuur om een nieuw wachtwoord.
         </p>
       </div>
     </main>

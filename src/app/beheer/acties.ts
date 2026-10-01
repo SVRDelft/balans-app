@@ -3,14 +3,14 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
 import { db } from "@/lib/db";
 
 /** Wisselt het boekjaar dat bekeken wordt. Schrijven blijft alleen toegestaan
  *  in het actieve boekjaar. */
 export async function kiesBoekjaar(boekjaarId: string): Promise<void> {
-  await vereisSessie();
+  await vereisBestuur();
 
   const boekjaar = await db.boekjaar.findUnique({ where: { id: boekjaarId } });
   if (!boekjaar) return;

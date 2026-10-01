@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { BOEKJAAR_COOKIE, controleerWachtwoord } from "@/lib/auth/sessie";
+import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
+import { controleerEigenWachtwoord } from "@/lib/auth/gebruikers";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { vergrendelBoekjaren } from "@/lib/slot";
 import { datumUitInvoer } from "@/lib/datum";
@@ -17,7 +18,7 @@ export async function bewaarBoekjaar(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const naam = leesTekst(formulier, "naam");
@@ -120,7 +121,7 @@ export async function activeerBoekjaar(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const id = leesTekst(formulier, "id");
@@ -167,14 +168,14 @@ export async function wisBoekingen(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
     // Het inlogwachtwoord in plaats van de boekjaarnaam overtypen: die naam
     // bevat een middenpunt dat op een toetsenbord lastig te typen is.
     const wachtwoord = String(formulier.get("wachtwoord") ?? "");
-    if (!controleerWachtwoord(wachtwoord)) {
+    if (!(await controleerEigenWachtwoord(sessie.gebruikerId, wachtwoord))) {
       return { fout: "Het wachtwoord klopt niet. Er is niets gewist." };
     }
 

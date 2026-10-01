@@ -304,3 +304,38 @@ geldige kop maar een beschadigde inhoud komt er nu doorheen. Het wordt bewaard
 zoals het is en alleen getoond, nooit uitgevoerd, dus het ergste geval is een
 logo dat scheef in de PDF staat. Verkleinen gebeurt niet meer; upload een logo
 van een redelijk formaat (maximaal 2 MB en 16 megapixels).
+
+### Accounts met een eigen wachtwoord, geen inloglink per e-mail
+
+De opdracht vroeg om persoonlijke accounts met een magic link per e-mail via
+SMTP. Dat is op verzoek van het bestuur vervallen: er komt geen `noreply@`-adres
+en geen mailserver. In plaats daarvan maakt het bestuur accounts aan en krijgt
+iedereen een wachtwoord dat de app verzint en één keer toont. Bij de eerste keer
+inloggen moet dat vervangen worden door een eigen wachtwoord.
+
+Wat dat kost: een wachtwoord moet mondeling of via een eigen kanaal worden
+doorgegeven, en wie het kwijt is moet het bestuur vragen. Wat het oplevert: geen
+mailserver, geen afhankelijkheid van een mailbox die bij een bestuurswissel mee
+moet, en inloggen werkt ook als de mail eruit ligt.
+
+Wachtwoorden worden gehasht met **scrypt** uit Node zelf (`node:crypto`), niet
+met bcrypt: dat laatste is een gecompileerde bibliotheek en kan niet mee naar de
+server van de TU Delft. De instellingen staan in de hash zelf, zodat ze later
+zwaarder gezet kunnen worden zonder dat bestaande wachtwoorden ongeldig worden.
+
+Mislukte pogingen worden geteld in de database (tabel `Inlogpoging`), per
+e-mailadres én per IP-adres: tien pogingen binnen een kwartier en het is een
+kwartier dicht. In het geheugen zou die teller niets waard zijn, want Passenger
+draait meerdere processen naast elkaar.
+
+### De rol komt uit de database, niet uit het cookie
+
+In het sessiecookie staat wie je bent en welke rol je had bij het inloggen, maar
+bij elk verzoek wordt het account opnieuw opgezocht. Een account dat is uitgezet
+of een rol die is veranderd geldt daardoor meteen, ook als het cookie nog dagen
+blijft staan. Dat kost één query per verzoek; dat is het waard.
+
+De controle zelf staat op één plek (`src/lib/auth/server.ts`) en wordt afgedwongen
+door een test die élke pagina, server action en API-route van `/beheer` langsloopt
+(`src/lib/auth/toegang.test.ts`). Die test vond bij het schrijven meteen zes
+schermen die alleen op de proxy leunden.

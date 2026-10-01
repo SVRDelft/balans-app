@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { RELATIE_TYPES, RELATIE_TYPE_LABEL, type RelatieType } from "@/lib/domein";
 
@@ -24,6 +25,7 @@ export const metadata: Metadata = { title: "Relaties" };
 export default async function RelatiesPagina({
   searchParams,
 }: PageProps<"/beheer/relaties">) {
+  await vereisBestuur();
   const parameters = await searchParams;
   const zoekterm = typeof parameters.q === "string" ? parameters.q.trim().slice(0, 120) : "";
   const gekozenType =

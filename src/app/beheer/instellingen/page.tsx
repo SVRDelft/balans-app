@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Paginakop } from "@/components/paginakop";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 
 import { InstellingenFormulier } from "./formulier";
@@ -8,6 +9,7 @@ import { InstellingenFormulier } from "./formulier";
 export const metadata: Metadata = { title: "Instellingen" };
 
 export default async function InstellingenPagina() {
+  await vereisBestuur();
   const instellingen = await db.instellingen.findUnique({
     where: { id: "svr" },
   });

@@ -6,7 +6,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   const sessie = await haalSessie();
-  if (!sessie) return new Response("Niet ingelogd", { status: 401 });
+  // Alleen het bestuur: hier zitten gegevens van alle verenigingen in.
+  const magErbij = sessie?.rol === "BESTUUR";
+  if (!magErbij) return new Response("Niet ingelogd", { status: 401 });
 
   const context = await haalBoekjaarContext();
   if (!context) return new Response("Geen boekjaar gevonden", { status: 404 });

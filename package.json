@@ -2,7 +2,7 @@
   "name": "balans-app",
   "version": "0.1.0",
   "private": true,
-  "description": "Financiële administratie van de StudieVerenigingenRaad Delft",
+  "description": "Financi\u00eble administratie van de StudieVerenigingenRaad Delft",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,7 +20,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "setup": "npm run db:deploy && prisma db seed",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "account:eerste": "tsx scripts/eerste-account.mts"
   },
   "engines": {
     "node": ">=20.9.0"

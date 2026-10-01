@@ -5,7 +5,7 @@ import { SESSIE_COOKIE, leesSessieCookie } from "@/lib/auth/sessie";
 const INLOGPAD = "/inloggen";
 
 /** Alles hierachter is alleen voor ingelogde mensen. De rest is de publieke site. */
-const BESCHERMD = ["/beheer", "/portaal", "/api"];
+const BESCHERMD = ["/beheer", "/portaal", "/api", "/wachtwoord"];
 
 const isBeschermd = (pad: string) =>
   BESCHERMD.some((begin) => pad === begin || pad.startsWith(`${begin}/`));

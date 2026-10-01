@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { formatteerTijdstempel } from "@/lib/datum";
 
@@ -25,6 +26,7 @@ const PER_PAGINA = 100;
 export default async function AuditlogPagina({
   searchParams,
 }: PageProps<"/beheer/auditlog">) {
+  await vereisBestuur();
   const parameters = await searchParams;
   const pagina = Math.max(
     1,

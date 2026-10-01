@@ -5,7 +5,7 @@ vi.mock("@react-pdf/renderer", () => ({
   renderToBuffer: async () => Buffer.from("%PDF-test"),
 }));
 vi.mock("@/lib/auth/server", () => ({
-  haalSessie: async () => ({ naam: "Bestuur" }),
+  haalSessie: async () => ({ gebruikerId: "g1", naam: "Bestuur", rol: "BESTUUR" }),
 }));
 vi.mock("@/lib/db", () => ({
   db: {

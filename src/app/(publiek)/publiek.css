@@ -324,14 +324,12 @@
 }
 
 .bestuurblok {
-  display: grid;
-  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-  gap: 2.5rem;
-  align-items: start;
   margin-top: 2rem;
 }
 .samenfoto {
-  margin: 0;
+  margin: 0 auto 2.5rem;
+  max-width: 26rem;
+  text-align: center;
 }
 .samenfoto img {
   width: 100%;
@@ -345,20 +343,17 @@
   font-size: 0.85rem;
   color: var(--grijs);
 }
-@media (max-width: 48rem) {
-  .bestuurblok {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-}
+
 
 .personen {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 44rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
   gap: 1.5rem;
+  justify-items: center;
 }
 .personen li {
   display: flex;

@@ -5,7 +5,7 @@ import { LogOut, Lock } from "lucide-react";
 
 import { Navigatie } from "@/components/navigatie";
 import { Button } from "@/components/ui/button";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { haalBoekjaarContext } from "@/lib/boekjaar";
 import { formatteerDatum } from "@/lib/datum";
 import { onbeveiligdMaarToegestaan } from "@/lib/beveiliging";
@@ -23,7 +23,7 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   const context = await haalBoekjaarContext();
   const onbeveiligd = onbeveiligdMaarToegestaan(await headers());
 

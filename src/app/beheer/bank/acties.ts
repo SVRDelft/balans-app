@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import { datumUitInvoer, formatteerDatum } from "@/lib/datum";
@@ -14,7 +14,7 @@ export async function bewaarBanksaldo(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -60,7 +60,7 @@ export async function verwijderBanksaldo(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();

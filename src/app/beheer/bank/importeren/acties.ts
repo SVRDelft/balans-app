@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { vergrendelRij } from "@/lib/slot";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
 import { logAudit } from "@/lib/audit";
@@ -26,7 +26,7 @@ async function vergrendelJaar(tx: DbClient, id: string) {
 }
 
 export async function importeerBankbestand(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   let importId = "";
   const resultaat = await voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
@@ -163,7 +163,7 @@ async function voorstellenVerwerken(tx: DbClient, jaarId: string, importId: stri
 }
 
 export async function bevestigBankimport(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "importId");
@@ -182,7 +182,7 @@ export async function bevestigBankimport(_staat: ActieStaat, formulier: FormData
 }
 
 export async function koppelSelectie(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "importId");
@@ -197,7 +197,7 @@ export async function koppelSelectie(_staat: ActieStaat, formulier: FormData): P
 }
 
 export async function verwerkBankmutatie(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
     await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); await koppel(tx, jaar.id, leesTekst(formulier, "mutatieId") ?? "", leesTekst(formulier, "doel") ?? "", sessie.naam, formulier); }, { timeout: 30_000 });
@@ -206,7 +206,7 @@ export async function verwerkBankmutatie(_staat: ActieStaat, formulier: FormData
 }
 
 export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "mutatieId");

@@ -20,7 +20,7 @@ const mocks = vi.hoisted(() => {
 });
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ db: { $transaction: mocks.transaction } }));
-vi.mock("@/lib/auth/server", () => ({ vereisSessie: mocks.auth }));
+vi.mock("@/lib/auth/server", () => ({ vereisBestuur: mocks.auth }));
 vi.mock("@/lib/boekjaar", () => ({ vereisSchrijfbaarBoekjaar: mocks.year }));
 vi.mock("@/lib/audit", () => ({ logAudit: mocks.audit }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));

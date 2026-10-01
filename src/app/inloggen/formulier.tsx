@@ -23,19 +23,20 @@ export function InlogFormulier({ verder }: { verder: string }) {
           <input type="hidden" name="verder" value={verder} />
 
           <Veld
-            label="Je naam"
-            htmlFor="naam"
+            label="E-mailadres"
+            htmlFor="email"
             verplicht
-            toelichting="Komt in het auditlog te staan bij alles wat je wijzigt."
+            toelichting="Het adres waarop het bestuur je account heeft gezet."
           >
             <Input
-              id="naam"
-              name="naam"
-              autoComplete="name"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="username"
               autoFocus
               required
-              maxLength={60}
-              placeholder="Bijvoorbeeld: Teun"
+              maxLength={200}
+              placeholder="bijvoorbeeld: secretaris@curius.nl"
             />
           </Veld>
 

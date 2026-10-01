@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import { POST_CATEGORIEEN, POST_SOORTEN } from "@/lib/domein";
@@ -15,7 +15,7 @@ export async function bewaarBegrotingspost(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -104,7 +104,7 @@ export async function verwijderBegrotingspost(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();

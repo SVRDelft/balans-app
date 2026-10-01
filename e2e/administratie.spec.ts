@@ -1,3 +1,6 @@
+// LET OP: deze browsertest is nog niet omgezet van Postgres naar MariaDB en van
+// het gedeelde wachtwoord naar de persoonlijke accounts. Hij draait dus niet.
+// NOG NIET OMGEZET — zie README, kopje "Testen".
 import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { writeFile, mkdir } from 'node:fs/promises';

@@ -20,7 +20,9 @@ export async function GET(
 ) {
   // Ook hier opnieuw controleren: een route is los van de interface te benaderen.
   const sessie = await haalSessie();
-  if (!sessie) {
+  // Alleen het bestuur: hier zitten gegevens van alle verenigingen in.
+  const magErbij = sessie?.rol === "BESTUUR";
+  if (!magErbij) {
     return new Response("Niet ingelogd", { status: 401 });
   }
 

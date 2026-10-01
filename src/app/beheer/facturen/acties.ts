@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
@@ -93,7 +93,7 @@ export async function bewaarFactuur(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   let doel = "/beheer/facturen";
 
@@ -342,7 +342,7 @@ export async function verstuurConcepten(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -399,7 +399,7 @@ export async function verstuurFactuur(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -439,7 +439,7 @@ export async function registreerBetaling(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -503,7 +503,7 @@ export async function verwijderBetaling(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -542,7 +542,7 @@ export async function zetStatus(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -604,7 +604,7 @@ export async function maakCreditfactuur(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   let doel = "/beheer/facturen";
 
@@ -694,7 +694,7 @@ export async function verwijderConcept(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   const resultaat = await voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -745,7 +745,7 @@ export async function genereerJaarfacturen(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();

@@ -62,13 +62,43 @@ Starten:
 npm run dev
 ```
 
-De app draait nu op <http://localhost:3000>. Log in met je eigen naam en het
-wachtwoord uit `APP_WACHTWOORD`. Die naam komt bij elke wijziging in het auditlog te staan,
-zodat achteraf te zien is wie wat gedaan heeft.
+Maak het eerste bestuursaccount aan; zonder account kan niemand inloggen:
 
-Na het testen kun je onderaan de pagina *Auditlog* het log wissen met hetzelfde
+```bash
+npm run account:eerste -- bestuur-svr@tudelft.nl "Je naam"
+```
+
+Het wachtwoord verschijnt één keer in de terminal. De app draait op
+<http://localhost:3000> en vraagt bij de eerste keer inloggen meteen om een
+eigen wachtwoord. Je naam komt bij elke wijziging in het auditlog te staan,
+zodat achteraf te zien is wie wat gedaan heeft. Verdere accounts maak je aan bij
+*Beheer › Accounts*.
+
+Na het testen kun je onderaan de pagina *Auditlog* het log wissen met je eigen
 wachtwoord. Er blijft dan één regel staan met wie het log wanneer gewist heeft.
-Boekingen wissen doe je apart bij *Boekjaren*, ook met het wachtwoord.
+Boekingen wissen doe je apart bij *Boekjaren*, ook met je wachtwoord.
+
+### Accounts en rollen
+
+| Rol | Mag bij | Hoe |
+|---|---|---|
+| **SVR-bestuur** | de administratie (`/beheer`) en het portaal | per persoon een account |
+| **Studievereniging** | alleen het portaal, en alleen de eigen vereniging | per vereniging één account op het functionele adres, bijvoorbeeld `secretaris@curius.nl` |
+
+Niemand kan zichzelf aanmelden. Accounts worden niet verwijderd maar uitgezet,
+zodat het auditlog blijft kloppen. Vergeet iemand zijn wachtwoord, dan geeft het
+bestuur bij *Accounts* een nieuw wachtwoord uit; dat wordt één keer getoond.
+
+### Testen
+
+```bash
+npm test          # alle tests, waaronder de toegangscontrole per scherm
+npm run typecheck
+npm run lint
+```
+
+`npm run test:e2e` (de browsertest met Playwright) is **nog niet omgezet** naar
+MariaDB en de nieuwe accounts; die staat tijdelijk stil.
 
 ---
 

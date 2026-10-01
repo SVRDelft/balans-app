@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { vergrendelRij } from "@/lib/slot";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { logAudit } from "@/lib/audit";
 import { type ActieStaat, voerUit, leesTekst } from "@/lib/acties";
@@ -60,7 +60,7 @@ export async function boekVerbruik(
   _staat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "id");
@@ -139,7 +139,7 @@ export async function bewaarVoorraad(
   _staat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
     const invoer = schema.safeParse(
@@ -225,7 +225,7 @@ export async function verwijderVoorraad(
   _staat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
     const id = leesTekst(formulier, "id");
@@ -262,7 +262,7 @@ export async function verwijderVoorraad(
 }
 
 export async function neemVoorraadOver(): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
     await db.$transaction(async (tx) => {

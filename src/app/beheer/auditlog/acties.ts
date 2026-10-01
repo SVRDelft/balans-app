@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { logAudit } from "@/lib/audit";
-import { controleerWachtwoord } from "@/lib/auth/sessie";
-import { vereisSessie } from "@/lib/auth/server";
+import { controleerEigenWachtwoord } from "@/lib/auth/gebruikers";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { voerUit, type ActieStaat } from "@/lib/acties";
 
@@ -16,11 +16,11 @@ export async function wisAuditlog(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const wachtwoord = String(formulier.get("wachtwoord") ?? "");
-    if (!controleerWachtwoord(wachtwoord)) {
+    if (!(await controleerEigenWachtwoord(sessie.gebruikerId, wachtwoord))) {
       return { fout: "Het wachtwoord klopt niet. Er is niets gewist." };
     }
 

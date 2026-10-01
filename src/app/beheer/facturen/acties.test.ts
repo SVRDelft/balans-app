@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/auth/server", () => ({
-  vereisSessie: async () => ({ naam: "Testbestuur" }),
+  vereisBestuur: async () => ({ gebruikerId: "g1", naam: "Testbestuur", rol: "BESTUUR" }),
 }));
 vi.mock("@/lib/boekjaar", () => ({
   vereisSchrijfbaarBoekjaar: async () => ({ id: "jaar" }),

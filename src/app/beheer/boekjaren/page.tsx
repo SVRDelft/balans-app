@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { datumNaarInvoer, formatteerDatum } from "@/lib/datum";
 import { centenNaarInvoer } from "@/lib/geld";
@@ -31,6 +32,7 @@ import { WisFormulier } from "./wisformulier";
 export const metadata: Metadata = { title: "Boekjaren" };
 
 export default async function BoekjarenPagina() {
+  await vereisBestuur();
   const context = await haalBoekjaarContext();
 
   const boekjaren = await db.boekjaar.findMany({

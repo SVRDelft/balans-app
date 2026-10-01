@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Paginakop } from "@/components/paginakop";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 
 import { RelatieFormulier } from "../formulier";
@@ -12,6 +13,7 @@ export const metadata: Metadata = { title: "Relatie bewerken" };
 export default async function RelatiePagina({
   params,
 }: PageProps<"/beheer/relaties/[id]">) {
+  await vereisBestuur();
   const { id } = await params;
 
   const relatie = await db.relatie.findUnique({

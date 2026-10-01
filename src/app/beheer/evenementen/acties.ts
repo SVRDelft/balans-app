@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
@@ -35,7 +35,7 @@ export async function bewaarEvenement(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   let doel = "/beheer/evenementen";
 
@@ -108,7 +108,7 @@ export async function voegDeelnemerToe(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -162,7 +162,7 @@ export async function wijzigDeelnemer(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -215,7 +215,7 @@ export async function verwijderDeelnemer(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -263,7 +263,7 @@ export async function berekenOmslagActie(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -539,7 +539,7 @@ export async function boekTenLasteVanSvr(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -591,7 +591,7 @@ export async function sluitEvenement(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();
@@ -650,7 +650,7 @@ export async function heropenEvenement(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const boekjaar = await vereisSchrijfbaarBoekjaar();

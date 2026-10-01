@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { logAudit } from "@/lib/audit";
-import { vereisSessie } from "@/lib/auth/server";
+import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { RELATIE_TYPES } from "@/lib/domein";
 import { voerUit, type ActieStaat } from "@/lib/acties";
@@ -31,7 +31,7 @@ export async function bewaarRelatie(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const uitkomst = leesFormulier(formulier);
@@ -94,7 +94,7 @@ export async function verwijderRelatie(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
 ): Promise<ActieStaat> {
-  const sessie = await vereisSessie();
+  const sessie = await vereisBestuur();
 
   return voerUit(async () => {
     const id = String(formulier.get("id") ?? "");

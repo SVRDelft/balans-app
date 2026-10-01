@@ -9,7 +9,9 @@ export async function GET(
   { params }: RouteContext<"/api/bijlagen/[id]">,
 ) {
   const sessie = await haalSessie();
-  if (!sessie) return new Response("Niet ingelogd", { status: 401 });
+  // Alleen het bestuur: hier zitten gegevens van alle verenigingen in.
+  const magErbij = sessie?.rol === "BESTUUR";
+  if (!magErbij) return new Response("Niet ingelogd", { status: 401 });
 
   const { id } = await params;
   const bijlage = await db.bijlage.findUnique({ where: { id } });

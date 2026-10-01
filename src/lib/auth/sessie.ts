@@ -1,11 +1,10 @@
 // Ondertekend sessiecookie. Gebruikt alleen Web Crypto, zodat dezelfde code
 // werkt in proxy.ts (edge) en in server components (node).
 //
-// Er is één gedeeld wachtwoord voor het hele bestuur. De naam die bij het
-// inloggen wordt opgegeven komt in het auditlog terecht: zonder die naam is
-// "wie wijzigde wat" niet te beantwoorden met twee mensen in één systeem.
-// De opzet laat ruimte voor echte accounts later: alleen controleerWachtwoord
-// en de inhoud van Sessie hoeven dan te veranderen.
+// In het cookie staat wie je bent en welke rol je had bij het inloggen. Of het
+// account nog bestaat en nog actief is, wordt bij elk verzoek opnieuw in de
+// database gecontroleerd (src/lib/auth/server.ts): een cookie dat blijft
+// hangen mag nooit toegang houden nadat een account is uitgezet.
 
 import { cookieAlleenOverHttps } from "@/lib/beveiliging";
 
@@ -14,9 +13,16 @@ export const BOEKJAAR_COOKIE = "svr_boekjaar";
 
 const SESSIE_DUUR_MS = 30 * 24 * 60 * 60 * 1000;
 
+export type Rol = "BESTUUR" | "SV";
+
 export interface Sessie {
-  /** Naam van het bestuurslid, zoals opgegeven bij het inloggen. */
+  /** Id van het account. */
+  gebruikerId: string;
+  /** Naam die in het auditlog komt te staan. */
   naam: string;
+  rol: Rol;
+  /** Alleen bij een SV-account: de vereniging waar dit account bij hoort. */
+  relatieId?: string;
   /** Epoch in milliseconden. */
   verlooptOp: number;
 }
@@ -86,9 +92,11 @@ function gelijkInVasteTijd(a: string, b: string): boolean {
   return verschil === 0;
 }
 
-export async function maakSessieCookie(naam: string): Promise<string> {
+export async function maakSessieCookie(
+  gebruiker: Pick<Sessie, "gebruikerId" | "naam" | "rol" | "relatieId">,
+): Promise<string> {
   const sessie: Sessie = {
-    naam,
+    ...gebruiker,
     verlooptOp: Date.now() + SESSIE_DUUR_MS,
   };
   const inhoud = naarBase64Url(tekstNaarBytes(JSON.stringify(sessie)));
@@ -123,6 +131,11 @@ export async function leesSessieCookie(
     if (typeof sessie.naam !== "string" || sessie.naam.trim() === "") {
       return null;
     }
+    if (typeof sessie.gebruikerId !== "string" || sessie.gebruikerId === "") {
+      return null;
+    }
+    if (sessie.rol !== "BESTUUR" && sessie.rol !== "SV") return null;
+    if (sessie.rol === "SV" && typeof sessie.relatieId !== "string") return null;
     if (typeof sessie.verlooptOp !== "number" || sessie.verlooptOp < Date.now()) {
       return null;
     }
@@ -130,13 +143,6 @@ export async function leesSessieCookie(
   } catch {
     return null;
   }
-}
-
-/** Controleert het gedeelde wachtwoord uit de omgevingsvariabele. */
-export function controleerWachtwoord(ingevoerd: string): boolean {
-  const verwacht = process.env.APP_WACHTWOORD;
-  if (!verwacht || verwacht === "") return false;
-  return gelijkInVasteTijd(ingevoerd, verwacht);
 }
 
 export const SESSIE_COOKIE_OPTIES = {

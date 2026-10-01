@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
 import { BOEKJAAR_COOKIE } from "@/lib/auth/sessie";
+import { vereisBestuur } from "@/lib/auth/server";
 import type { Boekjaar } from "@/lib/types";
 
 export interface BoekjaarContext {
@@ -48,7 +49,13 @@ export async function haalBoekjaarContext(): Promise<BoekjaarContext | null> {
   };
 }
 
+/**
+ * Elke pagina en actie van de administratie begint hier. De rolcontrole staat
+ * er met opzet in: zo kan er geen scherm bestaan dat de boekjaarcontext wel
+ * ophaalt maar vergeet te controleren wie er kijkt.
+ */
 export async function vereisBoekjaarContext(): Promise<BoekjaarContext> {
+  await vereisBestuur();
   const context = await haalBoekjaarContext();
   if (!context) {
     redirect("/beheer/boekjaren");

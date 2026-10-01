@@ -115,6 +115,7 @@ model Relatie {
   facturen   Factuur[]
   uitgaven   Uitgave[]
   deelnemers Deelnemer[]
+  gebruikers Gebruiker[]
 
   @@index([type])
 }
@@ -537,4 +538,51 @@ model Auditlog {
 
   @@index([tijdstip])
   @@index([entiteit, entiteitId])
+}
+
+// ---------------------------------------------------------------------------
+// Accounts
+// ---------------------------------------------------------------------------
+
+/// Persoonlijke accounts. Het bestuur maakt ze aan; niemand kan zichzelf
+/// registreren. Een SV-account hoort bij precies één studievereniging en komt
+/// nooit bij de administratie.
+model Gebruiker {
+  id    String @id @default(cuid())
+  /// Waarmee je inlogt. Bij een vereniging het functionele adres, zodat er bij
+  /// een bestuurswissel niets over te dragen valt.
+  email String @unique
+  /// Naam die in het auditlog komt te staan.
+  naam  String
+
+  /// 'BESTUUR' | 'SV'
+  rol String
+
+  relatieId String?
+  relatie   Relatie? @relation(fields: [relatieId], references: [id])
+
+  /// scrypt-hash, zie src/lib/auth/wachtwoord.ts. Nooit het wachtwoord zelf.
+  wachtwoordHash String  @db.Text
+  /// Na een door het bestuur ingesteld wachtwoord: eerst zelf een eigen kiezen.
+  moetWijzigen   Boolean @default(true)
+
+  actief       Boolean   @default(true)
+  laatsteInlog DateTime?
+  aangemaaktOp DateTime  @default(now())
+  bijgewerktOp DateTime  @updatedAt
+
+  @@index([rol])
+  @@index([relatieId])
+}
+
+/// Mislukte inlogpogingen, per e-mailadres en per IP. Staat in de database en
+/// niet in het geheugen: Passenger draait meerdere processen naast elkaar, en
+/// een teller per proces houdt niemand tegen.
+model Inlogpoging {
+  sleutel        String   @id
+  aantal         Int      @default(0)
+  eerstePoging   DateTime @default(now())
+  geblokkeerdTot DateTime?
+
+  @@index([geblokkeerdTot])
 }
