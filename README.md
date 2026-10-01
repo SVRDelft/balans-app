@@ -109,10 +109,15 @@ bent. **Neem `storage/` mee in de back-up**: die map staat niet in git.
 ### Testen
 
 ```bash
+npm run build     # eerst: hiermee maakt Next de typen voor de routes aan
 npm test          # alle tests, waaronder de toegangscontrole per scherm
 npm run typecheck
 npm run lint
 ```
+
+Op een verse kopie van de repository faalt `npm run typecheck` tot je één keer
+hebt gebouwd: `PageProps` en `RouteContext` komen uit bestanden die de build
+genereert. GitHub Actions doet daarom hetzelfde: eerst bouwen, dan controleren.
 
 `npm run test:e2e` (de browsertest met Playwright) is **nog niet omgezet** naar
 MariaDB en de nieuwe accounts; die staat tijdelijk stil.
