@@ -1,0 +1,82 @@
+{
+  "node": {
+    "0032cda399854b463f67af68c4c7413b8cade04617": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "uitloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "600a17fbf590ec917106ec3b4f70e645b5a555002f": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "4062bcd7edc73f02efc9b451d923a0685f8f73ddee": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "kiesBoekjaar",
+      "filename": "src/app/beheer/acties.ts"
+    },
+    "60cfef31a180ef2fe219aa1b7169541892d1c6e495": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarVoorraad",
+      "filename": "src/app/beheer/voorraad/acties.ts"
+    },
+    "0031c3b76ffcf95c26601325ce93dd2e201f5ad033": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "neemVoorraadOver",
+      "filename": "src/app/beheer/voorraad/acties.ts"
+    },
+    "6027ec67550427a2267d34f65e274b783822aba797": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderVoorraad",
+      "filename": "src/app/beheer/voorraad/acties.ts"
+    },
+    "60c1425ecea98e19dfe821c3424ccc3b2575f4eb7f": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "boekVerbruik",
+      "filename": "src/app/beheer/voorraad/acties.ts"
+    }
+  },
+  "edge": {}
+}

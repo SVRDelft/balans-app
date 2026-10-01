@@ -1,0 +1,16 @@
+{
+  "node": {
+    "600a17fbf590ec917106ec3b4f70e645b5a555002f": {
+      "workers": {
+        "app/inloggen/page": {
+          "moduleId": 7716,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,370 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/bijlagen/[id]",
+      "regex": "^/api/bijlagen/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/bijlagen/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/facturen/[id]/pdf",
+      "regex": "^/api/facturen/([^/]+?)/pdf(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/facturen/(?<nxtPid>[^/]+?)/pdf(?:/)?$"
+    },
+    {
+      "page": "/api/portaal/bestand/[id]",
+      "regex": "^/api/portaal/bestand/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/portaal/bestand/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/bank/importeren/[id]",
+      "regex": "^/beheer/bank/importeren/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/bank/importeren/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/begroting/[id]",
+      "regex": "^/beheer/begroting/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/begroting/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/evenementen/[id]",
+      "regex": "^/beheer/evenementen/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/evenementen/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/evenementen/[id]/bewerken",
+      "regex": "^/beheer/evenementen/([^/]+?)/bewerken(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/evenementen/(?<nxtPid>[^/]+?)/bewerken(?:/)?$"
+    },
+    {
+      "page": "/beheer/facturen/[id]",
+      "regex": "^/beheer/facturen/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/facturen/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/facturen/[id]/bewerken",
+      "regex": "^/beheer/facturen/([^/]+?)/bewerken(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/facturen/(?<nxtPid>[^/]+?)/bewerken(?:/)?$"
+    },
+    {
+      "page": "/beheer/relaties/[id]",
+      "regex": "^/beheer/relaties/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/relaties/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/uitgaven/[id]",
+      "regex": "^/beheer/uitgaven/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/uitgaven/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/beheer/verenigingen/[id]",
+      "regex": "^/beheer/verenigingen/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/beheer/verenigingen/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/api/export/alles",
+      "regex": "^/api/export/alles(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/export/alles(?:/)?$"
+    },
+    {
+      "page": "/api/export/excel",
+      "regex": "^/api/export/excel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/export/excel(?:/)?$"
+    },
+    {
+      "page": "/api/export/pdf",
+      "regex": "^/api/export/pdf(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/export/pdf(?:/)?$"
+    },
+    {
+      "page": "/api/logo",
+      "regex": "^/api/logo(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/logo(?:/)?$"
+    },
+    {
+      "page": "/beheer",
+      "regex": "^/beheer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer(?:/)?$"
+    },
+    {
+      "page": "/beheer/accounts",
+      "regex": "^/beheer/accounts(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/accounts(?:/)?$"
+    },
+    {
+      "page": "/beheer/auditlog",
+      "regex": "^/beheer/auditlog(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/auditlog(?:/)?$"
+    },
+    {
+      "page": "/beheer/balans",
+      "regex": "^/beheer/balans(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/balans(?:/)?$"
+    },
+    {
+      "page": "/beheer/bank",
+      "regex": "^/beheer/bank(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/bank(?:/)?$"
+    },
+    {
+      "page": "/beheer/bank/importeren",
+      "regex": "^/beheer/bank/importeren(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/bank/importeren(?:/)?$"
+    },
+    {
+      "page": "/beheer/begroting",
+      "regex": "^/beheer/begroting(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/begroting(?:/)?$"
+    },
+    {
+      "page": "/beheer/begroting/nieuw",
+      "regex": "^/beheer/begroting/nieuw(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/begroting/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/boekjaren",
+      "regex": "^/beheer/boekjaren(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/boekjaren(?:/)?$"
+    },
+    {
+      "page": "/beheer/evenementen",
+      "regex": "^/beheer/evenementen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/evenementen(?:/)?$"
+    },
+    {
+      "page": "/beheer/evenementen/nieuw",
+      "regex": "^/beheer/evenementen/nieuw(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/evenementen/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/exploitatie",
+      "regex": "^/beheer/exploitatie(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/exploitatie(?:/)?$"
+    },
+    {
+      "page": "/beheer/facturen",
+      "regex": "^/beheer/facturen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/facturen(?:/)?$"
+    },
+    {
+      "page": "/beheer/facturen/jaarfacturen",
+      "regex": "^/beheer/facturen/jaarfacturen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/facturen/jaarfacturen(?:/)?$"
+    },
+    {
+      "page": "/beheer/facturen/nieuw",
+      "regex": "^/beheer/facturen/nieuw(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/facturen/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/instellingen",
+      "regex": "^/beheer/instellingen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/instellingen(?:/)?$"
+    },
+    {
+      "page": "/beheer/overdracht",
+      "regex": "^/beheer/overdracht(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/overdracht(?:/)?$"
+    },
+    {
+      "page": "/beheer/portaal",
+      "regex": "^/beheer/portaal(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/portaal(?:/)?$"
+    },
+    {
+      "page": "/beheer/relaties",
+      "regex": "^/beheer/relaties(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/relaties(?:/)?$"
+    },
+    {
+      "page": "/beheer/relaties/nieuw",
+      "regex": "^/beheer/relaties/nieuw(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/relaties/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/uitgaven",
+      "regex": "^/beheer/uitgaven(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/uitgaven(?:/)?$"
+    },
+    {
+      "page": "/beheer/uitgaven/nieuw",
+      "regex": "^/beheer/uitgaven/nieuw(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/uitgaven/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/verenigingen",
+      "regex": "^/beheer/verenigingen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/verenigingen(?:/)?$"
+    },
+    {
+      "page": "/beheer/voorraad",
+      "regex": "^/beheer/voorraad(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/voorraad(?:/)?$"
+    },
+    {
+      "page": "/bestuur-worden",
+      "regex": "^/bestuur\\-worden(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/bestuur\\-worden(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/inloggen",
+      "regex": "^/inloggen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/inloggen(?:/)?$"
+    },
+    {
+      "page": "/portaal",
+      "regex": "^/portaal(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portaal(?:/)?$"
+    },
+    {
+      "page": "/privacy",
+      "regex": "^/privacy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/privacy(?:/)?$"
+    },
+    {
+      "page": "/robots.txt",
+      "regex": "^/robots\\.txt(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/robots\\.txt(?:/)?$"
+    },
+    {
+      "page": "/wachtwoord",
+      "regex": "^/wachtwoord(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/wachtwoord(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

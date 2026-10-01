@@ -1,0 +1,17 @@
+{
+  "name": "svr-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gebouwde versie voor de webserver van de TU Delft. Niet bewerken; dit komt uit GitHub Actions.",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "prisma migrate deploy",
+    "account": "node account.js"
+  },
+  "dependencies": {
+    "prisma": "^7.10.0"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

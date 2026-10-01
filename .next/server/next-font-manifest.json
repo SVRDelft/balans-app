@@ -1,0 +1,167 @@
+{
+  "app": {
+    "[project]/src/app/(publiek)/bestuur-worden/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/(publiek)/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/(publiek)/privacy/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/_not-found/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/accounts/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/auditlog/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/balans/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/bank/importeren/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/bank/importeren/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/bank/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/begroting/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/begroting/nieuw/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/begroting/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/boekjaren/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/evenementen/[id]/bewerken/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/evenementen/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/evenementen/nieuw/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/evenementen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/exploitatie/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/facturen/[id]/bewerken/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/facturen/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/facturen/jaarfacturen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/facturen/nieuw/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/facturen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/instellingen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/overdracht/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/portaal/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/relaties/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/relaties/nieuw/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/relaties/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/uitgaven/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/uitgaven/nieuw/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/uitgaven/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/verenigingen/[id]/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/verenigingen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/beheer/voorraad/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/inloggen/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/portaal/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ],
+    "[project]/src/app/wachtwoord/page": [
+      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
+      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}

@@ -1,0 +1,16 @@
+{
+  "node": {
+    "607173ce128a6abea1fb97e0c9a197dcf1344b3dd9": {
+      "workers": {
+        "app/wachtwoord/page": {
+          "moduleId": 37363,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "wijzigWachtwoord",
+      "filename": "src/app/wachtwoord/acties.ts"
+    }
+  },
+  "edge": {}
+}

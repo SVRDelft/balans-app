@@ -1,0 +1,3 @@
+{
+  "/api/portaal/bestand/[id]/route": "app/api/portaal/bestand/[id]/route.js"
+}

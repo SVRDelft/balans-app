@@ -1,0 +1,3 @@
+{
+  "/api/bijlagen/[id]/route": "app/api/bijlagen/[id]/route.js"
+}
