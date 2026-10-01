@@ -116,6 +116,7 @@ model Relatie {
   uitgaven   Uitgave[]
   deelnemers Deelnemer[]
   gebruikers Gebruiker[]
+  vergaderingen Vergadering[]
 
   @@index([type])
 }
@@ -585,4 +586,71 @@ model Inlogpoging {
   geblokkeerdTot DateTime?
 
   @@index([geblokkeerdTot])
+}
+
+// ---------------------------------------------------------------------------
+// Portaal
+// ---------------------------------------------------------------------------
+
+/// Berichten van het SVR-bestuur aan de verenigingen.
+model Mededeling {
+  id           String   @id @default(cuid())
+  titel        String
+  tekst        String   @db.Text
+  geplaatstOp  DateTime @default(now())
+  geplaatstDoor String
+  bijgewerktOp DateTime @updatedAt
+
+  @@index([geplaatstOp])
+}
+
+/// Een vergadering uit een van de vier reeksen, met de vereniging die ontvangt.
+model Vergadering {
+  id    String   @id @default(cuid())
+  /// 'SVR' | 'SVR-O' | 'SVeuRo' | 'SVjwR'
+  reeks String
+  datum DateTime
+  /// Begintijd als "14:00"; bewust tekst, want het is een vaste afspraak.
+  tijd  String   @default("14:00")
+
+  gastheerId String?
+  gastheer   Relatie? @relation(fields: [gastheerId], references: [id])
+  /// Naam van de ontvangende vereniging als die geen relatie (meer) is.
+  gastheerNaam String @default("")
+
+  notitie String? @db.Text
+
+  aangemaaktOp DateTime @default(now())
+  bijgewerktOp DateTime @updatedAt
+
+  bestanden Portaalbestand[]
+
+  @@index([datum])
+  @@index([reeks, datum])
+}
+
+/// Agenda's, notulen en losse documenten. Het bestand zelf staat op schijf in
+/// storage/, buiten de map die de webserver rechtstreeks uitserveert; de
+/// download gaat altijd langs een route die eerst controleert wie je bent.
+model Portaalbestand {
+  id    String @id @default(cuid())
+  /// 'agenda' | 'notulen' | 'document'
+  soort String
+  titel String
+
+  vergaderingId String?
+  vergadering   Vergadering? @relation(fields: [vergaderingId], references: [id], onDelete: Cascade)
+
+  /// Naam zoals de uploader hem kende.
+  bestandsnaam String @db.Text
+  mimeType     String
+  grootte      Int
+  /// Willekeurige naam op schijf, zodat een naam nooit iets prijsgeeft.
+  opslagnaam   String @unique
+
+  geuploadOp   DateTime @default(now())
+  geuploadDoor String
+
+  @@index([vergaderingId])
+  @@index([soort, geuploadOp])
 }

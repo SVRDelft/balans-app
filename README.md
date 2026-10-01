@@ -15,7 +15,7 @@ betalingen en het banksaldo voer je handmatig in.
 | Pad | Voor wie | Wat |
 |---|---|---|
 | `/`, `/bestuur-worden`, `/privacy` | iedereen | de publieke site van de SVR |
-| `/portaal` | ingelogde studieverenigingen | agenda's, notulen en mededelingen (in aanbouw) |
+| `/portaal` | ingelogde studieverenigingen | mededelingen, vergaderingen met agenda en notulen, en documenten |
 | `/beheer` | ingelogd SVR-bestuur | de financiële administratie |
 
 De teksten van de publieke pagina's staan in `content/`; hoe je die aanpast
@@ -88,6 +88,23 @@ Boekingen wissen doe je apart bij *Boekjaren*, ook met je wachtwoord.
 Niemand kan zichzelf aanmelden. Accounts worden niet verwijderd maar uitgezet,
 zodat het auditlog blijft kloppen. Vergeet iemand zijn wachtwoord, dan geeft het
 bestuur bij *Accounts* een nieuw wachtwoord uit; dat wordt één keer getoond.
+
+### Portaal
+
+Bij *Beheer › Portaal* plaatst het bestuur mededelingen, voert het de
+vergaderingen in en uploadt het agenda's, notulen en losse documenten. Alles wat
+daar staat is zichtbaar voor **alle** aangesloten verenigingen met een account.
+
+De vergaderingen van 2026-2027 staan in het seed-script
+(`src/lib/portaal/vergaderingen.ts`); een volgend bestuur voert het nieuwe
+rooster in via het scherm.
+
+Uploads mogen PDF, PNG, JPG of DOCX zijn, maximaal 20 MB. De app kijkt naar de
+inhoud van het bestand en niet naar de extensie. De bestanden staan in `storage/`
+— buiten de map die de webserver uitserveert — met een willekeurige naam; de
+oorspronkelijke naam staat in de database. Downloaden kan alleen via
+`/api/portaal/bestand/<id>`, en daar wordt eerst gecontroleerd of je ingelogd
+bent. **Neem `storage/` mee in de back-up**: die map staat niet in git.
 
 ### Testen
 

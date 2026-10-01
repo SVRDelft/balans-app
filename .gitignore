@@ -55,3 +55,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .idea
+
+# Geüploade bestanden van het portaal; die horen in de back-up, niet in git.
+storage/

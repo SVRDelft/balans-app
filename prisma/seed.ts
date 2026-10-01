@@ -4,6 +4,7 @@ import "../src/lib/env";
 
 import { db } from "../src/lib/db";
 import { maakDag } from "../src/lib/datum";
+import { VERGADERINGEN_2026_2027 } from "../src/lib/portaal/vergaderingen";
 
 const BOEKJAAR_NAAM = "SVR 62 · 2026-2027";
 const FACTUUR_PREFIX = "SVR62-2026";
@@ -226,6 +227,32 @@ async function main() {
   } else {
     console.log("  evenement: LBG 2027 bestond al");
   }
+
+  // Vergaderingen van dit bestuursjaar voor het portaal. Alleen aanvullen:
+  // bestaande vergaderingen (met hun agenda en notulen) blijven staan.
+  let nieuweVergaderingen = 0;
+  for (const afspraak of VERGADERINGEN_2026_2027) {
+    const datum = new Date(`${afspraak.datum}T00:00:00.000Z`);
+    const bestaat = await db.vergadering.findFirst({
+      where: { reeks: afspraak.reeks, datum },
+    });
+    if (bestaat) continue;
+    const gastheer = await db.relatie.findFirst({
+      where: { naam: afspraak.gastheer },
+      select: { id: true },
+    });
+    await db.vergadering.create({
+      data: {
+        reeks: afspraak.reeks,
+        datum,
+        tijd: afspraak.tijd,
+        gastheerId: gastheer?.id ?? null,
+        gastheerNaam: afspraak.gastheer,
+      },
+    });
+    nieuweVergaderingen += 1;
+  }
+  console.log(`  ${nieuweVergaderingen} vergaderingen toegevoegd (${VERGADERINGEN_2026_2027.length} in het rooster)`);
 
   console.log("Klaar.");
 }

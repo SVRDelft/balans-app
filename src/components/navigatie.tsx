@@ -20,6 +20,7 @@ import {
   Users,
   Menu,
   KeyRound,
+  Megaphone,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -62,6 +63,7 @@ const GROEPEN: { titel: string; items: NavItem[] }[] = [
     items: [
       { href: "/beheer/overdracht", label: "Overdracht", icoon: ArrowLeftRight },
       { href: "/beheer/boekjaren", label: "Boekjaren", icoon: CalendarDays },
+      { href: "/beheer/portaal", label: "Portaal", icoon: Megaphone },
       { href: "/beheer/accounts", label: "Accounts", icoon: KeyRound },
       { href: "/beheer/auditlog", label: "Auditlog", icoon: ClipboardList },
       { href: "/beheer/instellingen", label: "Instellingen", icoon: Settings },

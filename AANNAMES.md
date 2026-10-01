@@ -339,3 +339,27 @@ De controle zelf staat op één plek (`src/lib/auth/server.ts`) en wordt afgedwo
 door een test die élke pagina, server action en API-route van `/beheer` langsloopt
 (`src/lib/auth/toegang.test.ts`). Die test vond bij het schrijven meteen zes
 schermen die alleen op de proxy leunden.
+
+### Het portaal is voor alle verenigingen tegelijk
+
+Mededelingen, vergaderingen en documenten in het portaal zijn voor iedereen met
+een account zichtbaar; er zit niets in dat maar voor één vereniging bedoeld is.
+Dat staat ook als waarschuwing boven het beheerscherm.
+
+Het idee dat een vereniging later de **eigen openstaande facturen** kan inzien is
+bewust niet gebouwd, maar het datamodel kan het aan: een `Gebruiker` met rol `SV`
+wijst naar precies één `Relatie`, en facturen hangen aan diezelfde relatie. De
+helpers `beperkingOpRelatie()` en `vereisEigenRelatie()` in
+`src/lib/auth/server.ts` staan er al voor klaar, met tests. Wie dat bouwt, filtert
+dus op `relatieId` uit de sessie en nooit op een id uit de URL.
+
+### Bestanden op schijf, niet in de database
+
+Bonnetjes bij uitgaven staan als bytes in de database (dat was er al). De
+bestanden van het portaal staan op schijf in `storage/`, omdat agenda's en
+notulen groter zijn en met tientallen tegelijk komen. Gevolg: een back-up van
+alleen de database is niet genoeg — `storage/` moet mee. Dat staat in DEPLOY.md
+en in de README.
+
+Alles loopt via één module (`src/lib/portaal/opslag.ts`). Wie later naar Vercel
+moet, vervangt alleen die module door opslag bij een dienst als Vercel Blob.
