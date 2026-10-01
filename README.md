@@ -12,26 +12,29 @@ betalingen en het banksaldo voer je handmatig in.
 
 ## Starten
 
-Gebruik [Node.js 22 of 24](https://nodejs.org) en een Postgres-database.
-De app kan via Vercel met Neon worden verbonden; zie [MIGRATIE.md](MIGRATIE.md).
+Gebruik [Node.js 20.9 of hoger](https://nodejs.org) (de webserver van de TU
+Delft draait 20.20) en een MariaDB-database.
 
 ```bash
 npm install
 ```
 
-```bash
-npx vercel link
-npx vercel env pull .env.local
-```
-
-Zet in Vercel een eigen `APP_WACHTWOORD` en `AUTH_SECRET` en haal de variabelen
-opnieuw op. Zonder Vercel kun je `.env.example` naar `.env.local` kopiëren en
-je eigen Postgres-adres invullen. Een
-willekeurige sleutel genereer je zo:
+Kopieer `.env.example` naar `.env` en vul je eigen waarden in. Een willekeurige
+sleutel genereer je zo:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+Start de database. Dat is een MariaDB 10.11 in Docker, dezelfde versie als op de
+server van de TU Delft:
+
+```bash
+npm run db:start
+```
+
+Draait Docker niet, installeer dan MariaDB 10.11 of hoger zelf en zet het adres
+van die database in `DATABASE_URL`. Verder verandert er niets.
 
 Database aanmaken en vullen met de startgegevens:
 
@@ -283,8 +286,9 @@ die testdatabase. Gebruik hiervoor ontwikkelvariabelen, geen productievariabelen
 Testresultaten, sessiegegevens en exports blijven buiten Git.
 
 - **Next.js 16** (App Router) met **TypeScript** en **React 19**
-- **Prisma 7** met **Postgres** via de `@prisma/adapter-pg` driver adapter;
-  hosting op Vercel met Neon — zie [MIGRATIE.md](MIGRATIE.md)
+- **Prisma 7** met **MariaDB** via de `@prisma/adapter-mariadb` driver adapter:
+  pure JavaScript, zodat de app ook draait op de webserver van de TU Delft —
+  zie [MIGRATIE.md](MIGRATIE.md)
 - **Tailwind CSS 4** met componenten in de conventie van **shadcn/ui**
 - **@react-pdf/renderer** voor de PDF's (geen headless Chromium, werkt op Vercel)
 - **ExcelJS** voor de Excel-export
@@ -314,5 +318,5 @@ ze te testen zijn. Draai `npm test` na elke wijziging daaraan.
 
 ## Verder lezen
 
-- [MIGRATIE.md](MIGRATIE.md) — Vercel en Postgres instellen en publiceren
+- [MIGRATIE.md](MIGRATIE.md) — de database en het publiceren van de app
 - [AANNAMES.md](AANNAMES.md) — de aannames die tijdens het bouwen zijn gedaan

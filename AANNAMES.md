@@ -272,3 +272,35 @@ SQLite kent geen enums. De toegestane waarden staan als constanten in
 
 Vitest 5 vraagt om `@types/node` 22 of nieuwer en liep vast op de npm-versie die
 bij Node 20 hoort. Vitest 4 doet hetzelfde werk.
+
+### MariaDB in plaats van Postgres, met de app op de TU-server
+
+De app verhuist van Vercel met Neon Postgres naar de webhosting van de TU Delft,
+waar alleen MariaDB 10.11 draait. Dat dwong een paar keuzes af:
+
+- Prisma gebruikt de driver adapter `@prisma/adapter-mariadb`: pure JavaScript,
+  zodat er niets gecompileerd hoeft te worden op een server waarvan we het
+  besturingssysteem niet kennen.
+- Alle vrije tekst heeft `@db.Text` in het schema. Zonder dat maakt MySQL er een
+  `VARCHAR(191)` van en worden lange omschrijvingen afgekapt.
+- `mode: "insensitive"` is uit de zoekfilters gehaald. Dat bestaat alleen in
+  Postgres; MariaDB vergelijkt met `utf8mb4_unicode_ci` al zonder op hoofdletters
+  te letten.
+- Zolang de overstap niet rond is, draait de bestaande app gewoon door op Vercel
+  met Postgres. Het werk voor de TU-server staat op de branch `tu-server`; de
+  branch `main` blijft de versie die live staat.
+
+### Logo controleren zonder sharp
+
+`sharp` is een gecompileerde bibliotheek en kan niet mee naar de TU-server. Het
+controleren van een geüpload logo gebeurt nu in `src/lib/afbeelding.ts`: dat
+leest alleen de kop van het bestand (PNG-signatuur en IHDR, of de JPEG-markeringen)
+en haalt daar het echte type en de afmetingen uit. Een bestand dat zich voordoet
+als afbeelding valt daarmee nog steeds af, en animaties (APNG) en bestanden met
+meerdere beelden worden geweigerd.
+
+Wat vervalt: de pixels worden niet meer gedecodeerd, dus een bestand met een
+geldige kop maar een beschadigde inhoud komt er nu doorheen. Het wordt bewaard
+zoals het is en alleen getoond, nooit uitgevoerd, dus het ergste geval is een
+logo dat scheef in de PDF staat. Verkleinen gebeurt niet meer; upload een logo
+van een redelijk formaat (maximaal 2 MB en 16 megapixels).

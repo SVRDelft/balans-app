@@ -42,8 +42,8 @@ export default async function UitgavenPagina({
       where: {
         boekjaarId: boekjaar.id,
         ...(zoekterm ? { OR: [
-          { leverancierNaam: { contains: zoekterm, mode: "insensitive" as const } },
-          { omschrijving: { contains: zoekterm, mode: "insensitive" as const } },
+          { leverancierNaam: { contains: zoekterm } },
+          { omschrijving: { contains: zoekterm } },
         ] } : {}),
         ...(postFilter ? { begrotingspostId: postFilter } : {}),
         ...(evenementFilter ? { evenementId: evenementFilter } : {}),

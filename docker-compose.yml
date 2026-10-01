@@ -1,0 +1,32 @@
+# Lokale MariaDB, dezelfde versie als op de webserver van de TU Delft (10.11).
+#
+#   docker compose up -d        starten
+#   docker compose down         stoppen (gegevens blijven staan)
+#   docker compose down -v      stoppen en de database leeggooien
+services:
+  db:
+    image: mariadb:10.11
+    container_name: svr-mariadb
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: svr-lokaal
+      MARIADB_DATABASE: svr
+      MARIADB_USER: svr
+      MARIADB_PASSWORD: svr-lokaal
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      # Bonnetjes staan als bestand in de database; standaard 16 MB is te krap.
+      - --max-allowed-packet=64M
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mariadb-data:/var/lib/mysql
+
+volumes:
+  mariadb-data:

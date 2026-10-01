@@ -11,7 +11,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   // De verbindingsgegevens staan in prisma7.config.ts (Prisma 7).
 }
 
@@ -36,13 +36,13 @@ model Instellingen {
   btwNummer        String @default("")
   logoData         Bytes?
   logoMimeType     String?
-  logoNaam         String?
+  logoNaam         String? @db.Text
   /// De SVR is niet btw-plichtig. Eén plek om dat te veranderen.
   btwPlichtig      Boolean @default(false)
   /// Hele procenten, bijvoorbeeld 21. Alleen gebruikt als btwPlichtig aanstaat.
   btwPercentage    Int     @default(21)
   betaaltermijnDagen Int   @default(30)
-  factuurVoetnoot  String  @default("")
+  factuurVoetnoot  String  @default("") @db.Text
   bijgewerktOp     DateTime @updatedAt
 }
 
@@ -68,7 +68,7 @@ model Boekjaar {
   /// verwijderen van een concept.
   factuurTeller Int @default(0)
 
-  notities     String?
+  notities     String? @db.Text
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt
 
@@ -108,7 +108,7 @@ model Relatie {
   /// Alleen zinvol bij studieverenigingen: krijgt deze vereniging de
   /// jaarlijkse bijdragefactuur?
   bijdragePlichtig Boolean @default(false)
-  notities       String?
+  notities       String? @db.Text
   aangemaaktOp   DateTime @default(now())
   bijgewerktOp   DateTime @updatedAt
 
@@ -137,7 +137,7 @@ model Begrotingspost {
 
   begrootCenten Int     @default(0)
   volgorde      Int     @default(0)
-  notities      String?
+  notities      String? @db.Text
 
   factuurregels Factuurregel[]
   uitgaven      Uitgave[]
@@ -168,7 +168,7 @@ model Factuur {
 
   factuurdatum DateTime
   vervaldatum  DateTime
-  omschrijving String
+  omschrijving String @db.Text
 
   /// 'concept' | 'verstuurd' | 'deels_betaald' | 'betaald' | 'oninbaar' | 'gecrediteerd'
   status String @default("concept")
@@ -189,7 +189,7 @@ model Factuur {
   /// Som van de regels. Wordt bij elke wijziging opnieuw berekend.
   totaalCenten Int @default(0)
 
-  notities     String?
+  notities     String? @db.Text
   verstuurdOp  DateTime?
   aangemaaktOp DateTime  @default(now())
   bijgewerktOp DateTime  @updatedAt
@@ -214,7 +214,7 @@ model Factuurregel {
   begrotingspostId String
   begrotingspost   Begrotingspost @relation(fields: [begrotingspostId], references: [id])
 
-  omschrijving       String
+  omschrijving       String @db.Text
   aantal             Int @default(1)
   prijsPerStukCenten Int
   /// Altijd aantal * prijsPerStukCenten.
@@ -232,7 +232,7 @@ model Betaling {
 
   datum        DateTime
   bedragCenten Int
-  notitie      String?
+  notitie      String? @db.Text
 
   geregistreerdOp   DateTime @default(now())
   geregistreerdDoor String?
@@ -256,9 +256,9 @@ model Uitgave {
   relatie   Relatie? @relation(fields: [relatieId], references: [id])
   /// Altijd gevuld, ook zonder gekoppelde relatie, zodat overzichten leesbaar
   /// blijven.
-  leverancierNaam String
+  leverancierNaam String @db.Text
 
-  omschrijving String
+  omschrijving String @db.Text
   bedragCenten Int
 
   begrotingspostId String
@@ -283,7 +283,7 @@ model Uitgave {
   betaald   Boolean   @default(false)
   betaaldOp DateTime?
 
-  notities String?
+  notities String? @db.Text
 
   bijlageId String?  @unique
   bijlage   Bijlage? @relation(fields: [bijlageId], references: [id])
@@ -302,7 +302,7 @@ model Uitgave {
 /// geen schrijfbaar bestandssysteem nodig heeft.
 model Bijlage {
   id           String   @id @default(cuid())
-  bestandsnaam String
+  bestandsnaam String @db.Text
   mimeType     String
   grootte      Int
   data         Bytes
@@ -334,7 +334,7 @@ model Evenement {
   opbrengstpostId String?
   opbrengstpost   Begrotingspost? @relation("EvenementOpbrengstpost", fields: [opbrengstpostId], references: [id])
 
-  notities     String?
+  notities     String? @db.Text
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt
 
@@ -362,7 +362,7 @@ model Deelnemer {
   /// Alleen hierop wordt omgeslagen. Dit onderscheid is de kern van de module.
   bevestigdBetalend Boolean @default(false)
 
-  notities String?
+  notities String? @db.Text
 
   omslagrondeRegels OmslagrondeDeelnemer[]
 
@@ -395,7 +395,7 @@ model Omslagronde {
   prijsPerPersoonCenten     Int
   totaalGefactureerdCenten  Int
 
-  notities String?
+  notities String? @db.Text
 
   regels   OmslagrondeDeelnemer[]
   facturen Factuur[]
@@ -435,7 +435,7 @@ model Banksaldo {
 
   datum        DateTime
   saldoCenten  Int
-  notitie      String?
+  notitie      String? @db.Text
   ingevoerdOp  DateTime @default(now())
   ingevoerdDoor String?
   bankimport Bankimport?
@@ -449,7 +449,7 @@ model Bankimport {
   boekjaarId String
   boekjaar Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
   bestandHash String @unique
-  bestandsnaam String
+  bestandsnaam String @db.Text
   rekening String
   beginDatum DateTime
   eindDatum DateTime
@@ -477,13 +477,13 @@ model Bankmutatie {
   rekening String
   datum DateTime
   bedragCenten Int
-  omschrijving String
-  tegenpartijNaam String @default("")
+  omschrijving String @db.Text
+  tegenpartijNaam String @default("") @db.Text
   tegenpartijIban String @default("")
   bankReferentie String?
   /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | genegeerd
   verwerking String @default("open")
-  notitie String?
+  notitie String? @db.Text
   betalingId String? @unique
   betaling Betaling? @relation(fields: [betalingId], references: [id], onDelete: Restrict)
   uitgaveId String? @unique
@@ -505,7 +505,7 @@ model Voorraadpost {
   aantal                   Int @default(0)
   waardePerStukCenten       Int @default(0)
   locatie                  String @default("")
-  notities                 String @default("")
+  notities                 String @default("") @db.Text
   bijgewerktOp             DateTime @updatedAt
 
   /// Op welke begrotingspost het verbruik van deze spullen thuishoort. Zonder
@@ -529,9 +529,9 @@ model Auditlog {
   entiteitId String?
   /// 'aangemaakt' | 'gewijzigd' | 'verwijderd' | vrije omschrijving
   actie      String
-  samenvatting String
+  samenvatting String @db.Text
   /// JSON als tekst. Geen Json-kolom, zodat het schema op elke provider werkt.
-  details    String?
+  details    String? @db.Text
 
   boekjaarId String?
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { vergrendelRij } from "@/lib/slot";
 import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { logAudit } from "@/lib/audit";
@@ -84,7 +85,7 @@ export async function boekVerbruik(
     let melding = "";
     await db.$transaction(async (tx) => {
       // Serialize withdrawals for the same stock item before reading its count.
-      await tx.$queryRaw`SELECT id FROM "Voorraadpost" WHERE id = ${id} AND "boekjaarId" = ${boekjaar.id} FOR UPDATE`;
+      await vergrendelRij(tx, "Voorraadpost", id);
       const post = await tx.voorraadpost.findFirst({
         where: { id, boekjaarId: boekjaar.id },
         include: { begrotingspost: { select: { code: true, naam: true } } },

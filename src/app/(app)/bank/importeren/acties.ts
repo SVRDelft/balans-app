@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { vergrendelRij } from "@/lib/slot";
 import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
@@ -20,7 +21,7 @@ const hash = (tekst: string) => createHash("sha256").update(tekst).digest("hex")
 const utc = (datum: string) => new Date(`${datum}T00:00:00Z`);
 function vernieuw() { revalidatePath("/", "layout"); }
 async function vergrendelJaar(tx: DbClient, id: string) {
-  await tx.$queryRaw`SELECT id FROM "Boekjaar" WHERE id = ${id} FOR UPDATE`;
+  await vergrendelRij(tx, "Boekjaar", id);
   if (!(await tx.boekjaar.findUnique({ where: { id } }))?.actief) throw new Error("Dit boekjaar is niet meer actief.");
 }
 
@@ -103,7 +104,7 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
     await vergrendelFactuur(tx, betaling.factuurId, jaarId);
     betalingId = betaling.id; verwerking = "bestaande_betaling";
   } else if (soort === "uitgave" && id) {
-    await tx.$queryRaw`SELECT id FROM "Uitgave" WHERE id = ${id} AND "boekjaarId" = ${jaarId} FOR UPDATE`;
+    await vergrendelRij(tx, "Uitgave", id);
     const uitgave = await tx.uitgave.findUnique({ where: { id, boekjaarId: jaarId, bankmutatie: null } });
     if (!uitgave || regel.bedragCenten >= 0 || uitgave.bedragCenten !== -regel.bedragCenten) throw new Error("Kies een ongekoppelde uitgave met hetzelfde bedrag als deze afschrijving.");
     uitgaveId = id; verwerking = uitgave.betaald ? "bestaande_uitgave" : "uitgave_betaald";
@@ -232,7 +233,7 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
       }
       if (regel.verwerking === "nieuwe_uitgave" && (regel.uitgave?.omslagrondeId || regel.uitgave?.bijlageId)) throw new Error("Aan deze uitgave is een bonnetje of omslag gekoppeld. Verwijder die koppeling eerst of boek een correctie.");
       if (regel.betaling) await vergrendelFactuur(tx, regel.betaling.factuurId, jaar.id);
-      if (regel.uitgaveId) await tx.$queryRaw`SELECT id FROM "Uitgave" WHERE id = ${regel.uitgaveId} FOR UPDATE`;
+      if (regel.uitgaveId) await vergrendelRij(tx, "Uitgave", regel.uitgaveId);
       await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
       if (regel.verwerking === "nieuwe_inkomst" && regel.betaling) {
         // De factuur is door de import zelf aangemaakt; die gaat mee terug.

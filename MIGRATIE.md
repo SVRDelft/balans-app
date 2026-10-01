@@ -1,138 +1,105 @@
-# Vercel en Postgres
+# Database en hosting
 
-De app gebruikt Postgres via Prisma 7. Het datamodel staat in
-`prisma/schema.prisma`; de Postgres-migraties staan in
-`prisma/migrations-postgres`. De oude SQLite-migraties in `prisma/migrations`
-zijn alleen een archief. De lokale SQLite-database wordt niet verwijderd.
+De app gebruikt **MariaDB** via Prisma 7 met de driver adapter
+`@prisma/adapter-mariadb`. Die adapter is pure JavaScript; er wordt niets
+gecompileerd. Dat is de voorwaarde om op de webserver van de TU Delft te kunnen
+draaien, waar we het besturingssysteem niet in de hand hebben.
 
-## Project verbinden
+Het datamodel staat in `prisma/schema.prisma`. De MariaDB-migraties staan in
+`prisma/migrations-mysql`. De mappen `prisma/migrations-postgres` en
+`prisma/migrations` zijn een archief van de Postgres- en SQLite-tijd; ze worden
+niet meer gebruikt, maar blijven staan zolang de oude app op Vercel nog draait.
 
-Gebruik Node.js 22 of 24 en installeer de afhankelijkheden:
-
-```bash
-npm ci
-npx vercel login
-npx vercel link
-```
-
-Kies het project `balans-app` van team `SVR` (`svr-d5ac`).
-
-## Database en inloggen
-
-Koppel via Vercel Storage een Neon Postgres-database in Frankfurt. De huidige
-preview-database heet `balans-app-db` en is verbonden met Preview en Development.
-Productie gebruikt de aparte database `balans-app-production-db` in Frankfurt.
-De integratie gebruikt de prefix `NEON_`, omdat er al een handmatig ingestelde
-`DATABASE_URL` in het project stond.
-
-De app gebruikt `NEON_DATABASE_URL` of, zonder prefix, `DATABASE_URL`.
-Voor migraties gebruikt Prisma bij voorkeur `NEON_DATABASE_URL_UNPOOLED`,
-`DATABASE_URL_UNPOOLED` of `DIRECT_DATABASE_URL` (het directe adres).
-De app en migraties moeten altijd naar dezelfde database verwijzen.
-
-Stel daarnaast `APP_WACHTWOORD` en een willekeurige `AUTH_SECRET` van minstens
-32 tekens in. Gebruik geen voorbeeldwaarden. Bewaar deze waarden als
-servervariabelen, zonder `NEXT_PUBLIC_`.
-
-Haal de ontwikkelinstellingen op:
+## Lokaal werken
 
 ```bash
-npx vercel env pull .env.local
-```
-
-Next.js, Prisma en het seed-script laden dezelfde `.env.local`. Dit bestand
-heeft voorrang op een eventuele oude `.env` met een SQLite-adres.
-
-## Eerste installatie
-
-Voor een nieuwe, lege database:
-
-```bash
-npm run setup
-```
-
-Dit maakt de tabellen aan en vult de startgegevens. Draai het seed-script niet
-bij iedere deployment: het zet sommige begrotings- en relatiegegevens terug
-naar de startwaarden. Gebruik bij een bestaande administratie alleen
-`npm run db:deploy`.
-
-Een oude SQLite-administratie wordt niet automatisch geïmporteerd. Bewaar het
-originele bestand en controleer bij een import alle tabellen, factuurnummers,
-bedragen, datums en bijlagen. Importeer alleen naar een lege database en gebruik
-een transactie, zodat een mislukte import geen halve administratie achterlaat.
-
-## Lokaal controleren
-
-```bash
-npm run typecheck
-npm run lint
-npm test
-npm run build
+npm install
+cp .env.example .env     # en vul je eigen waarden in
+npm run db:start         # MariaDB 10.11 in Docker
+npm run setup            # tabellen aanmaken en startgegevens vullen
 npm run dev
 ```
 
-Open <http://localhost:3000> en log in met je eigen naam en het wachtwoord uit
-`APP_WACHTWOORD`. Controleer het dashboard, de verenigingen en de exports.
+`npm run db:stop` stopt de database, `docker compose down -v` gooit hem ook leeg.
+Zonder Docker kan elke MariaDB 10.11 of hoger; zet dan alleen `DATABASE_URL` in
+`.env` goed.
 
-## Preview publiceren
+## Van Postgres naar MariaDB
+
+Zolang de oude app op Vercel met Neon Postgres draait, staat de echte
+administratie daar. Overzetten gaat met één script:
 
 ```bash
-npx vercel deploy --target=preview
+npx vercel env pull .env.local                       # geeft NEON_DATABASE_URL
+npx tsx scripts/postgres-naar-mariadb.mts            # droge loop: alleen tellen
+npx tsx scripts/postgres-naar-mariadb.mts --schrijf  # echt overzetten
 ```
 
-`vercel.json` stelt Frankfurt in als regio en draait bij de build eerst
-`prisma migrate deploy`. `postinstall` genereert de Prisma-client. Er wordt
-geen lokale database of `.env`-bestand geüpload.
+Het script schrijft alleen naar een **lege** MariaDB (`npm run db:reset` maakt
+hem leeg) en controleert daarna per tabel het aantal rijen en de som van alle
+bedragen in centen. Komt er één tabel niet overeen, dan stopt het met een
+foutmelding en gebruik je de uitkomst niet.
 
-Gebruik voor productie een aparte database en stel de vereiste variabelen ook
-voor de Production-omgeving in. Publiceer daarna bewust met
-`npx vercel deploy --prod`. Preview- en ontwikkelversies mogen niet naar de
-productiedatabase schrijven.
+Draai dit pas op het moment van de echte overstap opnieuw, zodat je niets mist
+wat er in de tussentijd op Vercel is bijgeboekt.
 
-## Als een push niet vanzelf deployt
+## Verschillen tussen Postgres en MariaDB
 
-De repository is privé en het Vercel-project draait op het Hobby-plan. Die
-combinatie stelt één eis: Vercel bouwt alleen commits waarvan het e-mailadres
-van de **auteur** bekend is op het Vercel-account. Commit je vanaf een ander
-adres, dan blijft de deployment hangen met:
+Deze dingen zijn bij de overstap aangepast. Houd er rekening mee als je code
+toevoegt:
 
-> The deployment was blocked because the commit author did not have contributing
-> access to the project on Vercel. The Hobby Plan does not support collaboration
-> for private repositories.
+- **Lange tekst.** MySQL maakt van een `String` standaard een `VARCHAR(191)`.
+  Alle vrije tekst (omschrijvingen, notities, auditregels) heeft daarom
+  `@db.Text` in het schema. Vergeet je dat bij een nieuw veld, dan wordt tekst
+  stilletjes afgekapt.
+- **Zoeken op hoofdletters.** Prisma's `mode: "insensitive"` bestaat alleen voor
+  Postgres en is verwijderd. MariaDB vergelijkt met `utf8mb4_unicode_ci` al
+  hoofdletterongevoelig, dus zoeken werkt hetzelfde.
+- **Tekenset.** De database draait op `utf8mb4`, zodat bijvoorbeeld "Bèta" en
+  een euroteken goed gaan.
+- **Bonnetjes.** Bijlagen staan als bytes in de database. MariaDB weigert
+  standaard pakketten boven 16 MB; `docker-compose.yml` zet
+  `max-allowed-packet=64M`. Doet Plesk dat niet, dan is de bovengrens voor een
+  upload lager dan de 20 MB uit de opdracht. Controleer dat op de server.
+- **Datums** blijven UTC; de driver krijgt `timezone: "Z"` mee.
 
-Dat is geen storing en het betekent ook niet dat je moet upgraden. Er zijn drie
-uitwegen, en de eerste twee kosten niets:
+## Hosting op de TU-server
 
-1. Commit vanaf het adres dat op het Vercel-account staat. Voor deze repository
-   staat dat al ingesteld:
+De app draait op de webhosting van de TU Delft (Plesk, Node.js via Passenger).
+De stappen in Plesk staan in [DEPLOY.md](DEPLOY.md); die wordt in fase 5
+geschreven.
 
-   ```bash
-   git config user.email "bestuur-svr@tudelft.nl"
-   ```
+Afspraken die daaruit volgen en die in de code gelden:
 
-   Dit geldt alleen in deze map; je andere projecten houden je eigen adres. Doet
-   een volgend bestuur dit vanaf een eigen laptop, dan moet het daar opnieuw.
+- Node 20.9 of hoger (`engines` in `package.json`); de server draait 20.20.
+- Geen gecompileerde modules: geen `sharp`, `bcrypt` of `better-sqlite3`.
+  Het controleren van een geüpload logo gebeurt in `src/lib/afbeelding.ts`.
+- De build draait lokaal of in GitHub Actions, nooit op de server.
+- Niets wat gedeeld moet zijn in het geheugen van het proces bewaren: Passenger
+  draait meerdere processen naast elkaar.
 
-2. Voeg je eigen e-mailadres toe aan het Vercel-account bij de
-   accountinstellingen. Vercel vergelijkt de commit-auteur met alle geverifieerde
-   adressen op dat account, dus daarna werken je eigen commits ook.
+## Uitweg terug naar Vercel
 
-3. Publiceer met de hand: `npx vercel deploy --prod`. Zo'n deploy staat op naam
-   van wie er is ingelogd en wordt dus nooit geblokkeerd. Handig als noodgreep,
-   maar je moet het dan elke keer zelf doen.
+Als ICT de app op de TU-server niet toestaat, kan hij terug naar Vercel. Er zit
+geen Plesk-specifieke code in de app. Nodig is dan:
 
-De repository openbaar maken lost het ook op, omdat Vercel deze controle dan
-overslaat. Doe dat niet: het zet de hele administratie te grabbel om een
-instelling die in een minuut te regelen is.
+1. Een MySQL-database die van buitenaf bereikbaar is (bijvoorbeeld PlanetScale
+   of een MySQL bij een andere aanbieder), of terug naar Postgres door in
+   `prisma/schema.prisma` de provider op `postgresql` te zetten, met
+   `@prisma/adapter-pg` in `src/lib/db.ts` en een nieuwe migratiemap. De
+   `@db.Text`-aanduidingen mogen dan blijven staan.
+2. `DATABASE_URL` als omgevingsvariabele in Vercel, plus `APP_WACHTWOORD` en
+   `AUTH_SECRET`.
+3. De uploads: op Plesk staan die in `storage/` op schijf. Op Vercel is het
+   bestandssysteem niet blijvend, dus dan is opslag bij een dienst als Vercel
+   Blob of S3 nodig. De opslag zit achter één interface, zodat alleen die
+   implementatie vervangen hoeft te worden.
+4. De limiet van 4,5 MB per request van Vercel geldt dan weer voor uploads.
 
-## Bijlagen en back-ups
+## Back-ups
 
-Bijlagen staan in Postgres. Uploads zijn beperkt tot 4 MB, zodat het bestand
-inclusief formuliergegevens binnen de
-[Vercel-requestlimiet](https://vercel.com/docs/functions/limitations) past.
-De browser controleert de grootte vóór het versturen; de server controleert
-opnieuw.
-
-Controleer in Neon welke herstel- en back-upmogelijkheden bij het gekozen plan
-horen. Bewaar daarnaast periodiek een database-export; de Excel- en PDF-export
-uit de app zijn rapportages en vervangen geen volledige databaseback-up.
+Op de TU-server regel je een dagelijkse back-up van de database en de map
+`storage/` in Plesk (*Backup & Restore*). Daarnaast heeft het bestuur in de app
+een exportknop die de hele database als JSON en de uploads als zip downloadt;
+bewaar die buiten de TU-server. De Excel- en PDF-exports zijn rapportages en
+vervangen geen back-up.

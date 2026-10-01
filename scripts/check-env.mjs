@@ -2,13 +2,13 @@ import nextEnv from "@next/env";
 
 nextEnv.loadEnvConfig(process.cwd(), false);
 
-const databaseUrl = process.env.NEON_DATABASE_URL ?? process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL;
 const password = process.env.APP_WACHTWOORD;
 const secret = process.env.AUTH_SECRET;
 const errors = [];
 
-if (!databaseUrl || !/^postgres(ql)?:\/\//.test(databaseUrl)) {
-  errors.push("Stel NEON_DATABASE_URL of DATABASE_URL in op een Postgres-adres.");
+if (!databaseUrl || !/^mysql:\/\//.test(databaseUrl)) {
+  errors.push("Stel DATABASE_URL in op een MariaDB-adres, bijvoorbeeld mysql://svr:...@localhost:3306/svr.");
 }
 if (!password || password === "verander-dit-wachtwoord" || password === "[SENSITIVE]") {
   errors.push("Stel APP_WACHTWOORD in op een eigen wachtwoord.");

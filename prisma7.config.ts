@@ -6,16 +6,12 @@ import { defineConfig } from "prisma/config";
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
-    path: "prisma/migrations-postgres",
+    // MariaDB op de server van de TU Delft. De oude Postgres-migraties staan
+    // nog in prisma/migrations-postgres, voor de app die nu op Vercel draait.
+    path: "prisma/migrations-mysql",
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // Neon levert een apart adres zonder pooler voor migraties.
-    url:
-      process.env.NEON_DATABASE_URL_UNPOOLED ??
-      process.env.NEON_DATABASE_URL ??
-      process.env.DATABASE_URL_UNPOOLED ??
-      process.env.DIRECT_DATABASE_URL ??
-      process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
 });

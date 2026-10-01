@@ -8,6 +8,7 @@ import { vereisSessie } from "@/lib/auth/server";
 import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
 import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
+import { vergrendelRij } from "@/lib/slot";
 import { datumUitInvoer } from "@/lib/datum";
 import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
 import { leesTekst, leesVinkje, voerUit, type ActieStaat } from "@/lib/acties";
@@ -122,7 +123,7 @@ export async function bewaarUitgave(
       }
 
       const uitgave = await db.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM "Uitgave" WHERE id = ${id} AND "boekjaarId" = ${boekjaar.id} FOR UPDATE`;
+      await vergrendelRij(tx, "Uitgave", id);
       const actueel = await tx.uitgave.findUniqueOrThrow({ where: { id, boekjaarId: boekjaar.id }, include: { bankmutatie: true } });
       if (actueel.bankmutatie && (gegevens.bedragCenten !== actueel.bedragCenten || gegevens.betaald !== actueel.betaald || gegevens.betaaldOp?.getTime() !== actueel.betaaldOp?.getTime())) throw new Error("Ontkoppel de bankregel eerst voordat je bedrag of betaling wijzigt.");
       if (actueel.omslagrondeId && (actueel.bedragCenten !== gegevens.bedragCenten || actueel.evenementId !== gegevens.evenementId || actueel.begrotingspostId !== gegevens.begrotingspostId || !gegevens.bedragDefinitief)) throw new Error("Deze uitgave is al in een omslag verdeeld en kan zo niet meer worden gewijzigd.");

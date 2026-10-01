@@ -1,19 +1,23 @@
-// Each run gets its own database. The normal development/production data is never reset.
+// Elke run krijgt een eigen database. De gewone ontwikkel- of productiegegevens
+// worden nooit gewist.
 import nextEnv from '@next/env';
-import pg from 'pg';
+import mariadb from 'mariadb';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile, unlink } from 'node:fs/promises';
 
 nextEnv.loadEnvConfig(process.cwd());
 const database = `svr_test_${Date.now()}_${randomBytes(3).toString('hex')}`;
-const source = process.env.NEON_DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
-if (!source?.startsWith('postgres')) throw new Error('A development Postgres connection is required.');
-const admin = new pg.Pool({ connectionString: source, max: 1 });
+const source = process.env.DATABASE_URL;
+if (!source?.startsWith('mysql:')) throw new Error('Een MariaDB-verbinding (DATABASE_URL) is nodig.');
 const url = new URL(source);
+const admin = await mariadb.createConnection({
+  host: url.hostname, port: Number(url.port || 3306),
+  user: decodeURIComponent(url.username), password: decodeURIComponent(url.password),
+});
 url.pathname = `/${database}`;
-const env = { ...process.env, NEON_DATABASE_URL: url.href, NEON_DATABASE_URL_UNPOOLED: url.href,
-  DATABASE_URL: url.href, APP_WACHTWOORD: randomBytes(24).toString('hex'),
+const env = { ...process.env, DATABASE_URL: url.href,
+  APP_WACHTWOORD: randomBytes(24).toString('hex'),
   AUTH_SECRET: randomBytes(48).toString('hex'), E2E_BASE_URL: 'http://localhost:3101', NEXT_TELEMETRY_DISABLED: '1' };
 let server;
 let created = false;
@@ -25,14 +29,14 @@ function run(file, args, options = {}) {
   });
 }
 try {
-  await admin.query(`CREATE DATABASE "${database}"`);
+  await admin.query(`CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
   created = true;
   await mkdir('.vercel', { recursive: true });
   await writeFile('.vercel/e2e-env.json', JSON.stringify({ database, env: {
-    NEON_DATABASE_URL: url.href, NEON_DATABASE_URL_UNPOOLED: url.href, DATABASE_URL: url.href,
+    DATABASE_URL: url.href,
     APP_WACHTWOORD: env.APP_WACHTWOORD, AUTH_SECRET: env.AUTH_SECRET, E2E_BASE_URL: env.E2E_BASE_URL,
   }}));
-  await run('scripts/migrate.mjs', []);
+  await run('node_modules/prisma/build/index.js', ['migrate', 'deploy']);
   server = spawn(process.execPath, ['node_modules/next/dist/bin/next', 'dev', '--port', '3101'], { env, stdio: 'inherit' });
   await Promise.race([
     new Promise((_, reject) => server.on('exit', code => reject(new Error(`Server stopped (${code})`)))),
@@ -64,9 +68,9 @@ try {
     else server.kill('SIGTERM');
   }
   if (created) {
-    // Only the unique database created above can be removed by this run.
+    // Alleen de hierboven aangemaakte database mag weg.
     if (!/^svr_test_\d+_[a-f0-9]{6}$/.test(database)) throw new Error('Unsafe test database name.');
-    await admin.query(`DROP DATABASE "${database}" WITH (FORCE)`);
+    await admin.query(`DROP DATABASE \`${database}\``);
     await unlink('.vercel/e2e-env.json').catch(() => {});
   }
   await admin.end();

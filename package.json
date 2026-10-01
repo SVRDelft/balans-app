@@ -12,16 +12,22 @@
     "test": "vitest run src",
     "test:e2e": "node scripts/e2e.mjs",
     "test:watch": "vitest",
-    "db:migrate": "node scripts/migrate.mjs dev",
-    "db:deploy": "node scripts/migrate.mjs",
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
     "setup": "npm run db:deploy && prisma db seed",
     "postinstall": "prisma generate"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "dependencies": {
     "@next/env": "^16.3.5",
+    "@prisma/adapter-mariadb": "^7.10.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@radix-ui/react-slot": "^1.2.3",
@@ -30,12 +36,12 @@
     "clsx": "^2.1.1",
     "exceljs": "^4.4.0",
     "lucide-react": "^1.46.0",
+    "mariadb": "^3.5.4",
     "next": "16.3.5",
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
-    "sharp": "^0.35.4",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.5"
   },

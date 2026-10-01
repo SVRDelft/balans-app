@@ -7,6 +7,7 @@ import { BOEKJAAR_COOKIE, controleerWachtwoord } from "@/lib/auth/sessie";
 import { logAudit } from "@/lib/audit";
 import { vereisSessie } from "@/lib/auth/server";
 import { db } from "@/lib/db";
+import { vergrendelBoekjaren } from "@/lib/slot";
 import { datumUitInvoer } from "@/lib/datum";
 import { formatteerEuro, parseerBedragNaarCenten } from "@/lib/geld";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
@@ -74,7 +75,7 @@ export async function bewaarBoekjaar(
       });
     } else {
       const boekjaar = await db.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
+      await vergrendelBoekjaren(tx);
       const eerste = (await tx.boekjaar.count()) === 0;
       const nieuw = await tx.boekjaar.create({
         data: {
@@ -129,7 +130,7 @@ export async function activeerBoekjaar(
     if (!boekjaar) return { fout: "Dit boekjaar bestaat niet meer." };
 
     await db.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
+      await vergrendelBoekjaren(tx);
       await tx.boekjaar.updateMany({
         where: { actief: true },
         data: { actief: false },
@@ -180,7 +181,7 @@ export async function wisBoekingen(
     const jaar = boekjaar.id;
     const telling = await db.$transaction(
       async (tx) => {
-        await tx.$queryRaw`SELECT pg_advisory_xact_lock(6282026)::text`;
+        await vergrendelBoekjaren(tx);
 
         // Volgorde telt: bankmutaties verwijzen naar betalingen en uitgaven,
         // en een bankimport naar een banksaldo.

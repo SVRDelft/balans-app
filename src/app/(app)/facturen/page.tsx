@@ -62,9 +62,9 @@ export default async function FacturenPagina({
         ...statusVoorwaarde,
         ...(statusFilter === "vervallen" ? { vervaldatum: { lt: vandaag() }, totaalCenten: { gt: 0 } } : {}),
         ...(zoekterm ? { OR: [
-          { nummer: { contains: zoekterm, mode: "insensitive" as const } },
-          { omschrijving: { contains: zoekterm, mode: "insensitive" as const } },
-          { relatie: { naam: { contains: zoekterm, mode: "insensitive" as const } } },
+          { nummer: { contains: zoekterm } },
+          { omschrijving: { contains: zoekterm } },
+          { relatie: { naam: { contains: zoekterm } } },
         ] } : {}),
         ...(relatieFilter ? { relatieId: relatieFilter } : {}),
         ...(evenementFilter ? { evenementId: evenementFilter } : {}),

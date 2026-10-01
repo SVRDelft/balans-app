@@ -2,7 +2,7 @@ import "server-only";
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
+import { leesAfbeelding } from "./afbeelding";
 
 let standaardLogo: Promise<Buffer> | undefined;
 
@@ -37,29 +37,17 @@ export async function controleerLogo(bestand: File) {
   if (!["image/png", "image/jpeg"].includes(bestand.type))
     throw new Error("Kies een PNG- of JPG-bestand voor het logo.");
   const data = Buffer.from(await bestand.arrayBuffer());
-  try {
-    const afbeelding = sharp(data, {
-      limitInputPixels: 16_000_000,
-      failOn: "warning",
-    });
-    const metadata = await afbeelding.metadata();
-    if (
-      !["png", "jpeg"].includes(metadata.format ?? "") ||
-      !metadata.width ||
-      !metadata.height ||
-      (metadata.pages ?? 1) > 1
-    ) {
-      throw new Error("invalid image");
-    }
-    await afbeelding.stats(); // Decodeer ook de pixels om beschadigde bestanden af te wijzen.
-    return {
-      logoData: new Uint8Array(data),
-      logoMimeType: metadata.format === "png" ? "image/png" : "image/jpeg",
-      logoNaam: bestand.name.slice(0, 200),
-    };
-  } catch {
+  const afbeelding = leesAfbeelding(data);
+  if (!afbeelding || afbeelding.breedte * afbeelding.hoogte > 16_000_000) {
     throw new Error(
       "Dit logo is geen geldige PNG of JPG, of heeft te veel pixels. Kies een afbeelding van maximaal 16 megapixels.",
     );
   }
+  // Het bestand wordt bewaard zoals het is: verkleinen zou een gecompileerde
+  // bibliotheek vragen, en die kan niet mee naar de server van de TU Delft.
+  return {
+    logoData: new Uint8Array(data),
+    logoMimeType: afbeelding.formaat === "png" ? "image/png" : "image/jpeg",
+    logoNaam: bestand.name.slice(0, 200),
+  };
 }

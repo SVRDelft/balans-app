@@ -37,7 +37,7 @@ export default async function RelatiesPagina({
     where: {
       ...(gekozenType ? { type: gekozenType } : {}),
       ...(toonInactief ? {} : { actief: true }),
-      ...(zoekterm ? { OR: ["naam", "contactpersoon", "email", "plaats", "kvkNummer"].map((veld) => ({ [veld]: { contains: zoekterm, mode: "insensitive" } })) } : {}),
+      ...(zoekterm ? { OR: ["naam", "contactpersoon", "email", "plaats", "kvkNummer"].map((veld) => ({ [veld]: { contains: zoekterm } })) } : {}),
     },
     orderBy: [{ type: "asc" }, { naam: "asc" }],
     include: { _count: { select: { facturen: true } } },
