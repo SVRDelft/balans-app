@@ -36,8 +36,27 @@ const globaalVoorPrisma = globalThis as unknown as {
   prismaClient?: PrismaClient;
 };
 
-export const db: PrismaClient = globaalVoorPrisma.prismaClient ?? maakClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globaalVoorPrisma.prismaClient = db;
+function haalClient(): PrismaClient {
+  const bestaand = globaalVoorPrisma.prismaClient;
+  if (bestaand) return bestaand;
+  const nieuw = maakClient();
+  // Eén verbinding per proces: in ontwikkeling omdat deze module bij elke
+  // herlaadbeurt opnieuw draait, in productie omdat Passenger meerdere
+  // processen start die elk hun eigen verbinding houden.
+  globaalVoorPrisma.prismaClient = nieuw;
+  return nieuw;
 }
+
+/**
+ * De verbinding wordt pas gemaakt bij het eerste gebruik, niet bij het laden van
+ * dit bestand. Zo kan de app gebouwd worden zonder database (GitHub Actions) en
+ * blijft de publieke site overeind als de database even niet bereikbaar is.
+ */
+export const db: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_doel, naam, ontvanger) {
+    const client = haalClient();
+    const waarde = Reflect.get(client, naam, ontvanger);
+    return typeof waarde === "function" ? waarde.bind(client) : waarde;
+  },
+  has: (_doel, naam) => naam in haalClient(),
+});
