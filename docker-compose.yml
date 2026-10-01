@@ -27,6 +27,7 @@ services:
       retries: 10
     volumes:
       - mariadb-data:/var/lib/mysql
+      - ./prisma/docker:/docker-entrypoint-initdb.d:ro
 
 volumes:
   mariadb-data:
