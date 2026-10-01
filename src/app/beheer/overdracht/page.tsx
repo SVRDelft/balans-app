@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, Download } from "lucide-react";
 
 import { Kerngetal, Paginakop } from "@/components/paginakop";
 import { Button } from "@/components/ui/button";
@@ -108,6 +108,26 @@ export default async function OverdrachtPagina() {
               <a href="/api/export/pdf">
                 <FileText />
                 PDF downloaden
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Volledige back-up</CardTitle>
+            <CardDescription>
+              Alles in één zip: de hele database als JSON, de bonnetjes en de
+              bestanden uit het portaal. Bewaar die buiten de server van de TU
+              Delft, bijvoorbeeld bij de overdracht aan het volgende bestuur.
+              Wachtwoorden zitten er niet in.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" asChild>
+              <a href="/api/export/alles">
+                <Download />
+                Back-up downloaden
               </a>
             </Button>
           </CardContent>

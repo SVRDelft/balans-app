@@ -58,3 +58,4 @@ yarn-error.log*
 
 # Geüploade bestanden van het portaal; die horen in de back-up, niet in git.
 storage/
+deploy/

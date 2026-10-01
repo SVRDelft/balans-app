@@ -1,0 +1,81 @@
+name: Bouwen voor de TU-server
+
+# Bouwt de app en zet het resultaat op de branch `deploy`. Daar staat alleen de
+# gebouwde versie op: geen broncode, geen .env, geen ontwikkelgereedschap.
+# In Plesk druk je daarna zelf op "Pull updates" — er gaat dus nooit vanzelf
+# iets live.
+
+on:
+  push:
+    branches: [main, tu-server]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-bundel
+  cancel-in-progress: true
+
+jobs:
+  bouwen:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Code ophalen
+        uses: actions/checkout@v4
+
+      - name: Node 20 klaarzetten
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.20.2"
+          cache: npm
+
+      - name: Afhankelijkheden installeren
+        run: npm ci
+
+      - name: Controles
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Bouwen
+        run: npm run build
+
+      - name: Bundel samenstellen
+        run: node scripts/deploy-bundel.mjs
+
+      - name: Controleren dat er geen geheimen in de bundel zitten
+        run: |
+          if find deploy -name ".env*" | grep -q .; then
+            echo "Er staat een .env-bestand in de bundel; dat hoort niet."
+            exit 1
+          fi
+
+      - name: Op de branch deploy zetten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          adres="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          # De bestaande branch ophalen als die er is, zodat de geschiedenis
+          # blijft staan. Nooit force-pushen.
+          if git ls-remote --exit-code --heads "$adres" deploy >/dev/null 2>&1; then
+            git clone --depth 1 --branch deploy "$adres" bundel-git
+          else
+            git clone --depth 1 "$adres" bundel-git
+            cd bundel-git && git checkout --orphan deploy && git rm -rq --cached . && cd ..
+          fi
+          # Alles weghalen behalve .git, en de nieuwe bundel erin zetten.
+          find bundel-git -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a deploy/. bundel-git/
+          cd bundel-git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Niets veranderd aan de gebouwde versie."
+            exit 0
+          fi
+          git commit -q -m "Gebouwd uit ${GITHUB_SHA:0:7} (${GITHUB_REF_NAME})"
+          git push -q origin deploy

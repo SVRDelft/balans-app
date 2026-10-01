@@ -10,6 +10,9 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-e2e/**",
+    // De gebouwde versie voor de TU-server; dat is geen broncode.
+    "deploy/**",
+    "storage/**",
     "playwright-report/**",
     "test-results/**",
     "out/**",

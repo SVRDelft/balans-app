@@ -380,5 +380,7 @@ ze te testen zijn. Draai `npm test` na elke wijziging daaraan.
 ## Verder lezen
 
 - [BEWERKEN.md](BEWERKEN.md) — teksten en foto's van de website aanpassen
+- [DEPLOY.md](DEPLOY.md) — de app op de webserver van de TU Delft zetten
+- [OVERDRACHT.md](OVERDRACHT.md) — overdracht aan het volgende bestuur
 - [MIGRATIE.md](MIGRATIE.md) — de database en het publiceren van de app
 - [AANNAMES.md](AANNAMES.md) — de aannames die tijdens het bouwen zijn gedaan
