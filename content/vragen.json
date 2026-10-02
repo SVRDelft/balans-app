@@ -1,0 +1,28 @@
+[
+  {
+    "vraag": "Is de SVR hetzelfde als de Studentenraad?",
+    "antwoord": "Nee. De Studentenraad is het medezeggenschapsorgaan van alle studenten. De SVR is de koepel van de studieverenigingen. Fracties uit de Studentenraad schuiven wel aan bij de SVR-vergaderingen."
+  },
+  {
+    "vraag": "Kan mijn vereniging aansluiten?",
+    "antwoord": "Over het toelaten van een nieuwe vereniging beslist het Algemeen Bestuur. Mail het bestuur, dan zetten we het op de agenda."
+  },
+  {
+    "vraag": "Wie zitten er in de SVR?",
+    "antwoord": "De vijftien studieverenigingen, vertegenwoordigd door hun voorzitters, plus een dagelijks bestuur van studenten."
+  },
+  {
+    "vraag": "Ik werk bij de TU of een andere organisatie en wil de studieverenigingen bereiken. Wat nu?",
+    "antwoord": "Mail het bestuur; wij zetten het door naar de juiste mensen."
+  },
+  {
+    "vraag": "Hoe word ik bestuurslid van de SVR?",
+    "antwoord": "Dat staat op de pagina Bestuur worden.",
+    "link": { "tekst": "Bestuur worden", "naar": "/bestuur-worden" }
+  },
+  {
+    "vraag": "Ik zit in een studieverenigingsbestuur. Waar vind ik de agenda's?",
+    "antwoord": "Die staan in het portaal.",
+    "link": { "tekst": "Inloggen", "naar": "/inloggen" }
+  }
+]

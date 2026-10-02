@@ -1,56 +1,37 @@
 # Vijftien studieverenigingen, één raad
 
-De StudieVerenigingenRaad Delft is het overleg van de vijftien studieverenigingen
-van de TU Delft. Aan dezelfde tafel stemmen de verenigingen onderling af, delen
-ze wat ze geleerd hebben en spreken ze samen met de universiteit.
+Sinds 1963 is de StudieVerenigingenRaad het overkoepelende orgaan van de
+studieverenigingen van de TU Delft.
 
 ## Wat we doen
 
 ### Samenwerken
-Wat één vereniging overkomt, komt de andere veertien ook tegen. In de raad
-wisselen besturen uit wat werkt en wat niet, van een eerstejaarsweekend tot een
-lastige sponsorovereenkomst.
+Voorzitters, penningmeesters, commissarissen onderwijs en de organisatoren van de
+eerstejaarsweekenden overleggen regelmatig. Ze wisselen uit wat werkt en wat
+niet: van boekhouding en btw tot vakevaluaties en het eerstejaarsweekend.
 
 ### Vertegenwoordigen
-De SVR brengt wat de verenigingen samen vinden naar de universiteit. Wat de raad
-uitdraagt is de consensus van de verenigingen, niet de eigen mening van het
-bestuur.
+De SVR spreekt namens alle studieverenigingen met de TU Delft en met andere
+partijen. Wat de raad uitdraagt is de gezamenlijke mening van de verenigingen,
+niet die van het bestuur.
 
 ### Verbinden
-Besturen leren elkaar kennen, en dat maakt samenwerken daarna vanzelfsprekend.
-Daar zijn de borrels, de dies en het gala voor.
+Op een borrel worden net zoveel dingen geregeld als in een vergadering. De SVR
+organiseert de momenten waarop alle Delftse besturen elkaar zien.
 
-## Aan tafel
+## Hoe de SVR werkt
 
-### SVR
-De voorzitters, elke maand. In pak, en elke keer bij een andere vereniging op
-bezoek.
+### Algemeen Bestuur
+De vertegenwoordigers van de vijftien verenigingen, bijna altijd de voorzitters.
+Het AB neemt de officiële besluiten, zoals het oprichten van een commissie of het
+toelaten van een nieuwe vereniging. Daarvoor moet minstens twee derde van de
+leden hebben gestemd.
 
-### SVR-O
-De commissarissen onderwijs, over alles wat met het onderwijs te maken heeft.
-Voorgezeten door de secretaris.
+### Dagelijks Bestuur
+Twee à drie studenten van verschillende studieverenigingen, elk jaar nieuw. Het
+DB zit de vergaderingen voor, notuleert en vertegenwoordigt de SVR naar buiten.
+Het DB heeft geen stemrecht in het Algemeen Bestuur.
 
-### SVeuRo
-De penningmeesters, over begroting, bijdragen en geld in het algemeen.
-Voorgezeten door de penningmeester.
-
-### SVjwR
-De organisatoren van de eerstejaarsweekenden, samen met het bestuur van de OWee.
-
-Ook de fracties uit de Studentenraad schuiven bij de overleggen aan.
-
-## Wat we organiseren
-
-### Educator of the Year Award
-De prijs voor de beste docent van de TU Delft. De SVR zit in de jury, samen met
-de rector magnificus. De uitreiking is op de Dag van het Onderwijs.
-
-### Dé DDB
-Dé Doldwaze Delftsche Besturenborrel, elk kwartaal. Voor besturen van alle
-verenigingen.
-
-### De Dies
-De verjaardag van de SVR, rond 26 februari.
-
-### Het Landelijk Bestuursgala
-Eén avond met besturen uit het hele land.
+### Informanten
+De fracties uit de Studentenraad schuiven aan en praten de verenigingen bij over
+wat er in de universiteit speelt. Ook zij stemmen niet.

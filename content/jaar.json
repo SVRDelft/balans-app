@@ -1,0 +1,12 @@
+{
+  "lbgMaand": "[IN TE VULLEN: maand]",
+  "momenten": [
+    { "wanneer": "Augustus", "wat": "De wissel", "uitleg": "Het nieuwe dagelijks bestuur neemt het over." },
+    { "wanneer": "September", "wat": "Constitutieborrels", "uitleg": "Alle nieuwe besturen worden ingehaald. De SVR recipieert overal, met een passend en vaak bijzonder cadeau." },
+    { "wanneer": "November", "wat": "Dag van het Onderwijs", "uitleg": "Met de uitreiking van de Educator of the Year Award." },
+    { "wanneer": "26 februari", "wat": "De Dies", "uitleg": "De verjaardag van de SVR. Er is taart." },
+    { "wanneer": "4 mei", "wat": "Dodenherdenking", "uitleg": "De SVR legt een krans bij de herdenking van de TU Delft." },
+    { "wanneer": "Elk kwartaal", "wat": "Dé DDB", "uitleg": "Dé Doldwaze Delftsche Besturenborrel, voor alle Delftse besturen." },
+    { "wanneer": "Door het jaar", "wat": "De vier overleggen", "uitleg": "SVR, SVR-O, SVeuRo en SVjwR." }
+  ]
+}

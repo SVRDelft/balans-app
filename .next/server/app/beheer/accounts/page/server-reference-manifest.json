@@ -1,6 +1,6 @@
 {
   "node": {
-    "003f558bdcda915aec62ed52ac984c7f921ceaead1": {
+    "00a58b7c064d1c2f29ebd4e2f177f287348c27d726": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6072f931edb1c11bc451804540e66c459ff07c497d": {
+    "604c40037bee4a88a80a6d20b4a58415db28217a8f": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "407e3a2b70b226509d9311e5d787ab45c78c650e03": {
+    "403695d63fc90df6e42c230be7018084efaaa2ab65": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60cec39bc50a385c0110d2aad081cb186f0447a17d": {
+    "6094112059b4fea9b197ca6b0b57047a0f465486cd": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,18 +44,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60cacd290b22eb9bb38267eb514a961bbfd36e6738": {
-      "workers": {
-        "app/beheer/accounts/page": {
-          "moduleId": 99773,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "nieuwWachtwoord",
-      "filename": "src/app/beheer/accounts/acties.ts"
-    },
-    "60e76c242c77ae88692d82a280f7bee69b6a2dc6f6": {
+    "60e8aee911ee3ba8ea6e19790971bc34b125628d50": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -64,6 +53,17 @@
         }
       },
       "exportedName": "zetActief",
+      "filename": "src/app/beheer/accounts/acties.ts"
+    },
+    "60f9173f288cac6f51f660210292b56dd0570693b0": {
+      "workers": {
+        "app/beheer/accounts/page": {
+          "moduleId": 99773,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "nieuwWachtwoord",
       "filename": "src/app/beheer/accounts/acties.ts"
     }
   },
