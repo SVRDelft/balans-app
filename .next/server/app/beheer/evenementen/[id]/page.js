@@ -1,5 +1,5 @@
 var R=require("../../../../chunks/ssr/[turbopack]_runtime.js")("server/app/beheer/evenementen/[id]/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1ndsald._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__1tcpdm5._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/src_app_beheer_evenementen_[id]_1oht-h5._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
@@ -19,5 +19,5 @@ R.c("server/chunks/ssr/src_app_beheer_error_tsx_0qizne6._.js")
 R.c("server/chunks/ssr/src_app_beheer_evenementen_acties_ts_0xh2tvi._.js")
 R.c("server/chunks/ssr/node_modules_next_0n5dn-n._.js")
 R.c("server/chunks/ssr/_0-njiji._.js")
-R.m(16073)
-module.exports=R.m(16073).exports
+R.m(88561)
+module.exports=R.m(88561).exports

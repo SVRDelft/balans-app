@@ -33,5 +33,6 @@ DB zit de vergaderingen voor, notuleert en vertegenwoordigt de SVR naar buiten.
 Het DB heeft geen stemrecht in het Algemeen Bestuur.
 
 ### Informanten
-De fracties uit de Studentenraad schuiven aan en praten de verenigingen bij over
-wat er in de universiteit speelt. Ook zij stemmen niet.
+De fracties uit de Studentenraad, zoals ORAS en Lijst Bèta, schuiven aan en
+praten de verenigingen bij over wat er in de universiteit speelt. Ook zij
+stemmen niet.

@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a58b7c064d1c2f29ebd4e2f177f287348c27d726": {
+    "0037a2453f5795828f1bffe0ea3d6aebebf6a99f0c": {
       "workers": {
         "app/beheer/instellingen/page": {
           "moduleId": 98611,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604c40037bee4a88a80a6d20b4a58415db28217a8f": {
+    "60d563376b6da65d3596a5a4e64a45ad7f216f994d": {
       "workers": {
         "app/beheer/instellingen/page": {
           "moduleId": 98611,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "403695d63fc90df6e42c230be7018084efaaa2ab65": {
+    "40fa1a4c6a697b526fe260f837b2ebc43abcbc0fc0": {
       "workers": {
         "app/beheer/instellingen/page": {
           "moduleId": 98611,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "601e26585a80d7e122a084d222bc2056c47164d1d0": {
+    "60b728d14460a979664ddd088888d0393044654796": {
       "workers": {
         "app/beheer/instellingen/page": {
           "moduleId": 98611,

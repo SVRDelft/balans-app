@@ -1,8 +1,22 @@
 [
-  { "wanneer": "26 februari 1963", "wat": "Opgericht als overkoepelend orgaan van de studieverenigingen van de TU Delft. Officieel heet het de Stichting Studieraad Delft." },
-  { "wanneer": "Het 41e bestuur", "wat": "De Delft Career Site, een SVR-initiatief om studenten en bedrijven bij elkaar te brengen, wordt opgeheven omdat er inmiddels betere alternatieven zijn." },
-  { "wanneer": "Het 45e bestuur", "wat": "Het Landelijk Bestuursgala wordt bedacht." },
-  { "wanneer": "Later", "wat": "De SVeuRo ontstaat, een SVR-initiatief voor de penningmeesters." },
-  { "wanneer": "Rond de coronajaren", "wat": "De SVjwR ontstaat, omdat de OWee en de verenigingen beter moesten afstemmen over de eerstejaarsweekenden." },
-  { "wanneer": "2026", "wat": "Het 62e bestuur." }
+  {
+    "wanneer": "26 februari 1963",
+    "wat": "Opgericht als overkoepelend orgaan van de studieverenigingen van de TU Delft. Officieel heet het de Stichting Studieraad Delft."
+  },
+  {
+    "wanneer": "Het 41e bestuur",
+    "wat": "De Delft Career Site, een SVR-initiatief om studenten en bedrijven bij elkaar te brengen, wordt opgeheven omdat er inmiddels betere alternatieven zijn."
+  },
+  {
+    "wanneer": "Het 45e bestuur",
+    "wat": "Het Landelijk Bestuursgala wordt bedacht. Ook de SVeuRo, het penningmeestersoverleg, is een SVR-initiatief."
+  },
+  {
+    "wanneer": "Rond de coronajaren",
+    "wat": "De SVjwR ontstaat, omdat de OWee en de verenigingen beter moesten afstemmen over de eerstejaarsweekenden."
+  },
+  {
+    "wanneer": "2026",
+    "wat": "Het 62e bestuur."
+  }
 ]

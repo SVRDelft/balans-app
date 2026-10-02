@@ -1,5 +1,5 @@
 var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/beheer/boekjaren/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__0t55z3p._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0s0le1l._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/src_0f9pc_3._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
@@ -18,5 +18,5 @@ R.c("server/chunks/ssr/src_lib_utils_ts_0m4hn6s._.js")
 R.c("server/chunks/ssr/src_app_beheer_error_tsx_0qizne6._.js")
 R.c("server/chunks/ssr/_06uiecw._.js")
 R.c("server/chunks/ssr/node_modules_next_0n5dn-n._.js")
-R.m(22848)
-module.exports=R.m(22848).exports
+R.m(1799)
+module.exports=R.m(1799).exports

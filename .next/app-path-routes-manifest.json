@@ -45,8 +45,10 @@
   "/beheer/verenigingen/page": "/beheer/verenigingen",
   "/beheer/voorraad/page": "/beheer/voorraad",
   "/favicon.ico/route": "/favicon.ico",
+  "/icon.svg/route": "/icon.svg",
   "/inloggen/page": "/inloggen",
   "/portaal/page": "/portaal",
   "/robots.txt/route": "/robots.txt",
+  "/sitemap.xml/route": "/sitemap.xml",
   "/wachtwoord/page": "/wachtwoord"
 }

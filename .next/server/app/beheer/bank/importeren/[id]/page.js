@@ -1,5 +1,5 @@
 var R=require("../../../../../chunks/ssr/[turbopack]_runtime.js")("server/app/beheer/bank/importeren/[id]/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1n955tt._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0amww94._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/src_1r56maf._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
@@ -19,5 +19,5 @@ R.c("server/chunks/ssr/src_app_beheer_error_tsx_0qizne6._.js")
 R.c("server/chunks/ssr/_1molqst._.js")
 R.c("server/chunks/ssr/node_modules_next_0n5dn-n._.js")
 R.c("server/chunks/ssr/src_1njv451._.js")
-R.m(43265)
-module.exports=R.m(43265).exports
+R.m(35695)
+module.exports=R.m(35695).exports

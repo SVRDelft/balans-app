@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a58b7c064d1c2f29ebd4e2f177f287348c27d726": {
+    "0037a2453f5795828f1bffe0ea3d6aebebf6a99f0c": {
       "workers": {
         "app/beheer/begroting/[id]/page": {
           "moduleId": 8107,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604c40037bee4a88a80a6d20b4a58415db28217a8f": {
+    "60d563376b6da65d3596a5a4e64a45ad7f216f994d": {
       "workers": {
         "app/beheer/begroting/[id]/page": {
           "moduleId": 8107,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "403695d63fc90df6e42c230be7018084efaaa2ab65": {
+    "40fa1a4c6a697b526fe260f837b2ebc43abcbc0fc0": {
       "workers": {
         "app/beheer/begroting/[id]/page": {
           "moduleId": 8107,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6026e7a31e1561bf28b886caf1056e5ce293d35801": {
+    "6054559dae89941034d17118fcd5a3d982dca38bca": {
       "workers": {
         "app/beheer/begroting/[id]/page": {
           "moduleId": 8107,
@@ -44,7 +44,7 @@
       "exportedName": "bewaarBegrotingspost",
       "filename": "src/app/beheer/begroting/acties.ts"
     },
-    "60c91494ed8ce1641df51c684b44c2c7ebff30ba1b": {
+    "606a3b588dc7916ab80b24983ec4d82a29b4e339f4": {
       "workers": {
         "app/beheer/begroting/[id]/page": {
           "moduleId": 8107,

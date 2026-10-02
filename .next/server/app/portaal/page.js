@@ -1,5 +1,5 @@
 var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/portaal/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__0mlb6tb._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__1ec2hk4._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__0h1xeh8._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
@@ -13,5 +13,5 @@ R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-e
 R.c("server/chunks/ssr/[root-of-the-server]__0fh7cwb._.js")
 R.c("server/chunks/ssr/_0_c6q85._.js")
 R.c("server/chunks/ssr/_0ci37o0._.js")
-R.m(37049)
-module.exports=R.m(37049).exports
+R.m(12551)
+module.exports=R.m(12551).exports

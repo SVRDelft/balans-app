@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a58b7c064d1c2f29ebd4e2f177f287348c27d726": {
+    "0037a2453f5795828f1bffe0ea3d6aebebf6a99f0c": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604c40037bee4a88a80a6d20b4a58415db28217a8f": {
+    "60d563376b6da65d3596a5a4e64a45ad7f216f994d": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "403695d63fc90df6e42c230be7018084efaaa2ab65": {
+    "40fa1a4c6a697b526fe260f837b2ebc43abcbc0fc0": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -33,18 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "601b7fcd57159d56066c8c5962a8ca00b255372932": {
-      "workers": {
-        "app/beheer/boekjaren/page": {
-          "moduleId": 31020,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "activeerBoekjaar",
-      "filename": "src/app/beheer/boekjaren/acties.ts"
-    },
-    "609efcc7569d98120afdd5b04ac6837f3f4cd83d78": {
+    "601ed3076a1bd7a5415ed8aaf0cb5697037065eba5": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -55,7 +44,7 @@
       "exportedName": "bewaarBoekjaar",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     },
-    "60ec2e19094f76fccd40f40da1623baca037826ca5": {
+    "60c6fb1af25654204d0b389b8f48f40fbb3aa4d3e2": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -64,6 +53,17 @@
         }
       },
       "exportedName": "wisBoekingen",
+      "filename": "src/app/beheer/boekjaren/acties.ts"
+    },
+    "60ff2099680b41c7e2dab9b8fb9558d313f5467a4f": {
+      "workers": {
+        "app/beheer/boekjaren/page": {
+          "moduleId": 31020,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "activeerBoekjaar",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     }
   },

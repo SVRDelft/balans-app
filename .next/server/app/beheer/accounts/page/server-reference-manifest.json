@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a58b7c064d1c2f29ebd4e2f177f287348c27d726": {
+    "0037a2453f5795828f1bffe0ea3d6aebebf6a99f0c": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604c40037bee4a88a80a6d20b4a58415db28217a8f": {
+    "60d563376b6da65d3596a5a4e64a45ad7f216f994d": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "403695d63fc90df6e42c230be7018084efaaa2ab65": {
+    "40fa1a4c6a697b526fe260f837b2ebc43abcbc0fc0": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6094112059b4fea9b197ca6b0b57047a0f465486cd": {
+    "608e9e6fdf4381f3d9082a8832608929b46b166f23": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,18 +44,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60e8aee911ee3ba8ea6e19790971bc34b125628d50": {
-      "workers": {
-        "app/beheer/accounts/page": {
-          "moduleId": 99773,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "zetActief",
-      "filename": "src/app/beheer/accounts/acties.ts"
-    },
-    "60f9173f288cac6f51f660210292b56dd0570693b0": {
+    "605f7e685ecd4bb7e175cbe7aed882c71abb2f2eee": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -64,6 +53,17 @@
         }
       },
       "exportedName": "nieuwWachtwoord",
+      "filename": "src/app/beheer/accounts/acties.ts"
+    },
+    "60f8770509ef227cdb45fb9448ea4edb35ef53b1eb": {
+      "workers": {
+        "app/beheer/accounts/page": {
+          "moduleId": 99773,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "zetActief",
       "filename": "src/app/beheer/accounts/acties.ts"
     }
   },

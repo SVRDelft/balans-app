@@ -45,8 +45,10 @@
   "/beheer/verenigingen/page": "app/beheer/verenigingen/page.js",
   "/beheer/voorraad/page": "app/beheer/voorraad/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/icon.svg/route": "app/icon.svg/route.js",
   "/inloggen/page": "app/inloggen/page.js",
   "/portaal/page": "app/portaal/page.js",
   "/robots.txt/route": "app/robots.txt/route.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js",
   "/wachtwoord/page": "app/wachtwoord/page.js"
 }

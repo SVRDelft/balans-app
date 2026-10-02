@@ -1,5 +1,5 @@
 var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/(publiek)/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1-w0jag._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0cdev8c._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/src_app_(publiek)_1_r0c9w._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
@@ -10,7 +10,7 @@ R.c("server/chunks/ssr/_0qptkf4._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_0p8s4lh._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthorized_0l_sp0x.js")
 R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_0q-w892.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1gxb5om._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0-7p9kq._.js")
 R.c("server/chunks/ssr/_next-internal_server_app_(publiek)_page_actions_1xn1aam.js")
-R.m(80293)
-module.exports=R.m(80293).exports
+R.m(65296)
+module.exports=R.m(65296).exports

@@ -2,29 +2,33 @@
   {
     "naam": "SVR",
     "wie": "De voorzitters",
-    "hoeVaak": "Ongeveer maandelijks, elke keer bij een andere vereniging, in pak",
+    "hoeVaak": "Tien keer per jaar",
     "waarover": "Alles wat de verenigingen samen aangaat",
-    "voorzitter": "Voorzitter van het dagelijks bestuur"
+    "voorzitter": "Voorzitter van het dagelijks bestuur",
+    "extra": "In pak, elke keer bij een andere vereniging"
   },
   {
     "naam": "SVR-O",
     "wie": "De commissarissen onderwijs",
-    "hoeVaak": "Een paar keer per jaar",
+    "hoeVaak": "Vier keer per jaar",
     "waarover": "Onderwijs, van vakevaluaties tot de Educator of the Year Award",
-    "voorzitter": "Secretaris van het dagelijks bestuur"
+    "voorzitter": "Secretaris van het dagelijks bestuur",
+    "extra": "In pak"
   },
   {
     "naam": "SVeuRo",
     "wie": "De penningmeesters",
-    "hoeVaak": "Per kwartaal, plus werksessies",
+    "hoeVaak": "Vier keer per jaar, plus werksessies",
     "waarover": "Boekhouding, begrotingen, btw en de jaarlijkse bijdrage",
-    "voorzitter": "Penningmeester van het dagelijks bestuur"
+    "voorzitter": "Penningmeester van het dagelijks bestuur",
+    "extra": ""
   },
   {
     "naam": "SVjwR",
-    "wie": "De organisatoren van de eerstejaarsweekenden, samen met het OWee-bestuur",
-    "hoeVaak": "Een paar keer per jaar",
+    "wie": "De organisatoren van de eerstejaarsweekenden",
+    "hoeVaak": "Drie keer per jaar, in het voorjaar",
     "waarover": "Afstemming over de eerstejaarsweekenden",
-    "voorzitter": "Dagelijks bestuur"
+    "voorzitter": "Dagelijks bestuur",
+    "extra": "Niet in pak; het OWee-bestuur schuift aan"
   }
 ]

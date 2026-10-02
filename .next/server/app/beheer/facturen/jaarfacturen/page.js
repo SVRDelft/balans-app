@@ -1,5 +1,5 @@
 var R=require("../../../../chunks/ssr/[turbopack]_runtime.js")("server/app/beheer/facturen/jaarfacturen/page.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1tz2s_3._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0b3z7ad._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__038l5oq._.js")
@@ -19,5 +19,5 @@ R.c("server/chunks/ssr/_1bolx9x._.js")
 R.c("server/chunks/ssr/src_app_beheer_facturen_acties_ts_17zes49._.js")
 R.c("server/chunks/ssr/node_modules_next_0n5dn-n._.js")
 R.c("server/chunks/ssr/node_modules_zod_v4_classic_external_071rx-x.js")
-R.m(46839)
-module.exports=R.m(46839).exports
+R.m(34851)
+module.exports=R.m(34851).exports

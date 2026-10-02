@@ -1,11 +1,6 @@
 {
   "pages": {},
-  "app": {
-    "[project]/src/app/beheer/auditlog/page": [
-      "static/media/young_serif_latin-s.p.14vs7lv3rx6_1.woff2",
-      "static/media/instrument_sans_latin-s.p.2jfp7v6ns64yg.woff2"
-    ]
-  },
-  "appUsingSizeAdjust": true,
+  "app": {},
+  "appUsingSizeAdjust": false,
   "pagesUsingSizeAdjust": false
 }
