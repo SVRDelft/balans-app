@@ -3,137 +3,324 @@ import Link from "next/link";
 import {
   initialen,
   leesBestuur,
+  leesEvenementen,
+  leesGeschiedenis,
+  leesJaar,
+  leesOverleggen,
+  leesSamenwerking,
   leesSvr,
   leesTekst,
+  leesTradities,
   leesVerenigingen,
+  leesVragen,
 } from "@/lib/content";
 
 import { Blokken } from "./blokken";
+import { Tafel } from "./tafel";
+import { Verenigingenlijst } from "./verenigingenlijst";
 
 // Alles komt uit content/ en wordt tijdens de build vastgelegd: deze pagina
 // raakt de database niet en blijft dus staan als die even weg is.
 export const dynamic = "force-static";
-
-/** De vijftien rond de tafel, zoals bij een echte vergadering. */
-function Ring({ namen }: { namen: string[] }) {
-  const midden = 240;
-  const straal = 118;
-  return (
-    <svg className="ring" viewBox="0 0 480 440" role="img" aria-labelledby="ringkop">
-      <title id="ringkop">
-        De vijftien aangesloten studieverenigingen rond de tafel van de SVR
-      </title>
-      <circle className="tafel" cx={midden} cy={220} r={straal} />
-      <text className="midden" x={midden} y={226} textAnchor="middle">
-        SVR
-      </text>
-      {namen.map((naam, i) => {
-        const hoek = (i / namen.length) * 2 * Math.PI - Math.PI / 2;
-        const stoelX = midden + Math.cos(hoek) * (straal + 20);
-        const stoelY = 220 + Math.sin(hoek) * (straal + 20);
-        const tekstX = midden + Math.cos(hoek) * (straal + 48);
-        const tekstY = 220 + Math.sin(hoek) * (straal + 48) + 5;
-        const kant =
-          Math.abs(Math.cos(hoek)) < 0.25
-            ? "middle"
-            : Math.cos(hoek) > 0
-              ? "start"
-              : "end";
-        const wacht = { "--wacht": `${0.15 + i * 0.06}s` } as React.CSSProperties;
-        return (
-          <g key={naam}>
-            <circle className="stoel" cx={stoelX} cy={stoelY} r={7} style={wacht} />
-            <text
-              className="naam"
-              x={tekstX}
-              y={tekstY}
-              textAnchor={kant}
-              style={wacht}
-            >
-              {naam}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
 
 export default function Home() {
   const tekst = leesTekst("home");
   const svr = leesSvr();
   const verenigingen = leesVerenigingen();
   const bestuur = leesBestuur();
+  const overleggen = leesOverleggen();
+  const jaar = leesJaar();
+  const evenementen = leesEvenementen();
+  const tradities = leesTradities();
+  const geschiedenis = leesGeschiedenis();
+  const samenwerking = leesSamenwerking();
+  const vragen = leesVragen();
+
+  const watWeDoen = tekst.secties.find((sectie) => sectie.kop === "Wat we doen");
+  const hoeHetWerkt = tekst.secties.find((sectie) => sectie.kop === "Hoe de SVR werkt");
 
   return (
     <>
+      {/* 1. Opening */}
       <section className="hero">
         <div className="binnen">
-          <div>
+          <div className="hero-tekst">
             <h1>{tekst.titel}</h1>
             <div className="lead">
               <Blokken blokken={tekst.blokken} />
             </div>
             <div className="acties">
-              <Link className="knop" href="/bestuur-worden">
+              <a className="knop" href="#wat-we-doen">
+                Wat we doen
+              </a>
+              <Link className="knop licht" href="/bestuur-worden">
                 Bestuur worden
               </Link>
-              <a className="knop licht" href={`mailto:${svr.email}`}>
-                Mail het bestuur
-              </a>
             </div>
           </div>
-          <Ring namen={verenigingen.map((vereniging) => vereniging.kort)} />
+          <div className="hero-tafel">
+            <Tafel verenigingen={verenigingen} />
+            <p className="tafel-uitleg">
+              Vijftien stoelen, vijftien verenigingen. Wijs een stoel aan voor de
+              faculteit, of klik door naar hun site.
+            </p>
+          </div>
         </div>
       </section>
 
-      {tekst.secties.map((sectie, i) => (
-        <section key={sectie.kop} className={`vlak ${i % 2 === 0 ? "wit" : ""}`}>
-          <div className="binnen">
-            <h2>{sectie.kop}</h2>
-            <Blokken blokken={sectie.blokken} />
-            {sectie.onderdelen.length > 0 ? (
-              <div className="kaarten">
-                {sectie.onderdelen.map((onderdeel) => (
-                  <article className="kaart" key={onderdeel.kop}>
-                    <h3>{onderdeel.kop}</h3>
-                    <Blokken blokken={onderdeel.blokken} />
-                  </article>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
-      ))}
+      {/* De band met de namen, in het motief van de das. */}
+      <div className="band strepen" aria-hidden>
+        <div className="bandloop">
+          {[0, 1].map((herhaling) => (
+            <span key={herhaling}>
+              {verenigingen.map((vereniging) => (
+                <span key={vereniging.slug}>{vereniging.naam}</span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </div>
 
-      <section className="vlak" id="verenigingen">
+      {/* 2. Vier feiten */}
+      <section className="vlak feiten">
+        <div className="binnen">
+          <p className="feitenzin">
+            Opgericht op <strong>26 februari 1963</strong>, vertegenwoordigt de SVR{" "}
+            <strong>{verenigingen.length}</strong> studieverenigingen, die elkaar in{" "}
+            <strong>{overleggen.length}</strong> vaste overleggen spreken. Dit jaar
+            onder leiding van het <strong>{bestuur.nummer}e</strong> dagelijks bestuur.
+          </p>
+        </div>
+      </section>
+
+      {/* 3. Wat we doen */}
+      <section className="vlak wit" id="wat-we-doen">
+        <div className="binnen">
+          <h2>Wat we doen</h2>
+          <div className="pijlers">
+            {watWeDoen?.onderdelen.map((pijler) => (
+              <div key={pijler.kop}>
+                <h3>{pijler.kop}</h3>
+                <Blokken blokken={pijler.blokken} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Hoe de SVR werkt */}
+      <section className="vlak donker" id="hoe-het-werkt">
+        <div className="binnen">
+          <h2>Hoe de SVR werkt</h2>
+          <div className="schema">
+            <svg className="schematekening" viewBox="0 0 320 240" role="img" aria-labelledby="schemakop">
+              <title id="schemakop">
+                Het Algemeen Bestuur beslist; het dagelijks bestuur en de informanten
+                hebben geen stemrecht
+              </title>
+              <rect x="40" y="16" width="240" height="64" rx="10" className="doos ab" />
+              <text x="160" y="42" textAnchor="middle" className="doos-naam">
+                Algemeen Bestuur
+              </text>
+              <text x="160" y="62" textAnchor="middle" className="doos-uitleg">
+                15 verenigingen · beslist
+              </text>
+
+              <line x1="100" y1="80" x2="100" y2="150" className="lijn" />
+              <line x1="220" y1="80" x2="220" y2="150" className="lijn" />
+
+              <rect x="20" y="150" width="160" height="62" rx="10" className="doos" />
+              <text x="100" y="176" textAnchor="middle" className="doos-naam">
+                Dagelijks Bestuur
+              </text>
+              <text x="100" y="195" textAnchor="middle" className="doos-uitleg">
+                zit voor · geen stem
+              </text>
+
+              <rect x="196" y="150" width="104" height="62" rx="10" className="doos" />
+              <text x="248" y="176" textAnchor="middle" className="doos-naam">
+                Informanten
+              </text>
+              <text x="248" y="195" textAnchor="middle" className="doos-uitleg">
+                geen stem
+              </text>
+            </svg>
+
+            <div className="schema-tekst">
+              {hoeHetWerkt?.onderdelen.map((onderdeel) => (
+                <div key={onderdeel.kop}>
+                  <h3>{onderdeel.kop}</h3>
+                  <Blokken blokken={onderdeel.blokken} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Aan tafel */}
+      <section className="vlak" id="overleggen">
+        <div className="binnen">
+          <h2>Aan tafel</h2>
+          <p>Vier overleggen, elk met zijn eigen gezelschap.</p>
+          <div className="overleggen">
+            {overleggen.map((overleg) => (
+              <article key={overleg.naam}>
+                <h3>{overleg.naam}</h3>
+                <dl>
+                  <dt>Wie</dt>
+                  <dd>{overleg.wie}</dd>
+                  <dt>Hoe vaak</dt>
+                  <dd>{overleg.hoeVaak}</dd>
+                  <dt>Waarover</dt>
+                  <dd>{overleg.waarover}</dd>
+                  <dt>Voorzitter</dt>
+                  <dd>{overleg.voorzitter}</dd>
+                </dl>
+              </article>
+            ))}
+          </div>
+          <p className="terzijde">
+            Bestuurslid van een studievereniging? De agenda&apos;s en notulen staan in{" "}
+            <Link href="/inloggen">het portaal</Link>.
+          </p>
+        </div>
+      </section>
+
+      {/* 6. Een jaar SVR */}
+      <section className="vlak wit" id="het-jaar">
+        <div className="binnen">
+          <h2>Een jaar SVR</h2>
+          <p>Van de wissel in augustus tot de wissel daarna.</p>
+          <ol
+            className="tijdlijn"
+            tabIndex={0}
+            aria-label="Het jaar van de SVR, van augustus tot augustus"
+          >
+            {jaar.momenten.map((moment) => (
+              <li key={moment.wanneer + moment.wat}>
+                <span className="stip strepen" aria-hidden />
+                <p className="wanneer">{moment.wanneer}</p>
+                <p className="wat">{moment.wat}</p>
+                <p className="uitleg">{moment.uitleg}</p>
+              </li>
+            ))}
+            <li>
+              <span className="stip strepen" aria-hidden />
+              <p className="wanneer">{jaar.lbgMaand}</p>
+              <p className="wat">Landelijk Bestuursgala</p>
+              <p className="uitleg">Hét gala voor besturen uit het hele land.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* 7. Wat we organiseren */}
+      <section className="vlak" id="organiseren">
+        <div className="binnen">
+          <h2>Wat we organiseren</h2>
+          <div className="evenementen">
+            {evenementen.map((evenement) => (
+              <article key={evenement.naam}>
+                {evenement.foto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    className="foto"
+                    src={`/img/events/${evenement.foto}`}
+                    alt=""
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="foto strepen" aria-hidden />
+                )}
+                <div className="inhoud">
+                  <h3>{evenement.naam}</h3>
+                  <p>{evenement.tekst}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 8. Namens de verenigingen */}
+      <section className="vlak donker" id="namens">
+        <div className="binnen">
+          <h2>Namens de verenigingen</h2>
+          <p>Waar de SVR aanschuift als de verenigingen samen iets te zeggen hebben.</p>
+          <dl className="samenwerking">
+            {samenwerking.map((partij) => (
+              <div key={partij.partij}>
+                <dt>{partij.partij}</dt>
+                <dd>{partij.tekst}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* 9. De vijftien */}
+      <section className="vlak wit" id="verenigingen">
         <div className="binnen">
           <h2>De vijftien</h2>
           <p>Deze studieverenigingen zijn aangesloten bij de SVR.</p>
-          <ul className="verenigingen">
-            {verenigingen.map((vereniging) => (
-              <li key={vereniging.naam}>
-                <strong>{vereniging.naam}</strong>
-                <span>{vereniging.faculteit}</span>
-              </li>
-            ))}
-          </ul>
+          <Verenigingenlijst verenigingen={verenigingen} />
         </div>
       </section>
 
+      {/* 10. Tradities */}
+      <section className="vlak" id="tradities">
+        <div className="binnen">
+          <h2>Tradities</h2>
+          <div className="tradities">
+            {tradities.map((traditie) => (
+              <article key={traditie.titel}>
+                <span className="merkje strepen" aria-hidden />
+                <h3>{traditie.titel}</h3>
+                <p>{traditie.tekst}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 11. Geschiedenis */}
+      <section className="vlak donker" id="geschiedenis">
+        <div className="binnen">
+          <h2>Geschiedenis</h2>
+          <ol className="mijlpalen">
+            {geschiedenis.map((mijlpaal) => (
+              <li key={mijlpaal.wanneer + mijlpaal.wat}>
+                <p className="wanneer">{mijlpaal.wanneer}</p>
+                <p className="wat">{mijlpaal.wat}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 12. Bestuur 62 */}
       <section className="vlak wit" id="bestuur">
         <div className="binnen">
-          <h2>Bestuur {bestuur.nummer}</h2>
-          <p>
-            Het {bestuur.nummer}e dagelijks bestuur, sinds{" "}
-            {new Date(bestuur.startdatum).toLocaleDateString("nl-NL", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-              timeZone: "UTC",
-            })}
-            .
-          </p>
+          <div className="bestuurkop">
+            <span className="nummer" aria-hidden>
+              {bestuur.nummer}
+            </span>
+            <div>
+              <h2>Bestuur {bestuur.nummer}</h2>
+              <p>
+                Het {bestuur.nummer}e dagelijks bestuur, sinds{" "}
+                {new Date(bestuur.startdatum).toLocaleDateString("nl-NL", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "UTC",
+                })}
+                .
+              </p>
+            </div>
+          </div>
+
           <div className="bestuurblok">
             {bestuur.samenFoto ? (
               <figure className="samenfoto">
@@ -143,35 +330,65 @@ export default function Home() {
                   alt={bestuur.samenBijschrift ?? `Het bestuur van de ${svr.afkorting}`}
                   width={1000}
                   height={1499}
+                  loading="lazy"
                 />
                 {bestuur.samenBijschrift ? (
                   <figcaption>{bestuur.samenBijschrift}</figcaption>
                 ) : null}
               </figure>
             ) : null}
-          <ul className="personen">
-            {bestuur.leden.map((lid) => (
-              <li key={lid.naam}>
-                {lid.foto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={`/img/${lid.foto}`} alt="" width={80} height={80} />
-                ) : (
-                  <span className="geenfoto strepen" aria-hidden>
-                    {initialen(lid.naam)}
+            <ul className="personen">
+              {bestuur.leden.map((lid) => (
+                <li key={lid.naam}>
+                  {lid.foto ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`/img/${lid.foto}`} alt="" width={80} height={80} loading="lazy" />
+                  ) : (
+                    <span className="geenfoto strepen" aria-hidden>
+                      {initialen(lid.naam)}
+                    </span>
+                  )}
+                  <span>
+                    <strong>{lid.naam}</strong>
+                    <span>{lid.functie}</span>
                   </span>
-                )}
-                <span>
-                  <strong>{lid.naam}</strong>
-                  <span>{lid.functie}</span>
-                </span>
-              </li>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="uitnodiging">
+            Zelf in het bestuur?{" "}
+            <Link href="/bestuur-worden">Lees wat het inhoudt</Link>.
+          </p>
+        </div>
+      </section>
+
+      {/* 13. Vragen */}
+      <section className="vlak" id="vragen">
+        <div className="binnen">
+          <h2>Veelgestelde vragen</h2>
+          <div className="vragen">
+            {vragen.map((vraag) => (
+              <details key={vraag.vraag}>
+                <summary>{vraag.vraag}</summary>
+                <p>
+                  {vraag.antwoord}
+                  {vraag.link ? (
+                    <>
+                      {" "}
+                      <Link href={vraag.link.naar}>{vraag.link.tekst}</Link>
+                    </>
+                  ) : null}
+                </p>
+              </details>
             ))}
-          </ul>
           </div>
         </div>
       </section>
 
-      <section className="vlak" id="contact">
+      {/* 14. Contact */}
+      <section className="vlak donker" id="contact">
         <div className="binnen">
           <h2>Contact</h2>
           <div className="contact">
@@ -193,7 +410,7 @@ export default function Home() {
                 Ben je bestuurder van een aangesloten vereniging? Agenda&apos;s en
                 notulen staan in het portaal.
               </p>
-              <Link className="knop" href="/inloggen">
+              <Link className="knop licht" href="/inloggen">
                 Naar het portaal
               </Link>
             </div>

@@ -29,8 +29,18 @@ export function Menu() {
       >
         <ul>
           <li>
-            <Link href="/" onClick={() => setOpen(false)}>
+            <Link href="/#wat-we-doen" onClick={() => setOpen(false)}>
               Wat we doen
+            </Link>
+          </li>
+          <li>
+            <Link href="/#overleggen" onClick={() => setOpen(false)}>
+              Overleggen
+            </Link>
+          </li>
+          <li>
+            <Link href="/#verenigingen" onClick={() => setOpen(false)}>
+              De vijftien
             </Link>
           </li>
           <li>

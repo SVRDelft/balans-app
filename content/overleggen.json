@@ -1,0 +1,30 @@
+[
+  {
+    "naam": "SVR",
+    "wie": "De voorzitters",
+    "hoeVaak": "Ongeveer maandelijks, elke keer bij een andere vereniging, in pak",
+    "waarover": "Alles wat de verenigingen samen aangaat",
+    "voorzitter": "Voorzitter van het dagelijks bestuur"
+  },
+  {
+    "naam": "SVR-O",
+    "wie": "De commissarissen onderwijs",
+    "hoeVaak": "Een paar keer per jaar",
+    "waarover": "Onderwijs, van vakevaluaties tot de Educator of the Year Award",
+    "voorzitter": "Secretaris van het dagelijks bestuur"
+  },
+  {
+    "naam": "SVeuRo",
+    "wie": "De penningmeesters",
+    "hoeVaak": "Per kwartaal, plus werksessies",
+    "waarover": "Boekhouding, begrotingen, btw en de jaarlijkse bijdrage",
+    "voorzitter": "Penningmeester van het dagelijks bestuur"
+  },
+  {
+    "naam": "SVjwR",
+    "wie": "De organisatoren van de eerstejaarsweekenden, samen met het OWee-bestuur",
+    "hoeVaak": "Een paar keer per jaar",
+    "waarover": "Afstemming over de eerstejaarsweekenden",
+    "voorzitter": "Dagelijks bestuur"
+  }
+]

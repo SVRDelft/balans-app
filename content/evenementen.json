@@ -1,0 +1,22 @@
+[
+  {
+    "naam": "Educator of the Year Award",
+    "foto": "eoty.jpg",
+    "tekst": "De prijs voor de beste docent van de TU Delft. De commissarissen onderwijs nomineren, de SVR zit in de jury met onder anderen de rector magnificus, en de uitreiking is op de Dag van het Onderwijs."
+  },
+  {
+    "naam": "Dé DDB",
+    "foto": "ddb.jpg",
+    "tekst": "Dé Doldwaze Delftsche Besturenborrel, elk kwartaal, voor alle Delftse besturen. Met de nadruk op Dé."
+  },
+  {
+    "naam": "De Dies",
+    "foto": "dies.jpg",
+    "tekst": "De verjaardag van de SVR op 26 februari. Halverwege het bestuursjaar, als iedereen elkaar inmiddels kent."
+  },
+  {
+    "naam": "Landelijk Bestuursgala",
+    "foto": "lbg.jpg",
+    "tekst": "Ooit bedacht door het 45e bestuur. Hét gala voor besturen uit het hele land."
+  }
+]

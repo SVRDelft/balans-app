@@ -363,3 +363,26 @@ en in de README.
 
 Alles loopt via één module (`src/lib/portaal/opslag.ts`). Wie later naar Vercel
 moet, vervangt alleen die module door opslag bij een dienst als Vercel Blob.
+
+### De homepage: wat gecontroleerd is en wat nog open staat
+
+De websites van de vijftien verenigingen in `content/verenigingen.json` zijn
+stuk voor stuk opgevraagd; alle vijftien gaven antwoord. Verandert er een adres,
+pas het dan in dat bestand aan. Laat je `website` leeg, dan blijft de vereniging
+gewoon in de lijst staan, maar zonder link.
+
+Nog in te vullen op de site, zichtbaar als `[IN TE VULLEN: …]`:
+
+- de maand van het Landelijk Bestuursgala, in `content/jaar.json`;
+- periode, deadline en aanmelden bij "Hoe solliciteer je?" in
+  `content/bestuur-worden.md`.
+
+Over de inhoud van de homepage is niets verzonnen: de teksten over het Algemeen
+Bestuur, het dagelijks bestuur, de informanten, de vier overleggen, de tradities
+en de geschiedenis komen uit de opdracht van het bestuur. Jaartallen die daar
+niet in stonden zijn niet afgeleid uit bestuursnummers; "Later" en "Rond de
+coronajaren" staan er bewust zo.
+
+De tafel in de opening en het filter bij de vijftien zijn gemaakt met CSS en
+SVG. Het filter heeft JavaScript nodig; staat dat uit, dan staan alle vijftien
+verenigingen er gewoon. De tafel werkt volledig zonder JavaScript.

@@ -10,11 +10,18 @@ github.com; daarna zet het bestuur de site opnieuw live.
 
 | Bestand | Wat erin staat |
 |---|---|
-| `content/home.md` | de voorpagina: de opening, "Wat we doen", "Aan tafel" en "Wat we organiseren" |
+| `content/home.md` | de opening van de voorpagina, "Wat we doen" en "Hoe de SVR werkt" |
+| `content/overleggen.json` | de vier overleggen: wie, hoe vaak, waarover en wie voorzit |
+| `content/jaar.json` | de tijdlijn "Een jaar SVR", en de maand van het Landelijk Bestuursgala |
+| `content/evenementen.json` | wat de SVR organiseert, met de bestandsnaam van de foto |
+| `content/tradities.json` | de "wist je dat"-blokjes |
+| `content/geschiedenis.json` | de mijlpalen op de tijdlijn |
+| `content/samenwerking.json` | waar de SVR namens de verenigingen aanschuift |
+| `content/vragen.json` | de veelgestelde vragen |
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |
 | `content/privacy.md` | de privacypagina |
 | `content/bestuur.json` | wie er in het bestuur zitten, het bestuursnummer en de startdatum |
-| `content/verenigingen.json` | de vijftien aangesloten verenigingen |
+| `content/verenigingen.json` | de vijftien verenigingen: naam, faculteit en de link naar hun site |
 | `content/svr.json` | e-mailadres, adres, KvK-nummer en oprichtingsdatum |
 | `public/img/` | het logo en de portretten, zie `public/img/LEESMIJ.md` |
 
@@ -34,6 +41,18 @@ github.com; daarna zet het bestuur de site opnieuw live.
 
 Verander niets aan de tekens `#`, `-`, `**` of de haakjes zelf, tenzij je weet
 wat je doet. De rest is gewone tekst; typefouten zijn gewoon typefouten.
+
+## Foto's van evenementen en logo's van verenigingen
+
+- Een foto bij een evenement: zet hem in `public/img/events` met precies de naam
+  die in `content/evenementen.json` bij `foto` staat (`eoty.jpg`, `ddb.jpg`,
+  `dies.jpg`, `lbg.jpg`). Liggend, ongeveer 1200 bij 800 pixels.
+- Een logo van een vereniging: zet het in `public/img/sv` met de naam uit
+  `slug` in `content/verenigingen.json`, bijvoorbeeld `curius.png`. Vierkant,
+  256 bij 256, met een doorzichtige achtergrond.
+
+Ontbreekt een bestand, dan is dat geen fout: bij een evenement verschijnt het
+dasmotief, en bij een vereniging de eerste letters van de naam.
 
 ## Een bestuurslid of een foto wijzigen
 

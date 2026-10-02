@@ -13,6 +13,8 @@ import { leesMarkdown, type Document } from "@/lib/markdown";
 // denkt de bundelaar dat het hele project meegelezen moet worden.
 const inhoudspad = (bestand: string) => path.join(process.cwd(), "content", bestand);
 const afbeeldingspad = (bestand: string) => path.join(process.cwd(), "public/img", bestand);
+const logopad = (bestand: string) => path.join(process.cwd(), "public/img/sv", bestand);
+const evenementpad = (bestand: string) => path.join(process.cwd(), "public/img/events", bestand);
 
 export interface Bestuurslid {
   naam: string;
@@ -33,7 +35,54 @@ export interface Bestuur {
 export interface Vereniging {
   naam: string;
   kort: string;
+  slug: string;
   faculteit: string;
+  /** Officiële website; leeg laten als die niet zeker is. */
+  website?: string;
+  /** Wordt tijdens de build gevuld als public/img/sv/<slug>.png bestaat. */
+  logo?: string;
+}
+
+export interface Overleg {
+  naam: string;
+  wie: string;
+  hoeVaak: string;
+  waarover: string;
+  voorzitter: string;
+}
+
+export interface Jaarmoment {
+  wanneer: string;
+  wat: string;
+  uitleg: string;
+}
+
+export interface Evenement {
+  naam: string;
+  tekst: string;
+  /** Alleen gevuld als de foto in public/img/events bestaat. */
+  foto?: string;
+}
+
+export interface Traditie {
+  titel: string;
+  tekst: string;
+}
+
+export interface Mijlpaal {
+  wanneer: string;
+  wat: string;
+}
+
+export interface Samenwerking {
+  partij: string;
+  tekst: string;
+}
+
+export interface Vraag {
+  vraag: string;
+  antwoord: string;
+  link?: { tekst: string; naar: string };
 }
 
 export interface Svr {
@@ -55,7 +104,31 @@ export const leesTekst = (naam: string): Document =>
   leesMarkdown(readFileSync(inhoudspad(`${naam}.md`), "utf8"));
 
 export const leesSvr = () => leesJson<Svr>("svr.json");
-export const leesVerenigingen = () => leesJson<Vereniging[]>("verenigingen.json");
+
+/** De vijftien, met hun logo als dat bestand er is. */
+export const leesVerenigingen = (): Vereniging[] =>
+  leesJson<Vereniging[]>("verenigingen.json").map((vereniging) => ({
+    ...vereniging,
+    logo: existsSync(logopad(`${vereniging.slug}.png`))
+      ? `${vereniging.slug}.png`
+      : undefined,
+  }));
+
+export const leesOverleggen = () => leesJson<Overleg[]>("overleggen.json");
+export const leesTradities = () => leesJson<Traditie[]>("tradities.json");
+export const leesGeschiedenis = () => leesJson<Mijlpaal[]>("geschiedenis.json");
+export const leesSamenwerking = () => leesJson<Samenwerking[]>("samenwerking.json");
+export const leesVragen = () => leesJson<Vraag[]>("vragen.json");
+
+export const leesJaar = () =>
+  leesJson<{ lbgMaand: string; momenten: Jaarmoment[] }>("jaar.json");
+
+/** De evenementen; een foto verschijnt alleen als het bestand er is. */
+export const leesEvenementen = (): Evenement[] =>
+  leesJson<Evenement[]>("evenementen.json").map((evenement) => ({
+    ...evenement,
+    foto: evenement.foto && existsSync(evenementpad(evenement.foto)) ? evenement.foto : undefined,
+  }));
 
 export function leesBestuur(): Bestuur {
   const bestuur = leesJson<Bestuur>("bestuur.json");
