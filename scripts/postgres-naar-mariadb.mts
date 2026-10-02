@@ -39,13 +39,27 @@ const model = (tabel: Tabel) =>
   (db as any)[tabel.charAt(0).toLowerCase() + tabel.slice(1)];
 
 const schrijf = process.argv.includes("--schrijf");
+// Bewust één eigen variabele: .env.local bevat de ontwikkeldatabase, en die wil
+// je hier nooit per ongeluk lezen. Zet BRON_POSTGRES_URL op het adres van de
+// database die je echt wilt overzetten.
 const adres =
+  process.env.BRON_POSTGRES_URL ??
   process.env.NEON_DATABASE_URL_UNPOOLED ??
   process.env.NEON_DATABASE_URL ??
   process.env.POSTGRES_URL;
 if (!adres?.startsWith("postgres")) {
   throw new Error(
-    "Zet NEON_DATABASE_URL in .env.local (npx vercel env pull .env.local) zodat de oude database gelezen kan worden.",
+    "Zet BRON_POSTGRES_URL op het Postgres-adres van de database die je wilt overzetten.",
+  );
+}
+// Laten zien waar gelezen en geschreven wordt, zonder het wachtwoord.
+const bronHost = new URL(adres).host;
+const doelHost = new URL(process.env.DATABASE_URL ?? "mysql://onbekend").host;
+console.log(`Lezen uit Postgres op ${bronHost}`);
+console.log(`Schrijven naar MariaDB op ${doelHost}\n`);
+if (!process.env.BRON_POSTGRES_URL) {
+  console.log(
+    "Let op: BRON_POSTGRES_URL is niet gezet, dus dit kan de ontwikkeldatabase zijn.\n",
   );
 }
 

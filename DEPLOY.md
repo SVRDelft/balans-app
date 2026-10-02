@@ -152,26 +152,61 @@ opnieuw deployen.
 
 ## Gegevens overzetten vanuit de huidige app
 
-Zolang de administratie nog op Vercel draait, staat de echte data daar. Op het
-moment van de overstap:
+De database op de TU-server is alleen vanaf die server zelf bereikbaar, dus je
+kunt er niet rechtstreeks naartoe schrijven. De route is: op je laptop een
+SQL-bestand maken en dat in Plesk importeren.
 
-1. Zet de app op Vercel even stil of spreek af dat er niets meer geboekt wordt.
-2. Op je laptop: `npx vercel env pull .env.local`
-3. Zorg dat `DATABASE_URL` in `.env` naar de **TU-database** wijst. Die is alleen
-   vanaf de server bereikbaar, dus dit kan alleen met een SSH-tunnel:
-   ```bash
-   ssh -L 3307:localhost:3306 svr@svr.tudelft.nl
-   ```
-   en dan `DATABASE_URL="mysql://svr-bestuur_app:...@localhost:3307/svr-bestuur_svr"`.
-4. `npx tsx scripts/postgres-naar-mariadb.mts` (eerst droog) en daarna met
-   `--schrijf`. Het script vergelijkt per tabel het aantal rijen en het
-   totaalbedrag en stopt als er iets niet klopt.
+**Doe dit als laatste stap, en boek daarna niets meer op Vercel.**
 
-Lukt SSH niet, dan is het alternatief: de volledige back-up downloaden
-(**Overdracht › Back-up downloaden**) en die handmatig inlezen. Vraag dan hulp;
-dit is het soort stap dat je één keer goed wilt doen.
+### Op je laptop
 
----
+```bash
+npm run db:start                                   # lokale MariaDB
+npx vercel env pull .env.local                     # haalt de adressen op
+```
+
+Zoek in `.env.local` het adres van de **productiedatabase**. Let op: er staan
+ook adressen van de ontwikkeldatabase in. Zet het goede adres in één commando:
+
+```bash
+# Windows PowerShell
+$env:BRON_POSTGRES_URL = "postgresql://...het productie-adres..."
+npx tsx scripts/postgres-naar-mariadb.mts            # droge loop: alleen tellen
+npx tsx scripts/postgres-naar-mariadb.mts --schrijf  # echt overzetten
+npx tsx prisma/seed.ts vergaderingen                 # vergaderrooster aanvullen
+node scripts/exporteer-sql.mjs                       # maakt svr-gegevens.sql
+```
+
+Het script zegt bovenaan uit welke server het leest; controleer dat het de
+productiedatabase is. Het vergelijkt daarna per tabel het aantal rijen en de som
+van alle bedragen, en stopt als er iets niet klopt. De lokale database moet leeg
+zijn; leeggooien doe je met:
+
+```bash
+docker exec svr-mariadb mariadb -uroot -psvr-lokaal -e "DROP DATABASE svr; CREATE DATABASE svr CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+npx prisma migrate deploy
+```
+
+### In Plesk
+
+1. Zorg dat de tabellen bestaan: **Node.js › Run script › `migrate`**.
+2. Ga naar **Websites & Domains › Databases**.
+3. Klik bij de database `svr-bestuur_svr` op **Import Dump**, kies
+   `svr-gegevens.sql` van je laptop en bevestig. Staat die knop er niet, open dan
+   **phpMyAdmin**, kies links de database, tabblad **Importeren**, bestand
+   kiezen, **Starten**.
+4. Onderaan `svr-gegevens.sql` staat een lijstje met het aantal rijen en het
+   totaalbedrag per tabel. Controleer dat in de app: open **Exploitatie** en
+   **Facturen** en kijk of de bedragen kloppen.
+
+Accounts en inlogpogingen zitten **niet** in het bestand: die staan al op de
+server en wachtwoorden horen niet door een webformulier te gaan.
+
+### Daarna
+
+- Zet de app op Vercel uit (of laat hem staan, maar boek er niets meer in).
+- Bewaar `svr-gegevens.sql` nog even, en haal daarna een verse back-up op via
+  **Overdracht › Back-up downloaden**.
 
 ## Back-ups
 

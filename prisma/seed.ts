@@ -112,6 +112,17 @@ const BEGROTINGSPOSTEN: PostInvoer[] = [
 ];
 
 async function main() {
+  // Met "vergaderingen" als argument alleen het vergaderrooster aanvullen. Dat
+  // gebruik je na het overzetten van een bestaande administratie: de relaties
+  // en de begroting staan er dan al en moeten niet teruggezet worden naar de
+  // startwaarden.
+  const alleenVergaderingen = process.argv.includes("vergaderingen");
+  if (alleenVergaderingen) {
+    await vulVergaderingen();
+    console.log("Klaar.");
+    return;
+  }
+
   console.log("Startgegevens wegschrijven…");
 
   await db.instellingen.upsert({
@@ -228,6 +239,13 @@ async function main() {
     console.log("  evenement: LBG 2027 bestond al");
   }
 
+  await vulVergaderingen();
+
+  console.log("Klaar.");
+}
+
+/** Vult het vergaderrooster aan; bestaande vergaderingen blijven staan. */
+async function vulVergaderingen() {
   // Vergaderingen van dit bestuursjaar voor het portaal. Alleen aanvullen:
   // bestaande vergaderingen (met hun agenda en notulen) blijven staan.
   let nieuweVergaderingen = 0;
@@ -254,7 +272,6 @@ async function main() {
   }
   console.log(`  ${nieuweVergaderingen} vergaderingen toegevoegd (${VERGADERINGEN_2026_2027.length} in het rooster)`);
 
-  console.log("Klaar.");
 }
 
 main()

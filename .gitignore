@@ -59,3 +59,7 @@ yarn-error.log*
 # Geüploade bestanden van het portaal; die horen in de back-up, niet in git.
 storage/
 deploy/
+
+# Uitvoer van scripts/exporteer-sql.mjs: de hele administratie.
+*.sql
+!prisma/migrations*/**/*.sql

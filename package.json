@@ -21,7 +21,8 @@
     "db:reset": "prisma migrate reset --force",
     "setup": "npm run db:deploy && prisma db seed",
     "postinstall": "prisma generate",
-    "account:eerste": "tsx scripts/eerste-account.mts"
+    "account:eerste": "tsx scripts/eerste-account.mts",
+    "export:sql": "node scripts/exporteer-sql.mjs"
   },
   "engines": {
     "node": ">=20.9.0"
