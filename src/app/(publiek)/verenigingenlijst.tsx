@@ -52,14 +52,19 @@ export function Verenigingenlijst({ verenigingen }: { verenigingen: Vereniging[]
                   loading="lazy"
                 />
               ) : (
-                <span className="logo" aria-hidden>
-                  {vereniging.kort.length <= 4 ? vereniging.kort : vereniging.kort.slice(0, 2)}
-                </span>
+                <span className="streepje" aria-hidden />
               )}
               <span className="wie">
                 <strong>{vereniging.naam}</strong>
                 <span>{vereniging.faculteit}</span>
               </span>
+              {vereniging.website ? (
+                <svg className="naarbuiten" viewBox="0 0 16 16" aria-hidden focusable="false">
+                  <path d="M6 2h8v8" />
+                  <path d="M14 2 7 9" />
+                  <path d="M12 10v4H2V4h4" />
+                </svg>
+              ) : null}
             </>
           );
 

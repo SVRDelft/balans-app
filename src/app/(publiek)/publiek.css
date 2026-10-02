@@ -1,3 +1,49 @@
+/* De lettertypen staan op onze eigen server, niet bij Google. Elk lettertype
+   komt in twee stukken: "latin" met de gewone letters en "latin-ext" met de
+   zeldzamere. De unicode-range zegt de browser welk stuk hij nodig heeft.
+   (Eerder laadde alleen latin-ext, waardoor alles terugviel op Arial.) */
+
+@font-face {
+  font-family: "Young Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/young-serif-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Young Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/young-serif-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 /* De publieke site. Eén bestand, geen Tailwind en geen shadcn: dit deel staat
    los van de administratie achter het slot.
 
@@ -21,7 +67,7 @@
 
   background: var(--grond);
   color: var(--navy);
-  font-family: var(--lettertype-tekst), system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   font-size: 1.0625rem;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -39,7 +85,7 @@
 .publiek h1,
 .publiek h2,
 .publiek h3 {
-  font-family: var(--lettertype-kop), Georgia, "Times New Roman", serif;
+  font-family: "Young Serif", Georgia, "Times New Roman", serif;
   font-weight: 400;
   line-height: 1.12;
   margin: 0;
@@ -140,11 +186,11 @@
   display: grid;
   place-items: center;
   color: var(--wit);
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 0.95rem;
 }
 .merk strong {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-weight: 400;
   font-size: 1.15rem;
   display: block;
@@ -248,17 +294,17 @@
   margin-top: 2rem;
 }
 .tafel-uitleg {
-  margin: 1rem auto 0;
-  max-width: 24rem;
+  margin: 0.25rem auto 0;
+  max-width: 22rem;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--grijs);
 }
 
 /* de tafel */
 .tafel {
   width: 100%;
-  max-width: 30rem;
+  max-width: 34rem;
   margin: 0 auto;
   display: block;
   overflow: visible;
@@ -269,7 +315,7 @@
   stroke-width: 1.5;
 }
 .tafel .blad-naam {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 40px;
   fill: var(--navy);
 }
@@ -280,18 +326,17 @@
 .tafel .raakvlak {
   fill: transparent;
 }
-.tafel .stoel {
-  fill: var(--wit);
-  stroke: var(--cyaan-donker);
-  stroke-width: 2;
-  transition: fill 0.15s ease, r 0.15s ease;
+.tafel .rug {
+  fill: var(--navy);
+  transition: fill 0.15s ease;
 }
 .tafel .stoel-naam {
-  font-size: 14px;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 17px;
   fill: var(--navy);
 }
 .tafel .stoel-faculteit {
-  font-size: 12px;
+  font-size: 13px;
   fill: var(--grijs);
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -300,14 +345,13 @@
   cursor: pointer;
   outline-offset: 4px;
 }
-.tafel .plek:hover .stoel,
-.tafel .plek:focus-visible .stoel {
+.tafel .plek:hover .rug,
+.tafel .plek:focus-visible .rug {
   fill: var(--cyaan);
-  stroke: var(--navy);
 }
 .tafel .plek:hover .stoel-naam,
 .tafel .plek:focus-visible .stoel-naam {
-  font-weight: 700;
+  fill: var(--cyaan-donker);
 }
 .tafel .plek:hover .stoel-faculteit,
 .tafel .plek:focus-visible .stoel-faculteit {
@@ -361,7 +405,7 @@
   gap: 2.5rem;
   padding-right: 2.5rem;
   white-space: nowrap;
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 1.05rem;
   color: var(--wit);
 }
@@ -421,7 +465,7 @@
   color: var(--navy) !important;
 }
 .feitenzin strong {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-weight: 400;
   font-size: 1.35em;
   color: var(--navy);
@@ -465,7 +509,7 @@
   stroke: var(--cyaan);
 }
 .schematekening .doos-naam {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 16px;
   fill: var(--wit);
 }
@@ -484,71 +528,59 @@
 
 /* 5. overleggen */
 .overleggen {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14.5rem, 1fr));
-  gap: 1.5rem;
   margin-top: 2rem;
+  border-top: 1px solid var(--rand);
 }
 .overleggen article {
-  background: var(--wit);
-  border: 1px solid var(--rand);
-  border-top: 4px solid var(--navy);
-  border-radius: 0.5rem;
-  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: baseline;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--rand);
 }
 .overleggen h3 {
-  font-size: 1.4rem;
-}
-.overleggen dl {
-  margin: 0.75rem 0 0;
-  display: grid;
-  gap: 0.15rem;
-}
-.overleggen dt {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--grijs);
-  margin-top: 0.6rem;
-}
-.overleggen dd {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  color: var(--cyaan-donker);
   margin: 0;
-  font-size: 0.95rem;
 }
+.overleggen .wie {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+.overleggen .details {
+  margin: 0;
+  color: var(--grijs);
+  font-size: 0.97rem;
+}
+
 .terzijde {
   margin-top: 2rem;
   font-size: 0.95rem;
   color: var(--grijs);
 }
 
-/* 6. tijdlijn van het jaar */
+/* 6. tijdlijn van het jaar: op een breed scherm alles in beeld, in twee rijen;
+   op een telefoon één rij die je opzij schuift. */
 .tijdlijn {
   list-style: none;
   margin: 2.5rem 0 0;
   padding: 0;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(11rem, 1fr);
-  gap: 1.5rem;
-  overflow-x: auto;
-  padding-bottom: 1rem;
-  padding-right: 1.5rem;
-  scroll-snap-type: x proximity;
-  /* Laat zien dat er rechts meer staat. */
-  mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.25rem 1.5rem;
 }
 .tijdlijn li {
   position: relative;
   padding-top: 1.75rem;
   border-top: 2px solid var(--rand);
-  scroll-snap-align: start;
 }
 .tijdlijn .stip {
   position: absolute;
-  top: -0.5rem;
+  top: -0.55rem;
   left: 0;
-  width: 1rem;
-  height: 1rem;
+  width: 1.1rem;
+  height: 1.1rem;
   border-radius: 50%;
   border: 2px solid var(--wit);
 }
@@ -561,19 +593,27 @@
 }
 .tijdlijn .wat {
   margin: 0.15rem 0 0.35rem;
-  font-family: var(--lettertype-kop), Georgia, serif;
-  font-size: 1.15rem;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 1.2rem;
+}
+.tijdlijn .datum {
+  margin: -0.2rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--navy);
 }
 .tijdlijn .uitleg {
   margin: 0;
   font-size: 0.92rem;
   color: var(--grijs);
 }
+.schuifhint {
+  display: none;
+}
 
 /* 7. evenementen */
 .evenementen {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
 }
@@ -585,11 +625,47 @@
   display: flex;
   flex-direction: column;
 }
+.evenementen article.groot {
+  grid-column: span 3;
+  flex-direction: row;
+  align-items: stretch;
+}
+.evenementen article.groot .foto {
+  width: 42%;
+  aspect-ratio: auto;
+}
+.evenementen article.groot .inhoud {
+  padding: 2rem 2.25rem;
+  align-self: center;
+}
+.evenementen article.groot h3 {
+  font-size: 1.7rem;
+}
 .evenementen .foto {
   display: block;
   width: 100%;
   aspect-ratio: 3 / 2;
   object-fit: cover;
+}
+/* Zonder foto een rustig vlak met één dasstreep in de hoek. */
+.evenementen .foto.leeg {
+  background: var(--grond);
+  position: relative;
+  overflow: hidden;
+}
+.evenementen .foto.leeg::after {
+  content: "";
+  position: absolute;
+  right: -1.5rem;
+  bottom: -1.5rem;
+  width: 7rem;
+  height: 1.1rem;
+  background: var(--cyaan);
+  transform: rotate(-25deg);
+}
+.evenementen article.groot .foto.leeg::after {
+  width: 11rem;
+  height: 1.4rem;
 }
 .evenementen .inhoud {
   padding: 1.1rem 1.25rem 1.4rem;
@@ -601,14 +677,22 @@
 }
 
 /* 8. samenwerking */
+.namens {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rand-donker);
+}
+.namens h3 {
+  font-size: 1.35rem;
+}
 .samenwerking {
-  margin: 2rem 0 0;
+  margin: 1.5rem 0 0;
   display: grid;
   gap: 1.5rem;
   max-width: 48rem;
 }
 .samenwerking dt {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 1.2rem;
   border-left: 3px solid var(--cyaan);
   padding-left: 0.85rem;
@@ -661,9 +745,14 @@
   color: inherit;
   height: 100%;
 }
-.verenigingen a:hover {
+.verenigingen a:hover,
+.verenigingen a:focus-visible {
   border-color: var(--cyaan);
   background: var(--wit);
+  transform: translateY(-1px);
+}
+.verenigingen a {
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 .verenigingen .logo {
   width: 2.75rem;
@@ -671,23 +760,33 @@
   flex: none;
   border-radius: 0.4rem;
   object-fit: contain;
-  display: grid;
-  place-items: center;
-  color: var(--wit);
-  font-family: var(--lettertype-kop), Georgia, serif;
-  font-size: 0.85rem;
-}
-.verenigingen img.logo {
   background: var(--wit);
 }
-.verenigingen span.logo {
-  background: var(--navy);
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
+/* Zonder logo één dasstreep, geen initialen: die lazen als een fout. */
+.verenigingen .streepje {
+  width: 0.35rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: 999px;
+  background: linear-gradient(var(--cyaan) 0 55%, var(--navy) 55% 100%);
+}
+.verenigingen .naarbuiten {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: auto;
+  flex: none;
+  fill: none;
+  stroke: var(--grijs);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.verenigingen a:hover .naarbuiten {
+  stroke: var(--cyaan-donker);
 }
 .verenigingen .wie strong {
   display: block;
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-weight: 400;
   font-size: 1.05rem;
   line-height: 1.2;
@@ -718,6 +817,16 @@
 }
 
 /* 11. geschiedenis */
+.geschiedenisblok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: center;
+}
+.geschiedenisblok .groot-getal {
+  justify-self: end;
+  font-size: clamp(4rem, 11vw, 9rem);
+}
 .mijlpalen {
   list-style: none;
   margin: 2rem 0 0;
@@ -742,7 +851,7 @@
 }
 .mijlpalen .wanneer {
   margin: 0;
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-size: 1.1rem;
   color: var(--wit);
 }
@@ -751,30 +860,25 @@
 }
 
 /* 12. bestuur */
-.bestuurkop {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
+.groot-getal {
+  font-family: "Young Serif", Georgia, serif;
+  line-height: 0.82;
+  font-size: clamp(7rem, 17vw, 15rem);
+  color: transparent;
+  -webkit-text-stroke: 3px var(--navy);
+  display: block;
+  letter-spacing: -0.02em;
 }
-.bestuurkop .nummer {
-  font-family: var(--lettertype-kop), Georgia, serif;
-  font-size: clamp(3.5rem, 8vw, 5.5rem);
-  line-height: 1;
-  padding: 0.35rem 1.1rem;
-  border: 3px solid var(--navy);
-  border-radius: 0.6rem;
-  color: var(--navy);
+.vlak.donker .groot-getal,
+.groot-getal.omtrek {
+  -webkit-text-stroke-color: var(--cyaan);
 }
-.bestuurkop p {
-  margin: 0.35rem 0 0;
-  color: var(--grijs);
-}
+
 .bestuurblok {
-  margin-top: 2.5rem;
+  margin-top: 2rem;
   display: grid;
-  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
-  gap: 2.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: 3rem;
   align-items: center;
 }
 .samenfoto {
@@ -795,19 +899,21 @@
 .personen {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 3rem 0 0;
   display: grid;
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 2rem;
+  max-width: 48rem;
 }
 .personen li {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 .personen img,
 .personen .geenfoto {
-  width: 5rem;
-  height: 5rem;
+  width: 8rem;
+  height: 8rem;
   flex: none;
   border-radius: 50%;
   object-fit: cover;
@@ -816,18 +922,20 @@
   display: grid;
   place-items: center;
   color: var(--wit);
-  font-family: var(--lettertype-kop), Georgia, serif;
-  font-size: 1.4rem;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 2rem;
 }
 .personen strong {
-  font-family: var(--lettertype-kop), Georgia, serif;
+  font-family: "Young Serif", Georgia, serif;
   font-weight: 400;
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   display: block;
+  line-height: 1.15;
 }
 .personen span span {
+  font-family: "Young Serif", Georgia, serif;
   color: var(--grijs);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 .uitnodiging {
   margin-top: 2.5rem;
@@ -941,9 +1049,24 @@
     padding-bottom: 2.5rem;
   }
   .schema,
-  .bestuurblok {
+  .bestuurblok,
+  .geschiedenisblok {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+  .geschiedenisblok .groot-getal {
+    justify-self: start;
+  }
+  .evenementen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .evenementen article.groot {
+    grid-column: span 2;
+    flex-direction: column;
+  }
+  .evenementen article.groot .foto {
+    width: 100%;
+    aspect-ratio: 3 / 2;
   }
   .samenfoto {
     max-width: 22rem;
@@ -987,28 +1110,38 @@
   .vlak {
     padding: 2.75rem 0;
   }
-  /* De tijdlijn wordt verticaal: scrollen in twee richtingen is vervelend. */
+  /* Op een telefoon één rij die je opzij schuift, met een zichtbare hint. */
   .tijdlijn {
-    grid-auto-flow: row;
-    grid-auto-columns: auto;
-    overflow-x: visible;
-    gap: 0;
-    padding-left: 1.25rem;
-    border-left: 2px solid var(--rand);
+    grid-auto-flow: column;
+    grid-auto-columns: 14rem;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.75rem;
   }
   .tijdlijn li {
-    border-top: 0;
-    padding-top: 0;
-    padding-bottom: 1.75rem;
+    scroll-snap-align: start;
   }
-  .tijdlijn .stip {
-    top: 0.35rem;
-    left: -1.75rem;
-    width: 0.75rem;
-    height: 0.75rem;
+  .schuifhint {
+    display: block;
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--grijs);
   }
-  .bestuurkop .nummer {
-    font-size: 3.2rem;
+  .evenementen {
+    grid-template-columns: 1fr;
+  }
+  .evenementen article.groot {
+    grid-column: span 1;
+  }
+  .overleggen article {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .personen img,
+  .personen .geenfoto {
+    width: 6rem;
+    height: 6rem;
   }
 }
 

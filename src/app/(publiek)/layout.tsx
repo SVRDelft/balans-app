@@ -1,28 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import localFont from "next/font/local";
 
 import { leesSvr, logoBestand } from "@/lib/content";
 
 import { Menu } from "./menu";
 import "./publiek.css";
-
-// Zelf gehost, niet via Google Fonts: dan gaat er geen verzoek van de bezoeker
-// naar een server van iemand anders.
-const kop = localFont({
-  src: "../../../public/fonts/young-serif-latin.woff2",
-  variable: "--lettertype-kop",
-  display: "swap",
-  fallback: ["Georgia", "Times New Roman", "serif"],
-});
-
-const tekst = localFont({
-  src: "../../../public/fonts/instrument-sans-latin.woff2",
-  variable: "--lettertype-tekst",
-  display: "swap",
-  weight: "400 700",
-  fallback: ["system-ui", "Segoe UI", "Arial", "sans-serif"],
-});
 
 const svr = leesSvr();
 
@@ -33,6 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     "De StudieVerenigingenRaad Delft is het overleg van de vijftien studieverenigingen van de TU Delft.",
+  metadataBase: new URL("https://svr.tudelft.nl"),
   openGraph: {
     type: "website",
     locale: "nl_NL",
@@ -40,6 +23,11 @@ export const metadata: Metadata = {
     title: svr.naam,
     description:
       "Het overleg van de vijftien studieverenigingen van de TU Delft.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: svr.naam }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og.png"],
   },
 };
 
@@ -51,7 +39,7 @@ export default function PubliekeLayout({
   const logo = logoBestand();
 
   return (
-    <div className={`publiek ${kop.variable} ${tekst.variable}`}>
+    <div className="publiek">
       <a href="#inhoud" className="knop" style={{ position: "absolute", left: "-9999px" }}>
         Naar de inhoud
       </a>

@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 
 import { leesMarkdown, type Document } from "@/lib/markdown";
+import { zonderPlaceholder } from "@/lib/placeholders";
 
 // De teksten van de publieke pagina's staan in `content/`, zodat een opvolger
 // ze kan aanpassen zonder de code in te duiken. Alles wordt tijdens de build
@@ -26,6 +27,8 @@ export interface Bestuurslid {
 export interface Bestuur {
   nummer: number;
   startdatum: string;
+  /** Aantal StOF-bestuursmaanden dat het bestuur samen krijgt. */
+  stofMaanden?: number;
   leden: Bestuurslid[];
   /** Grote foto van het hele bestuur, in public/img. */
   samenFoto?: string;
@@ -49,12 +52,16 @@ export interface Overleg {
   hoeVaak: string;
   waarover: string;
   voorzitter: string;
+  /** Bijvoorbeeld "In pak" of "Niet in pak; het OWee-bestuur schuift aan". */
+  extra?: string;
 }
 
 export interface Jaarmoment {
   wanneer: string;
   wat: string;
   uitleg: string;
+  /** Alleen als de datum dit jaar vastligt, zoals bij het gala. */
+  datum?: string;
 }
 
 export interface Evenement {
@@ -100,8 +107,21 @@ function leesJson<T>(naam: string): T {
   return JSON.parse(readFileSync(inhoudspad(naam), "utf8")) as T;
 }
 
-export const leesTekst = (naam: string): Document =>
-  leesMarkdown(readFileSync(inhoudspad(`${naam}.md`), "utf8"));
+/**
+ * Leest een tekst uit content/. Waarden tussen rechte haken, zoals
+ * [STOF-MAANDEN], worden ingevuld; een "[IN TE VULLEN: …]" dat is blijven staan
+ * verdwijnt in productie (zie src/lib/placeholders.ts).
+ */
+export function leesTekst(
+  naam: string,
+  waarden: Record<string, string | number> = {},
+): Document {
+  let ruw = readFileSync(inhoudspad(`${naam}.md`), "utf8");
+  for (const [sleutel, waarde] of Object.entries(waarden)) {
+    ruw = ruw.replaceAll(`[${sleutel}]`, String(waarde));
+  }
+  return leesMarkdown(zonderPlaceholder(ruw));
+}
 
 export const leesSvr = () => leesJson<Svr>("svr.json");
 
@@ -120,8 +140,7 @@ export const leesGeschiedenis = () => leesJson<Mijlpaal[]>("geschiedenis.json");
 export const leesSamenwerking = () => leesJson<Samenwerking[]>("samenwerking.json");
 export const leesVragen = () => leesJson<Vraag[]>("vragen.json");
 
-export const leesJaar = () =>
-  leesJson<{ lbgMaand: string; momenten: Jaarmoment[] }>("jaar.json");
+export const leesJaar = () => leesJson<{ momenten: Jaarmoment[] }>("jaar.json");
 
 /** De evenementen; een foto verschijnt alleen als het bestand er is. */
 export const leesEvenementen = (): Evenement[] =>

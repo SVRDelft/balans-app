@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { leesSvr, leesTekst } from "@/lib/content";
+import { leesBestuur, leesSvr, leesTekst } from "@/lib/content";
 
 import { Blokken } from "../blokken";
 
@@ -18,7 +18,10 @@ export const metadata: Metadata = {
 };
 
 export default function BestuurWorden() {
-  const tekst = leesTekst("bestuur-worden");
+  const bestuur = leesBestuur();
+  const tekst = leesTekst("bestuur-worden", {
+    "STOF-MAANDEN": bestuur.stofMaanden ?? "[IN TE VULLEN: aantal]",
+  });
   const svr = leesSvr();
 
   return (

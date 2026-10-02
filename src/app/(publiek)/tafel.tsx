@@ -5,13 +5,19 @@ import type { Vereniging } from "@/lib/content";
  *
  * Alles zit in SVG en CSS, zonder JavaScript. Elke stoel is een link naar de
  * website van die vereniging en dus met het toetsenbord te bereiken; bij hover
- * of focus licht hij op en verschijnt de faculteit. Verenigingen zonder bekende
- * website worden een groep met een toegankelijke naam, zodat ze wel oplichten
- * maar nergens heen wijzen.
+ * of focus kleurt hij cyaan en verschijnt de faculteit. Verenigingen zonder
+ * bekende website worden een groep met een toegankelijke naam, zodat ze wel
+ * oplichten maar nergens heen wijzen.
  */
-export function Tafel({ verenigingen }: { verenigingen: Vereniging[] }) {
+export function Tafel({
+  verenigingen,
+  logo,
+}: {
+  verenigingen: Vereniging[];
+  logo?: string;
+}) {
   const midden = 250;
-  const straal = 118;
+  const straal = 112;
 
   return (
     <svg
@@ -25,32 +31,52 @@ export function Tafel({ verenigingen }: { verenigingen: Vereniging[] }) {
       </title>
 
       <circle className="blad" cx={midden} cy={midden} r={straal} />
-      <text className="blad-naam" x={midden} y={midden + 14} textAnchor="middle">
-        SVR
-      </text>
+      {logo ? (
+        <image
+          href={`/img/${logo}`}
+          x={midden - 64}
+          y={midden - 64}
+          width={128}
+          height={128}
+          preserveAspectRatio="xMidYMid meet"
+        />
+      ) : (
+        <text className="blad-naam" x={midden} y={midden + 14} textAnchor="middle">
+          SVR
+        </text>
+      )}
 
       {verenigingen.map((vereniging, i) => {
         const hoek = (i / verenigingen.length) * 2 * Math.PI - Math.PI / 2;
         const cos = Math.cos(hoek);
         const sin = Math.sin(hoek);
-        const stoelX = midden + cos * (straal + 26);
-        const stoelY = midden + sin * (straal + 26);
-        const naamX = midden + cos * (straal + 56);
-        const naamY = midden + sin * (straal + 56);
+        const stoelX = midden + cos * (straal + 30);
+        const stoelY = midden + sin * (straal + 30);
+        const naamX = midden + cos * (straal + 66);
+        const naamY = midden + sin * (straal + 66);
         const kant = Math.abs(cos) < 0.3 ? "middle" : cos > 0 ? "start" : "end";
         const stijl = { "--wacht": `${0.1 + i * 0.05}s` } as React.CSSProperties;
         const inhoud = (
           <>
-            {/* Groter dan de stip zelf: zo is hij op een telefoon goed te raken. */}
-            <circle className="raakvlak" cx={stoelX} cy={stoelY} r={18} />
-            <circle className="stoel" cx={stoelX} cy={stoelY} r={8} />
+            {/* Groter dan de stoel zelf: zo is hij op een telefoon goed te raken. */}
+            <circle className="raakvlak" cx={stoelX} cy={stoelY} r={22} />
+            {/* De rugleuning wijst naar de tafel toe. */}
+            <rect
+              className="rug"
+              x={stoelX - 11}
+              y={stoelY - 11}
+              width={22}
+              height={22}
+              rx={6}
+              transform={`rotate(${(hoek * 180) / Math.PI + 90} ${stoelX} ${stoelY})`}
+            />
             <text className="stoel-naam" x={naamX} y={naamY} textAnchor={kant}>
               {vereniging.kort}
             </text>
             <text
               className="stoel-faculteit"
               x={naamX}
-              y={naamY + 15}
+              y={naamY + 16}
               textAnchor={kant}
             >
               {vereniging.faculteit}

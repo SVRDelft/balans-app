@@ -371,18 +371,39 @@ stuk voor stuk opgevraagd; alle vijftien gaven antwoord. Verandert er een adres,
 pas het dan in dat bestand aan. Laat je `website` leeg, dan blijft de vereniging
 gewoon in de lijst staan, maar zonder link.
 
-Nog in te vullen op de site, zichtbaar als `[IN TE VULLEN: …]`:
-
-- de maand van het Landelijk Bestuursgala, in `content/jaar.json`;
-- periode, deadline en aanmelden bij "Hoe solliciteer je?" in
-  `content/bestuur-worden.md`.
-
 Over de inhoud van de homepage is niets verzonnen: de teksten over het Algemeen
 Bestuur, het dagelijks bestuur, de informanten, de vier overleggen, de tradities
-en de geschiedenis komen uit de opdracht van het bestuur. Jaartallen die daar
-niet in stonden zijn niet afgeleid uit bestuursnummers; "Later" en "Rond de
-coronajaren" staan er bewust zo.
+en de geschiedenis komen uit de opdracht van het bestuur. Bestuursnummers zijn
+bewust **niet** omgerekend naar jaartallen; bij het 41e en 45e bestuur staat
+daarom geen jaar.
+
+Wat nog ingevuld moet worden staat als `[IN TE VULLEN: …]` in `content/`. Zulke
+notities zijn lokaal zichtbaar, maar worden op de echte site weggelaten
+(`src/lib/placeholders.ts`). Op dit moment staat er niets meer open.
 
 De tafel in de opening en het filter bij de vijftien zijn gemaakt met CSS en
 SVG. Het filter heeft JavaScript nodig; staat dat uit, dan staan alle vijftien
 verenigingen er gewoon. De tafel werkt volledig zonder JavaScript.
+
+### De lettertypen laadden de verkeerde helft
+
+Young Serif en Instrument Sans stonden wel op de server, maar alleen de
+**latin-ext**-subset: het stuk met de zeldzame tekens, zonder de gewone letters.
+De browser viel daardoor terug op Arial, en alleen letters als de "A" van "Aan
+tafel" kwamen uit het echte lettertype. Nu staan beide subsets in `public/fonts`
+en declareert `publiek.css` ze zelf met de bijbehorende `unicode-range`, in
+plaats van via `next/font/local`. Zo is in één bestand te zien wat er geladen
+wordt.
+
+### Het Landelijk Bestuursgala is niet meer landelijk
+
+Volgens de inwerkstukken van DB 61 was het LBG ooit echt landelijk en is het dat
+nu niet meer; het is het gala voor de Delftse besturen, op een locatie buiten de
+stad. De datum (31 mei 2027) staat in `content/jaar.json` en moet elk jaar
+worden bijgewerkt.
+
+### Dé DDB wordt niet door de SVR georganiseerd
+
+De SVR plant de borrels in; per editie organiseren een paar verenigingen er één.
+Daarom heet de sectie nu "Waar je ons tegenkomt" en niet meer "Wat we
+organiseren": die kop klopt ook voor de Dodenherdenking en Dé DDB.

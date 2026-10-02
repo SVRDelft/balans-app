@@ -12,10 +12,10 @@ onze eigen server, dus ook daarvoor gaat er geen verzoek naar buiten.
 Wie inlogt krijgt één cookie: een sessiecookie waarmee de server weet wie je
 bent. Dat cookie verdwijnt als je uitlogt of als de sessie verloopt.
 
-Voor het portaal bewaren we het e-mailadres van het bestuur van elke
-studievereniging, zodat we een inloglink kunnen sturen. In het administratiedeel
-staan de gegevens die bij de financiële administratie horen: facturen,
-betalingen, uitgaven en de contactgegevens van de verenigingen.
+Voor het portaal bewaren we per studievereniging een e-mailadres als inlognaam
+en een versleuteld wachtwoord. We versturen geen e-mail vanuit deze site. In het
+administratiedeel staan de gegevens die bij de financiële administratie horen:
+facturen, betalingen, uitgaven en de contactgegevens van de verenigingen.
 
 Elke wijziging komt met naam en tijdstip in een logboek. Dat is nodig om
 achteraf te kunnen zien wie wat heeft gedaan, en hoort bij een administratie die

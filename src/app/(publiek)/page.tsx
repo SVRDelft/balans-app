@@ -13,6 +13,7 @@ import {
   leesTradities,
   leesVerenigingen,
   leesVragen,
+  logoBestand,
 } from "@/lib/content";
 
 import { Blokken } from "./blokken";
@@ -59,7 +60,7 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-tafel">
-            <Tafel verenigingen={verenigingen} />
+            <Tafel verenigingen={verenigingen} logo={logoBestand()} />
             <p className="tafel-uitleg">
               Vijftien stoelen, vijftien verenigingen. Wijs een stoel aan voor de
               faculteit, of klik door naar hun site.
@@ -155,6 +156,18 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          <div className="namens">
+            <h3>Namens de verenigingen</h3>
+            <dl className="samenwerking">
+              {samenwerking.map((partij) => (
+                <div key={partij.partij}>
+                  <dt>{partij.partij}</dt>
+                  <dd>{partij.tekst}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
         </div>
       </section>
 
@@ -167,16 +180,15 @@ export default function Home() {
             {overleggen.map((overleg) => (
               <article key={overleg.naam}>
                 <h3>{overleg.naam}</h3>
-                <dl>
-                  <dt>Wie</dt>
-                  <dd>{overleg.wie}</dd>
-                  <dt>Hoe vaak</dt>
-                  <dd>{overleg.hoeVaak}</dd>
-                  <dt>Waarover</dt>
-                  <dd>{overleg.waarover}</dd>
-                  <dt>Voorzitter</dt>
-                  <dd>{overleg.voorzitter}</dd>
-                </dl>
+                <div>
+                  <p className="wie">{overleg.wie}.</p>
+                  <p className="details">
+                    {overleg.hoeVaak}
+                    {overleg.extra ? ` · ${overleg.extra}` : ""}. Over{" "}
+                    {overleg.waarover.charAt(0).toLowerCase() + overleg.waarover.slice(1)}.
+                    Voorgezeten door de {overleg.voorzitter.toLowerCase()}.
+                  </p>
+                </div>
               </article>
             ))}
           </div>
@@ -202,26 +214,22 @@ export default function Home() {
                 <span className="stip strepen" aria-hidden />
                 <p className="wanneer">{moment.wanneer}</p>
                 <p className="wat">{moment.wat}</p>
+                {moment.datum ? <p className="datum">{moment.datum}</p> : null}
                 <p className="uitleg">{moment.uitleg}</p>
               </li>
             ))}
-            <li>
-              <span className="stip strepen" aria-hidden />
-              <p className="wanneer">{jaar.lbgMaand}</p>
-              <p className="wat">Landelijk Bestuursgala</p>
-              <p className="uitleg">Hét gala voor besturen uit het hele land.</p>
-            </li>
           </ol>
+          <p className="schuifhint">Schuif opzij voor de rest van het jaar.</p>
         </div>
       </section>
 
-      {/* 7. Wat we organiseren */}
+      {/* 7. Waar je ons tegenkomt */}
       <section className="vlak" id="organiseren">
         <div className="binnen">
-          <h2>Wat we organiseren</h2>
+          <h2>Waar je ons tegenkomt</h2>
           <div className="evenementen">
-            {evenementen.map((evenement) => (
-              <article key={evenement.naam}>
+            {evenementen.map((evenement, i) => (
+              <article key={evenement.naam} className={i === 0 ? "groot" : undefined}>
                 {evenement.foto ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -231,7 +239,7 @@ export default function Home() {
                     loading="lazy"
                   />
                 ) : (
-                  <span className="foto strepen" aria-hidden />
+                  <span className="foto leeg" aria-hidden />
                 )}
                 <div className="inhoud">
                   <h3>{evenement.naam}</h3>
@@ -240,22 +248,6 @@ export default function Home() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 8. Namens de verenigingen */}
-      <section className="vlak donker" id="namens">
-        <div className="binnen">
-          <h2>Namens de verenigingen</h2>
-          <p>Waar de SVR aanschuift als de verenigingen samen iets te zeggen hebben.</p>
-          <dl className="samenwerking">
-            {samenwerking.map((partij) => (
-              <div key={partij.partij}>
-                <dt>{partij.partij}</dt>
-                <dd>{partij.tekst}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
 
@@ -288,6 +280,7 @@ export default function Home() {
       <section className="vlak donker" id="geschiedenis">
         <div className="binnen">
           <h2>Geschiedenis</h2>
+          <div className="geschiedenisblok">
           <ol className="mijlpalen">
             {geschiedenis.map((mijlpaal) => (
               <li key={mijlpaal.wanneer + mijlpaal.wat}>
@@ -296,32 +289,32 @@ export default function Home() {
               </li>
             ))}
           </ol>
+          <span className="groot-getal omtrek" aria-hidden>
+            1963
+          </span>
+          </div>
         </div>
       </section>
 
       {/* 12. Bestuur 62 */}
       <section className="vlak wit" id="bestuur">
         <div className="binnen">
-          <div className="bestuurkop">
-            <span className="nummer" aria-hidden>
-              {bestuur.nummer}
-            </span>
-            <div>
-              <h2>Bestuur {bestuur.nummer}</h2>
-              <p>
-                Het {bestuur.nummer}e dagelijks bestuur, sinds{" "}
-                {new Date(bestuur.startdatum).toLocaleDateString("nl-NL", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  timeZone: "UTC",
-                })}
-                .
-              </p>
-            </div>
-          </div>
+          <h2>Bestuur {bestuur.nummer}</h2>
+          <p>
+            Het {bestuur.nummer}e dagelijks bestuur, sinds{" "}
+            {new Date(bestuur.startdatum).toLocaleDateString("nl-NL", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              timeZone: "UTC",
+            })}
+            .
+          </p>
 
           <div className="bestuurblok">
+            <span className="groot-getal" aria-hidden>
+              {bestuur.nummer}
+            </span>
             {bestuur.samenFoto ? (
               <figure className="samenfoto">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -337,25 +330,26 @@ export default function Home() {
                 ) : null}
               </figure>
             ) : null}
-            <ul className="personen">
-              {bestuur.leden.map((lid) => (
-                <li key={lid.naam}>
-                  {lid.foto ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/img/${lid.foto}`} alt="" width={80} height={80} loading="lazy" />
-                  ) : (
-                    <span className="geenfoto strepen" aria-hidden>
-                      {initialen(lid.naam)}
-                    </span>
-                  )}
-                  <span>
-                    <strong>{lid.naam}</strong>
-                    <span>{lid.functie}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
           </div>
+
+          <ul className="personen">
+            {bestuur.leden.map((lid) => (
+              <li key={lid.naam}>
+                {lid.foto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/img/${lid.foto}`} alt="" width={128} height={128} loading="lazy" />
+                ) : (
+                  <span className="geenfoto strepen" aria-hidden>
+                    {initialen(lid.naam)}
+                  </span>
+                )}
+                <span>
+                  <strong>{lid.naam}</strong>
+                  <span>{lid.functie}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
 
           <p className="uitnodiging">
             Zelf in het bestuur?{" "}

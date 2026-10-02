@@ -2,12 +2,13 @@
   {
     "naam": "Educator of the Year Award",
     "foto": "eoty.jpg",
-    "tekst": "De prijs voor de beste docent van de TU Delft. De commissarissen onderwijs nomineren, de SVR zit in de jury met onder anderen de rector magnificus, en de uitreiking is op de Dag van het Onderwijs."
+    "tekst": "De prijs voor de beste docent van de TU Delft. De commissarissen onderwijs nomineren, de SVR zit in de jury met onder anderen de rector magnificus, en de uitreiking is op de Dag van het Onderwijs.",
+    "uitgelicht": true
   },
   {
     "naam": "Dé DDB",
     "foto": "ddb.jpg",
-    "tekst": "Dé Doldwaze Delftsche Besturenborrel, elk kwartaal, voor alle Delftse besturen. Met de nadruk op Dé."
+    "tekst": "Dé Doldwaze Delftsche Besturenborrel, één keer per kwartaal in de tentamenweken, voor alle Delftse besturen. De SVR plant ze in, steeds een paar verenigingen organiseren er één. Met de nadruk op Dé."
   },
   {
     "naam": "De Dies",
@@ -17,6 +18,6 @@
   {
     "naam": "Landelijk Bestuursgala",
     "foto": "lbg.jpg",
-    "tekst": "Ooit bedacht door het 45e bestuur. Hét gala voor besturen uit het hele land."
+    "tekst": "Bedacht door het 45e bestuur en ooit echt landelijk. Nu het gala voor de Delftse besturen, op een locatie buiten de stad."
   }
 ]

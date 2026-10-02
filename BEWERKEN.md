@@ -12,7 +12,7 @@ github.com; daarna zet het bestuur de site opnieuw live.
 |---|---|
 | `content/home.md` | de opening van de voorpagina, "Wat we doen" en "Hoe de SVR werkt" |
 | `content/overleggen.json` | de vier overleggen: wie, hoe vaak, waarover en wie voorzit |
-| `content/jaar.json` | de tijdlijn "Een jaar SVR", en de maand van het Landelijk Bestuursgala |
+| `content/jaar.json` | de tijdlijn "Een jaar SVR"; bij het gala staat ook de datum van dit jaar |
 | `content/evenementen.json` | wat de SVR organiseert, met de bestandsnaam van de foto |
 | `content/tradities.json` | de "wist je dat"-blokjes |
 | `content/geschiedenis.json` | de mijlpalen op de tijdlijn |
@@ -20,7 +20,7 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/vragen.json` | de veelgestelde vragen |
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |
 | `content/privacy.md` | de privacypagina |
-| `content/bestuur.json` | wie er in het bestuur zitten, het bestuursnummer en de startdatum |
+| `content/bestuur.json` | wie er in het bestuur zitten, het bestuursnummer, de startdatum en het aantal StOF-maanden |
 | `content/verenigingen.json` | de vijftien verenigingen: naam, faculteit en de link naar hun site |
 | `content/svr.json` | e-mailadres, adres, KvK-nummer en oprichtingsdatum |
 | `public/img/` | het logo en de portretten, zie `public/img/LEESMIJ.md` |
