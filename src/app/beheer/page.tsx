@@ -329,7 +329,7 @@ function Balkje({
         <span className="truncate">{naam}</span>
         <span className="cijfers shrink-0 text-muted-foreground">
           {formatteerEuro(gerealiseerdCenten)}
-          <span className="text-muted-foreground/70">
+          <span className="text-muted-foreground">
             {" "}
             / {formatteerEuro(begrootCenten)}
           </span>
