@@ -157,10 +157,22 @@
       "namedRegex": "^/api/export/pdf(?:/)?$"
     },
     {
+      "page": "/api/facturen/bundel",
+      "regex": "^/api/facturen/bundel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/facturen/bundel(?:/)?$"
+    },
+    {
       "page": "/api/logo",
       "regex": "^/api/logo(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/logo(?:/)?$"
+    },
+    {
+      "page": "/api/zoeken",
+      "regex": "^/api/zoeken(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/zoeken(?:/)?$"
     },
     {
       "page": "/beheer",
@@ -257,6 +269,12 @@
       "regex": "^/beheer/facturen/nieuw(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/beheer/facturen/nieuw(?:/)?$"
+    },
+    {
+      "page": "/beheer/ga",
+      "regex": "^/beheer/ga(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/ga(?:/)?$"
     },
     {
       "page": "/beheer/instellingen",

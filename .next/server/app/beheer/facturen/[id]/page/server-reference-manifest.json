@@ -1,6 +1,6 @@
 {
   "node": {
-    "00dac3de80571673b32c85f223efe417756788d8c3": {
+    "0055f8282f368e9e15db6835e0893f3c447448be22": {
       "workers": {
         "app/beheer/facturen/[id]/page": {
           "moduleId": 12724,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "601213f7e1f44fe2484e48b176605cd279bc66d21c": {
+    "6032d832a90de4ca879640e364b7855fe413c23237": {
       "workers": {
         "app/beheer/facturen/[id]/page": {
           "moduleId": 12724,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4054cc9ef82f107ea6588bceea3c0182f1fd45c044": {
+    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
       "workers": {
         "app/beheer/facturen/[id]/page": {
           "moduleId": 12724,
@@ -33,84 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6004bfd6983f76bf38603cba26c02c50efd1260011": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderBetaling",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "600e915f05004f93c68eac762d49679f8f16559e80": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderConcept",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "60158cf677254faf2e536b7609071868cb7eb2b1fd": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "bewaarFactuur",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "6023d2f8cbb6bd6fff110d13aeb53215a079f3eb77": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verstuurFactuur",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "6034263cb162021813004683186470f67bf0be6d84": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "registreerBetaling",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "605ed6ba703cfcbdb15407cae1b56ae7c99914e308": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "genereerJaarfacturen",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "60663dbb7b74e6bbbd83af3eff81c7cb94fda272d2": {
-      "workers": {
-        "app/beheer/facturen/[id]/page": {
-          "moduleId": 12724,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "zetStatus",
-      "filename": "src/app/beheer/facturen/acties.ts"
-    },
-    "60a23e8b2a4d4924b145f79b509ed9ff42c86776eb": {
+    "6009eb3aaddc5e9d2186f426eaa3d75330daca2b1c": {
       "workers": {
         "app/beheer/facturen/[id]/page": {
           "moduleId": 12724,
@@ -121,7 +44,7 @@
       "exportedName": "maakCreditfactuur",
       "filename": "src/app/beheer/facturen/acties.ts"
     },
-    "60c6a34f3da1631d75ee4c45013085b1249bb85381": {
+    "60642d173a532dbd5f09e95391cf0d56e4fc04a9ef": {
       "workers": {
         "app/beheer/facturen/[id]/page": {
           "moduleId": 12724,
@@ -130,6 +53,94 @@
         }
       },
       "exportedName": "verstuurConcepten",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "607c2d549d9da01808efe526fba0205ac0f9fbcf7e": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarFactuur",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "608a25b580bd5eef5cb6918d1cdd83887d7fd3d689": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderConcept",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60a39114bd7cc90036fc8aa01c91312c2d94d25b93": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "legHerinneringVast",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60b6d8144fd1b25d72fe4c27e23cc86ebd64acd7b6": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "genereerJaarfacturen",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60ca88de01cbbab5ba4ed23edb8fd237baa4160a9f": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verstuurFactuur",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60cbffbf47e62c172cce2130001e6e9097b7b80029": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "registreerBetaling",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60d6b5ca645c2d019d0cb1c1303be6a33066003489": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "zetStatus",
+      "filename": "src/app/beheer/facturen/acties.ts"
+    },
+    "60f691f5129808c649c851c90b839689295a92b3b8": {
+      "workers": {
+        "app/beheer/facturen/[id]/page": {
+          "moduleId": 12724,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderBetaling",
       "filename": "src/app/beheer/facturen/acties.ts"
     }
   },

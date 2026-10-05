@@ -1,6 +1,6 @@
 {
   "node": {
-    "00dac3de80571673b32c85f223efe417756788d8c3": {
+    "0055f8282f368e9e15db6835e0893f3c447448be22": {
       "workers": {
         "app/beheer/uitgaven/nieuw/page": {
           "moduleId": 76510,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "601213f7e1f44fe2484e48b176605cd279bc66d21c": {
+    "6032d832a90de4ca879640e364b7855fe413c23237": {
       "workers": {
         "app/beheer/uitgaven/nieuw/page": {
           "moduleId": 76510,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4054cc9ef82f107ea6588bceea3c0182f1fd45c044": {
+    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
       "workers": {
         "app/beheer/uitgaven/nieuw/page": {
           "moduleId": 76510,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "605d98736252187a06192688a5547d0ec1aafa0206": {
+    "60a2f9f9e189c06e82e63766a3d48789dc897b9bf6": {
       "workers": {
         "app/beheer/uitgaven/nieuw/page": {
           "moduleId": 76510,

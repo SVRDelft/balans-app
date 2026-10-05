@@ -17,6 +17,7 @@
     "/api/export/excel": {},
     "/api/export/pdf": {},
     "/api/facturen/[id]/pdf": {},
+    "/api/facturen/bundel": {},
     "/api/logo": {}
   }
 }

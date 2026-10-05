@@ -1,6 +1,6 @@
 {
   "node": {
-    "00dac3de80571673b32c85f223efe417756788d8c3": {
+    "0055f8282f368e9e15db6835e0893f3c447448be22": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "601213f7e1f44fe2484e48b176605cd279bc66d21c": {
+    "6032d832a90de4ca879640e364b7855fe413c23237": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4054cc9ef82f107ea6588bceea3c0182f1fd45c044": {
+    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "608b72bd15e6beed6ee91cab271eb37ae7133e5925": {
+    "603fc2ed4daa6497e0cc7ece207fe6ac5c34786544": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -44,7 +44,7 @@
       "exportedName": "verwijderRekeningpost",
       "filename": "src/app/beheer/debiteuren/acties.ts"
     },
-    "60b4fed989122c6eabad6b9a48bd9e63236673501b": {
+    "60999a3af55adf72087fb4c160ca34e6bf8d9289b5": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
