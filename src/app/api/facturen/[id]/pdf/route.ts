@@ -1,15 +1,6 @@
-import { renderToBuffer } from "@react-pdf/renderer";
-
 import { haalSessie } from "@/lib/auth/server";
 import { db } from "@/lib/db";
-import { betaaldBedrag } from "@/lib/facturen";
-import { FactuurDocument } from "@/lib/pdf/factuur-document";
-import { logoVoorPdf } from "@/lib/logo";
-import { factuurStandRelaties } from "@/lib/factuur-includes";
-import {
-  factuurOpenstaand,
-  factuurRealisatie,
-} from "@/lib/finance/factuurstanden";
+import { maakFactuurPdf } from "@/lib/pdf/factuur-pdf";
 
 // @react-pdf/renderer draait op Node, niet op de edge runtime.
 export const runtime = "nodejs";
@@ -20,102 +11,32 @@ export async function GET(
 ) {
   // Ook hier opnieuw controleren: een route is los van de interface te benaderen.
   const sessie = await haalSessie();
-  // Alleen het bestuur: hier zitten gegevens van alle verenigingen in.
-  const magErbij = sessie?.rol === "BESTUUR";
-  if (!magErbij) {
-    return new Response("Niet ingelogd", { status: 401 });
-  }
+  if (!sessie) return new Response("Niet ingelogd", { status: 401 });
 
   const { id } = await params;
 
-  const [factuur, instellingen] = await Promise.all([
-    db.factuur.findUnique({
-      where: { id },
-      include: {
-        ...factuurStandRelaties,
-        relatie: true,
-        regels: { orderBy: { volgorde: "asc" } },
-        betalingen: { select: { bedragCenten: true } },
-      },
-    }),
-    db.instellingen.findUnique({ where: { id: "svr" } }),
-  ]);
+  // Eerst kijken of deze factuur voor deze gebruiker is, en pas daarna het
+  // document maken: anders renderen we een factuur die niemand mag zien.
+  const factuur = await db.factuur.findUnique({
+    where: { id },
+    select: { relatieId: true, status: true },
+  });
+  if (!factuur) return new Response("Factuur niet gevonden", { status: 404 });
 
-  if (!factuur) {
-    return new Response("Factuur niet gevonden", { status: 404 });
-  }
+  // Het bestuur mag elke factuur. Een vereniging alleen haar eigen facturen, en
+  // nooit een concept: dat is nog niet verstuurd en hoort nog nergens rond te gaan.
+  const magErbij =
+    sessie.rol === "BESTUUR" ||
+    (sessie.relatieId === factuur.relatieId && factuur.status !== "concept");
+  if (!magErbij) return new Response("Geen toegang", { status: 403 });
 
-  const buffer = await renderToBuffer(
-    FactuurDocument({
-      factuur: {
-        logoSrc: await logoVoorPdf(instellingen),
-        nummer: factuur.nummer,
-        omschrijving: factuur.omschrijving,
-        factuurdatum: factuur.factuurdatum,
-        vervaldatum: factuur.vervaldatum,
-        status: factuur.status,
-        isConcept: factuur.status === "concept",
-        isCredit: factuur.soort === "credit",
-        notities: factuur.notities,
-        totaalCenten: factuur.totaalCenten,
-        betaaldCenten: betaaldBedrag(factuur.betalingen),
-        openstaandCenten: factuurOpenstaand(factuur),
-        afgeboektCenten:
-          factuur.status === "oninbaar"
-            ? Math.max(0, factuur.totaalCenten - factuurRealisatie(factuur))
-            : 0,
-        creditfactuur:
-          factuur.creditfactuur &&
-          !["concept", "oninbaar"].includes(factuur.creditfactuur.status)
-            ? {
-                nummer: factuur.creditfactuur.nummer,
-                bedragCenten: factuur.creditfactuur.totaalCenten,
-              }
-            : null,
-        crediteertFactuurNummer: factuur.crediteertFactuur?.nummer ?? null,
-        regels: factuur.regels.map((regel) => ({
-          omschrijving: regel.omschrijving,
-          aantal: regel.aantal,
-          prijsPerStukCenten: regel.prijsPerStukCenten,
-          bedragCenten: regel.bedragCenten,
-        })),
-        relatie: {
-          naam: factuur.relatie.naam,
-          contactpersoon: factuur.relatie.contactpersoon,
-          adres: factuur.relatie.adres,
-          postcode: factuur.relatie.postcode,
-          plaats: factuur.relatie.plaats,
-          land: factuur.relatie.land,
-          email: factuur.relatie.email,
-          kvkNummer: factuur.relatie.kvkNummer,
-          btwNummer: factuur.relatie.btwNummer,
-        },
-        afzender: {
-          organisatieNaam:
-            instellingen?.organisatieNaam ?? "StudieVerenigingenRaad Delft",
-          adres: instellingen?.adres ?? "",
-          postcode: instellingen?.postcode ?? "",
-          plaats: instellingen?.plaats ?? "",
-          email: instellingen?.email ?? "",
-          iban: instellingen?.iban ?? "",
-          kvkNummer: instellingen?.kvkNummer ?? "",
-          btwPlichtig: instellingen?.btwPlichtig ?? false,
-          btwPercentage: instellingen?.btwPercentage ?? 0,
-          voetnoot: instellingen?.factuurVoetnoot ?? "",
-          contactpersoon: instellingen?.contactpersoon ?? "",
-          land: instellingen?.land ?? "",
-          telefoon: instellingen?.telefoon ?? "",
-          website: instellingen?.website ?? "",
-          btwNummer: instellingen?.btwNummer ?? "",
-        },
-      },
-    }),
-  );
+  const pdf = await maakFactuurPdf(id);
+  if (!pdf) return new Response("Factuur niet gevonden", { status: 404 });
 
-  return new Response(new Uint8Array(buffer), {
+  return new Response(new Uint8Array(pdf.bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="${factuur.nummer}.pdf"`,
+      "Content-Disposition": `inline; filename="${pdf.nummer}.pdf"`,
       "Cache-Control": "no-store",
     },
   });

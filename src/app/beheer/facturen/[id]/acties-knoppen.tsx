@@ -9,6 +9,7 @@ import { Melding } from "@/components/ui/melding";
 import type { ActieStaat } from "@/lib/acties";
 
 import {
+  legHerinneringVast,
   maakCreditfactuur,
   verstuurFactuur,
   verwijderConcept,
@@ -105,10 +106,25 @@ export function VerwijderConceptKnop({
 }
 
 /** Zet de tekst voor een herinneringsmail op het klembord; versturen doet het
- *  bestuur zelf. */
-export function HerinneringKnop({ tekst }: { tekst: string }) {
+ *  bestuur zelf. Daarna kun je aantekenen dat het gebeurd is, zodat je later
+ *  weet wie je al hebt aangemaand. */
+export function HerinneringKnop({
+  tekst,
+  id,
+  herinneringen,
+  laatsteOp,
+}: {
+  tekst: string;
+  id: string;
+  herinneringen: number;
+  laatsteOp: string | null;
+}) {
   const [gekopieerd, setGekopieerd] = useState(false);
   const [toonTekst, setToonTekst] = useState(false);
+  const [staat, vastleggen, bezig] = useActionState<ActieStaat, FormData>(
+    legHerinneringVast,
+    {},
+  );
 
   async function kopieer() {
     try {
@@ -136,6 +152,32 @@ export function HerinneringKnop({ tekst }: { tekst: string }) {
           {toonTekst ? "Verbergen" : "Tekst bekijken"}
         </Button>
       </div>
+
+      <form action={vastleggen}>
+        <input type="hidden" name="id" value={id} />
+        <Button type="submit" variant="secondary" size="sm" disabled={bezig}>
+          <Check />
+          {bezig ? "Bezig…" : "Aantekenen dat hij verstuurd is"}
+        </Button>
+      </form>
+
+      {herinneringen > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          {herinneringen === 1 ? "Eén herinnering" : `${herinneringen} herinneringen`}
+          {laatsteOp ? `, laatste op ${laatsteOp}` : ""}.
+        </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          Nog geen herinnering aangetekend.
+        </p>
+      )}
+
+      {staat.fout ? <Melding toon="fout">{staat.fout}</Melding> : null}
+      {staat.melding ? (
+        <div role="status">
+          <Melding toon="goed">{staat.melding}</Melding>
+        </div>
+      ) : null}
 
       {toonTekst ? (
         <textarea

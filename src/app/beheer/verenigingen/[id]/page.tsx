@@ -51,6 +51,18 @@ export default async function VerenigingPagina({
   });
   if (!vereniging) notFound();
 
+  // De rekening-courant loopt over boekjaren heen, dus hier alles tot en met dit
+  // jaar: een saldo uit vorig jaar staat nog net zo goed open.
+  const rekeningposten = await db.rekeningpost.findMany({
+    where: { relatieId: id, boekjaar: { startDatum: { lte: boekjaar.startDatum } } },
+    orderBy: { datum: "desc" },
+    select: { id: true, datum: true, omschrijving: true, bedragCenten: true },
+  });
+  const rekeningSaldo = rekeningposten.reduce(
+    (som, post) => som + post.bedragCenten,
+    0,
+  );
+
   const tellend = vereniging.facturen.filter((factuur) =>
     factuur.status !== "concept",
   );
@@ -136,7 +148,58 @@ export default async function VerenigingPagina({
           waarde={formatteerEuro(openstaand)}
           toon={openstaand > 0 ? "fout" : "goed"}
         />
+        {rekeningposten.length > 0 ? (
+          <Kerngetal
+            label="Rekening-courant"
+            waarde={formatteerEuro(rekeningSaldo)}
+            toon={rekeningSaldo > 0 ? "fout" : undefined}
+            toelichting={
+              rekeningSaldo > 0
+                ? "Moet nog aan de SVR betaald worden"
+                : rekeningSaldo < 0
+                  ? "De SVR moet dit nog terugbetalen"
+                  : "Verrekend"
+            }
+          />
+        ) : null}
       </div>
+
+      {rekeningposten.length > 0 ? (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Rekening-courant</CardTitle>
+          </CardHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Datum</TableHead>
+                <TableHead>Waarvoor</TableHead>
+                <TableHead className="text-right">Bedrag</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rekeningposten.map((post) => (
+                <TableRow key={post.id}>
+                  <TableCell className="cijfers whitespace-nowrap">
+                    {formatteerDatum(post.datum)}
+                  </TableCell>
+                  <TableCell>{post.omschrijving}</TableCell>
+                  <TableCell className="text-right">
+                    <Bedrag centen={post.bedragCenten} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <CardContent className="pt-0 text-sm text-muted-foreground">
+            Geld dat buiten facturen om liep.{" "}
+            <Link href="/beheer/debiteuren" className="underline">
+              Naar de debiteurenstand
+            </Link>
+            .
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="mb-6">
         <CardHeader>

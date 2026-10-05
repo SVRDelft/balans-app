@@ -70,12 +70,25 @@ describe("elke ingang van de administratie controleert de rol", () => {
       "src/app/api/bijlagen/[id]/route.ts",
       "src/app/api/export/excel/route.ts",
       "src/app/api/export/pdf/route.ts",
-      "src/app/api/facturen/[id]/pdf/route.ts",
+      "src/app/api/zoeken/route.ts",
     ]) {
       expect(lees(route), `${route} controleert de rol niet`).toMatch(
         /rol === "BESTUUR"/,
       );
     }
+    expect(
+      lees("src/app/api/facturen/bundel/route.ts"),
+      "de facturenbundel controleert de rol niet",
+    ).toMatch(/vereisBestuur\(\)/);
+  });
+
+  it("geeft een factuur-PDF aan het bestuur of aan de vereniging zelf", () => {
+    // Een vereniging mag haar eigen factuur downloaden, maar nooit die van een
+    // ander en nooit een concept. Zie ook de tests naast die route zelf.
+    const route = lees("src/app/api/facturen/[id]/pdf/route.ts");
+    expect(route).toMatch(/rol === "BESTUUR"/);
+    expect(route).toMatch(/sessie\.relatieId === factuur\.relatieId/);
+    expect(route).toMatch(/status !== "concept"/);
   });
 
   it("houdt /beheer, /portaal, /wachtwoord en /api achter het slot", () => {

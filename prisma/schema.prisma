@@ -201,6 +201,13 @@ model Factuur {
 
   notities     String? @db.Text
   verstuurdOp  DateTime?
+
+  /// Hoe vaak er een herinnering is verstuurd, en op welke dag voor het laatst. Het
+  /// versturen doet het bestuur zelf uit zijn eigen mail; dit is de aantekening
+  /// dat het gebeurd is, zodat niemand twee keer aanmaant of het vergeet.
+  herinneringen        Int       @default(0)
+  laatsteHerinneringOp DateTime?
+
   aangemaaktOp DateTime  @default(now())
   bijgewerktOp DateTime  @updatedAt
 

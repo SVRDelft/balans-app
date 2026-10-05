@@ -15,7 +15,7 @@ betalingen en het banksaldo voer je handmatig in.
 | Pad | Voor wie | Wat |
 |---|---|---|
 | `/`, `/bestuur-worden`, `/privacy` | iedereen | de publieke site van de SVR |
-| `/portaal` | ingelogde studieverenigingen | mededelingen, vergaderingen met agenda en notulen, en documenten |
+| `/portaal` | ingelogde studieverenigingen | eigen facturen met PDF, mededelingen, vergaderingen met agenda en notulen, en documenten |
 | `/beheer` | ingelogd SVR-bestuur | de financiële administratie |
 
 De teksten van de publieke pagina's staan in `content/`; hoe je die aanpast
@@ -165,6 +165,14 @@ Het inlogwachtwoord staat in `APP_WACHTWOORD` in `.env.local`.
 
 ## Hoe de app werkt
 
+### Snel ergens komen
+
+**Ctrl+K** (op een Mac Cmd+K) opent het zoekvenster, vanaf elke pagina van de
+administratie. Daarin typ je een factuurnummer, de naam van een vereniging, een
+uitgave, een evenement of de naam van een pagina; Enter brengt je erheen. Het
+zoekt over **alle boekjaren**: een factuur van vorig jaar wisselt onderweg zelf
+van boekjaar, zodat je niet op een leeg scherm belandt.
+
 ### Boekjaren
 
 Er is altijd precies één **actief** boekjaar. Alleen daarin kun je schrijven;
@@ -208,6 +216,17 @@ hergebruikt**, ook niet als je een concept verwijdert. Een gat in de reeks is
 verklaarbaar; een hergebruikt nummer niet.
 
 Deelbetalingen kunnen: de status volgt automatisch uit de som van de betalingen.
+
+Bij een openstaande factuur maakt de app de tekst voor een herinnering; versturen
+doe je zelf uit je eigen mail. Met één knop teken je aan dát je hem hebt verstuurd,
+en dan houdt de app bij hoe vaak en wanneer dat gebeurde. Zo zie je in de lijst
+welke facturen nog **niet** herinnerd zijn, en staat op het dashboard hoeveel te
+late facturen daar nog op wachten.
+
+Staat er een hele ronde facturen in de lijst — bijvoorbeeld alle LBG-facturen —
+dan haal je met **PDF's als zip downloaden** alle PDF's in één keer op, met de
+naam van de vereniging in de bestandsnaam. De knop volgt de filters die boven de
+lijst staan.
 
 Een betaling hoort bij het boekjaar waarin het **geld** binnenkwam, en dat is niet
 altijd het jaar van de factuur. Betaalt een vereniging in oktober de factuur van

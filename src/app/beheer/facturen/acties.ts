@@ -536,6 +536,62 @@ export async function registreerBetaling(
   });
 }
 
+/**
+ * Tekent aan dat er een herinnering is verstuurd.
+ *
+ * De app verstuurt zelf geen mail — het bestuur mailt uit zijn eigen postvak.
+ * Zonder deze aantekening weet je een maand later niet meer wie je al hebt
+ * aangemaand, en dat is precies de vraag die dan opkomt. Mag ook bij een factuur
+ * uit een afgesloten jaar: daar komt het geld soms nog van.
+ */
+export async function legHerinneringVast(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    await vereisBoekjaarContext();
+    const id = leesTekst(formulier, "id");
+    if (!id) return { fout: "Onbekende factuur." };
+
+    const factuur = await db.factuur.findUnique({ where: { id } });
+    if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
+    if (factuur.status === "concept") {
+      return { fout: "Een concept is nog niet verstuurd, dus herinneren kan niet." };
+    }
+
+    const bijgewerkt = await db.factuur.update({
+      where: { id },
+      data: {
+        herinneringen: { increment: 1 },
+        // De dag, niet het moment: een herinnering van gisteravond hoort niet als
+        // vandaag te verschijnen, en omgekeerd.
+        laatsteHerinneringOp: vandaag(),
+      },
+    });
+
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Factuur",
+      entiteitId: id,
+      actie: "herinnering verstuurd",
+      samenvatting: `Herinnering ${bijgewerkt.herinneringen} voor ${factuur.nummer} aangetekend`,
+      boekjaarId: factuur.boekjaarId,
+    });
+
+    revalidatePath("/beheer/facturen");
+    revalidatePath(`/beheer/facturen/${id}`);
+    revalidatePath("/beheer");
+    return {
+      melding:
+        bijgewerkt.herinneringen === 1
+          ? "Aangetekend: eerste herinnering verstuurd."
+          : `Aangetekend: ${bijgewerkt.herinneringen}e herinnering verstuurd.`,
+    };
+  });
+}
+
 export async function verwijderBetaling(
   _vorigeStaat: ActieStaat,
   formulier: FormData,

@@ -31,9 +31,11 @@ export default async function DashboardPagina() {
   const scheveEvenementen = cijfers.evenementen.filter(
     (evenement) => !evenement.afstemming.klopt,
   );
+  const zonderHerinnering = teLaat.filter((factuur) => factuur.herinneringen === 0);
 
   const aandachtspunten =
     teLaat.length +
+    (cijfers.openBankregels > 0 ? 1 : 0) +
     scheveEvenementen.length +
     cijfers.uitgavenZonderPost +
     cijfers.conceptFacturen +
@@ -199,6 +201,13 @@ export default async function DashboardPagina() {
                       ),
                     )}
                     .
+                    {zonderHerinnering.length > 0 ? (
+                      <>
+                        {" "}
+                        Daarvan {zonderHerinnering.length === 1 ? "is er één" : `zijn er ${zonderHerinnering.length}`} nog
+                        niet herinnerd.
+                      </>
+                    ) : null}
                   </p>
                 </Melding>
               ) : null}
@@ -233,6 +242,21 @@ export default async function DashboardPagina() {
                       Bekijk de balans
                     </Link>
                     .
+                  </p>
+                </Melding>
+              ) : null}
+
+              {cijfers.openBankregels > 0 ? (
+                <Melding toon="waarschuwing">
+                  <p>
+                    <Link href="/beheer/bank/importeren" className="underline">
+                      {cijfers.openBankregels}{" "}
+                      {cijfers.openBankregels === 1
+                        ? "bankregel is nog niet verwerkt"
+                        : "bankregels zijn nog niet verwerkt"}
+                    </Link>
+                    . Zolang die openstaan, klopt het banksaldo niet met de
+                    administratie.
                   </p>
                 </Melding>
               ) : null}

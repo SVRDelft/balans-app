@@ -452,7 +452,16 @@ export default async function FactuurPagina({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <HerinneringKnop tekst={herinneringstekst} />
+                <HerinneringKnop
+                  tekst={herinneringstekst}
+                  id={factuur.id}
+                  herinneringen={factuur.herinneringen}
+                  laatsteOp={
+                    factuur.laatsteHerinneringOp
+                      ? formatteerDatum(factuur.laatsteHerinneringOp)
+                      : null
+                  }
+                />
               </CardContent>
             </Card>
           ) : null}

@@ -39,6 +39,9 @@ export interface OpenstaandeFactuurRegel {
   betaaldCenten: number;
   openstaandCenten: number;
   status: string;
+  /** Hoe vaak er al aan herinnerd is, en wanneer voor het laatst. */
+  herinneringen: number;
+  laatsteHerinneringOp: Date | null;
 }
 
 export interface OpenstaandeUitgaveRegel {
@@ -75,6 +78,8 @@ export interface BoekjaarCijfers {
   evenementen: EvenementAfstemming[];
   uitgavenZonderPost: number;
   conceptFacturen: number;
+  /** Bankregels die zijn ingelezen maar nog niet gekoppeld of genegeerd. */
+  openBankregels: number;
   voorraadposten: (Voorraadpost & {
     begrotingspost: { code: string; naam: string } | null;
   })[];
@@ -157,7 +162,7 @@ export async function haalBoekjaarCijfers(
   const totEnMetNu = (id: string) => startVan(id) <= boekjaar.startDatum;
   const eerderJaar = (id: string) => startVan(id) < boekjaar.startDatum;
 
-  const [eerdereFacturen, ontvangen, rekeningposten] = await Promise.all([
+  const [eerdereFacturen, ontvangen, rekeningposten, openBankregels] = await Promise.all([
     db.factuur.findMany({
       where: { boekjaarId: { not: boekjaarId }, status: { not: "concept" } },
       include: {
@@ -178,6 +183,7 @@ export async function haalBoekjaarCijfers(
       },
       orderBy: { datum: "asc" },
     }),
+    db.bankmutatie.count({ where: { boekjaarId, verwerking: "open" } }),
   ]);
 
   // De stand van een factuur zoals die bij dit boekjaar hoort: een betaling die
@@ -315,6 +321,8 @@ export async function haalBoekjaarCijfers(
       betaaldCenten,
       openstaandCenten,
       status: factuur.status,
+      herinneringen: factuur.herinneringen,
+      laatsteHerinneringOp: factuur.laatsteHerinneringOp,
     };
   };
 
@@ -513,5 +521,6 @@ export async function haalBoekjaarCijfers(
     ).length,
     conceptFacturen: facturen.filter((factuur) => factuur.status === "concept")
       .length,
+    openBankregels,
   };
 }

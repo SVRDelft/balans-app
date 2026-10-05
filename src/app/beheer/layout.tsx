@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { LogOut, Lock, History } from "lucide-react";
 
 import { Navigatie } from "@/components/navigatie";
+import { Zoekpalet } from "@/components/zoekpalet";
 import { Button } from "@/components/ui/button";
 import { vereisBestuur } from "@/lib/auth/server";
 import { haalBoekjaarContext } from "@/lib/boekjaar";
@@ -91,6 +92,7 @@ export default async function AppLayout({
                   In reconstructie — je boekt in een afgesloten jaar
                 </span>
               ) : null}
+              <Zoekpalet />
             </>
           ) : (
             <span className="text-sm text-muted-foreground">

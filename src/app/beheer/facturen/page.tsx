@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus, Wand2 } from "lucide-react";
+import { FileArchive, Plus, Wand2 } from "lucide-react";
 
 import { Paginakop } from "@/components/paginakop";
 import { Zoekveld } from "@/components/zoekveld";
@@ -99,6 +99,11 @@ export default async function FacturenPagina({
     .filter((factuur) => factuur.status === "concept" && factuur.soort !== "credit")
     .map((factuur) => ({ id: factuur.id, totaalCenten: factuur.totaalCenten }));
   const totaalOpenstaand = facturen.reduce((som, factuur) => som + factuurOpenstaand(factuur), 0);
+  // Van een concept gaat geen PDF naar buiten; meer dan zestig in één keer duurt
+  // te lang voor één verzoek.
+  const bundelbaar = facturen
+    .filter((factuur) => factuur.status !== "concept")
+    .slice(0, 60);
 
   return (
     <>
@@ -183,6 +188,26 @@ export default async function FacturenPagina({
         ) : null}
       </form>
 
+      {bundelbaar.length > 1 ? (
+        <form
+          method="post"
+          action="/api/facturen/bundel"
+          className="mb-4 niet-afdrukken"
+        >
+          {bundelbaar.map((factuur) => (
+            <input key={factuur.id} type="hidden" name="id" value={factuur.id} />
+          ))}
+          <Button type="submit" variant="outline" size="sm">
+            <FileArchive />
+            {bundelbaar.length} PDF&apos;s als zip downloaden
+          </Button>
+          <span className="ml-2 text-xs text-muted-foreground">
+            Gebruikt de filters hierboven; handig om een hele ronde facturen in
+            één keer te kunnen bijvoegen.
+          </span>
+        </form>
+      ) : null}
+
       {schrijfbaar ? <ConceptenVersturen concepten={verstuurbaar} /> : null}
 
       {facturen.length === 0 ? (
@@ -238,6 +263,18 @@ export default async function FacturenPagina({
                     </TableCell>
                     <TableCell>
                       <FactuurStatusBadge status={factuur.status} />
+                      {factuur.herinneringen > 0 ? (
+                        <span className="block text-xs text-muted-foreground">
+                          {factuur.herinneringen}× herinnerd
+                          {factuur.laatsteHerinneringOp
+                            ? `, ${formatteerDatum(factuur.laatsteHerinneringOp)}`
+                            : ""}
+                        </span>
+                      ) : teLaat ? (
+                        <span className="block text-xs text-muted-foreground">
+                          nog niet herinnerd
+                        </span>
+                      ) : null}
                     </TableCell>
                     <TableCell className="text-right">
                       <Bedrag centen={factuur.totaalCenten} />

@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, Download, FileText, Megaphone } from "lucide-react";
+import { CalendarDays, Download, FileText, Megaphone, Receipt } from "lucide-react";
 
 import { vereisPortaal } from "@/lib/auth/server";
 import { formatteerDatum } from "@/lib/datum";
-import { gastheerVan, haalDocumenten, haalMededelingen, haalVergaderingen } from "@/lib/portaal/gegevens";
+import {
+  gastheerVan,
+  haalDocumenten,
+  haalEigenRekening,
+  haalMededelingen,
+  haalVergaderingen,
+} from "@/lib/portaal/gegevens";
+import { FACTUUR_STATUS_LABEL, type FactuurStatus } from "@/lib/domein";
+import { formatteerEuro } from "@/lib/geld";
 import { REEKS_UITLEG, type Reeks } from "@/lib/portaal/vergaderingen";
 import { leesSvr } from "@/lib/content";
 
@@ -85,10 +93,13 @@ function Vergaderingen({
 export default async function PortaalPagina() {
   const sessie = await vereisPortaal();
   const svr = leesSvr();
-  const [mededelingen, vergaderingen, documenten] = await Promise.all([
+  const [mededelingen, vergaderingen, documenten, rekening] = await Promise.all([
     haalMededelingen(),
     haalVergaderingen(),
     haalDocumenten(),
+    // Alleen een vereniging heeft een eigen rekening; het bestuur ziet die in de
+    // administratie, niet hier.
+    sessie.relatieId ? haalEigenRekening(sessie.relatieId) : null,
   ]);
 
   return (
@@ -120,6 +131,123 @@ export default async function PortaalPagina() {
           </form>
         </div>
       </header>
+
+      {rekening ? (
+        <section className="mb-10">
+          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
+            <Receipt className="size-5" /> Jullie facturen
+          </h2>
+
+          {rekening.regels.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Er staan nog geen facturen voor jullie klaar.
+            </p>
+          ) : (
+            <>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="text-sm text-muted-foreground">Nu openstaand</p>
+                <p className="cijfers text-2xl font-semibold">
+                  {formatteerEuro(rekening.openstaandCenten)}
+                </p>
+                {rekening.openstaandCenten !== 0 && rekening.iban ? (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Over te maken naar{" "}
+                    <span className="cijfers">{rekening.iban}</span>, onder
+                    vermelding van het factuurnummer. Betalingen worden met de hand
+                    bijgewerkt, dus het kan een paar dagen duren voordat je het hier
+                    ziet staan.
+                  </p>
+                ) : null}
+                {rekening.openstaandCenten === 0 ? (
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Alles is betaald — niets meer te doen.
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="mt-3 overflow-x-auto rounded-xl border border-border bg-card">
+                <table className="w-full text-sm">
+                  <thead className="border-b border-border text-left text-xs text-muted-foreground uppercase">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Factuur</th>
+                      <th className="px-4 py-2 font-medium">Waarvoor</th>
+                      <th className="px-4 py-2 font-medium">Vervalt</th>
+                      <th className="px-4 py-2 text-right font-medium">Bedrag</th>
+                      <th className="px-4 py-2 text-right font-medium">Openstaand</th>
+                      <th className="px-4 py-2" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rekening.regels.map((regel) => (
+                      <tr key={regel.id} className="border-b border-border last:border-0">
+                        <td className="px-4 py-2">
+                          <span className="cijfers">{regel.nummer}</span>
+                          <span className="block text-xs text-muted-foreground">
+                            {FACTUUR_STATUS_LABEL[regel.status as FactuurStatus] ??
+                              regel.status}{" "}
+                            · {regel.boekjaarNaam}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">{regel.omschrijving}</td>
+                        <td className="cijfers px-4 py-2 whitespace-nowrap text-muted-foreground">
+                          {formatteerDatum(regel.vervaldatum)}
+                        </td>
+                        <td className="cijfers px-4 py-2 text-right whitespace-nowrap">
+                          {formatteerEuro(regel.totaalCenten)}
+                        </td>
+                        <td className="cijfers px-4 py-2 text-right whitespace-nowrap">
+                          {regel.openstaandCenten === 0
+                            ? "—"
+                            : formatteerEuro(regel.openstaandCenten)}
+                        </td>
+                        <td className="px-4 py-2 text-right">
+                          <a
+                            className="inline-flex items-center gap-1.5 text-primary underline"
+                            href={`/api/facturen/${regel.id}/pdf`}
+                          >
+                            <Download className="size-4" />
+                            PDF
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {rekening.rekeningSaldoCenten !== 0 ? (
+            <div className="mt-3 rounded-xl border border-border bg-card p-4">
+              <p className="font-semibold">
+                {rekening.rekeningSaldoCenten > 0
+                  ? "Daarnaast nog te verrekenen"
+                  : "De SVR moet jullie nog terugbetalen"}
+                : {formatteerEuro(Math.abs(rekening.rekeningSaldoCenten))}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Dit loopt buiten facturen om — bijvoorbeeld iets dat de SVR heeft
+                voorgeschoten of juist van jullie heeft gekregen.
+              </p>
+              <ul className="mt-2 space-y-1 text-sm">
+                {rekening.rekeningposten.slice(0, 5).map((post) => (
+                  <li key={post.id} className="flex justify-between gap-3">
+                    <span>
+                      <span className="cijfers text-muted-foreground">
+                        {formatteerDatum(post.datum)}
+                      </span>{" "}
+                      {post.omschrijving}
+                    </span>
+                    <span className="cijfers whitespace-nowrap">
+                      {formatteerEuro(post.bedragCenten)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="mb-10">
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">

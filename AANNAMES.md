@@ -340,18 +340,25 @@ door een test die élke pagina, server action en API-route van `/beheer` langslo
 (`src/lib/auth/toegang.test.ts`). Die test vond bij het schrijven meteen zes
 schermen die alleen op de proxy leunden.
 
-### Het portaal is voor alle verenigingen tegelijk
+### Het portaal is bijna helemaal voor alle verenigingen tegelijk
 
 Mededelingen, vergaderingen en documenten in het portaal zijn voor iedereen met
 een account zichtbaar; er zit niets in dat maar voor één vereniging bedoeld is.
 Dat staat ook als waarschuwing boven het beheerscherm.
 
-Het idee dat een vereniging later de **eigen openstaande facturen** kan inzien is
-bewust niet gebouwd, maar het datamodel kan het aan: een `Gebruiker` met rol `SV`
-wijst naar precies één `Relatie`, en facturen hangen aan diezelfde relatie. De
-helpers `beperkingOpRelatie()` en `vereisEigenRelatie()` in
-`src/lib/auth/server.ts` staan er al voor klaar, met tests. Wie dat bouwt, filtert
-dus op `relatieId` uit de sessie en nooit op een id uit de URL.
+Eén onderdeel is wél per vereniging: **jullie facturen**. Een vereniging ziet daar
+haar eigen facturen met het openstaande bedrag, en kan de PDF downloaden. Dat
+scheelt het bestuur het heen-en-weer mailen van "wat staat er nog open?".
+
+De regel daarbij: filteren op `relatieId` uit de **sessie** en nooit op een id uit
+de URL. Dat gebeurt op twee plekken, en nergens anders:
+
+- `haalEigenRekening(relatieId)` in `src/lib/portaal/gegevens.ts`, waar de
+  aanroeper de relatie uit de sessie meegeeft;
+- de route `/api/facturen/[id]/pdf`, die eerst de relatie van de factuur opzoekt en
+  pas daarna het document maakt. Het bestuur mag elke factuur; een vereniging
+  alleen haar eigen, en nooit een concept — dat is nog niet verstuurd. Er staan
+  tests naast die route die dat afdwingen.
 
 ### Bestanden op schijf, niet in de database
 
