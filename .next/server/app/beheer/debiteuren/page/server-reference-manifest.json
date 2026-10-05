@@ -1,0 +1,60 @@
+{
+  "node": {
+    "00dac3de80571673b32c85f223efe417756788d8c3": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "uitloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "601213f7e1f44fe2484e48b176605cd279bc66d21c": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "4054cc9ef82f107ea6588bceea3c0182f1fd45c044": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "kiesBoekjaar",
+      "filename": "src/app/beheer/acties.ts"
+    },
+    "608b72bd15e6beed6ee91cab271eb37ae7133e5925": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderRekeningpost",
+      "filename": "src/app/beheer/debiteuren/acties.ts"
+    },
+    "60b4fed989122c6eabad6b9a48bd9e63236673501b": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarRekeningpost",
+      "filename": "src/app/beheer/debiteuren/acties.ts"
+    }
+  },
+  "edge": {}
+}

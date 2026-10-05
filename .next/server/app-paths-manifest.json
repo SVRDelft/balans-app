@@ -21,6 +21,7 @@
   "/beheer/begroting/nieuw/page": "app/beheer/begroting/nieuw/page.js",
   "/beheer/begroting/page": "app/beheer/begroting/page.js",
   "/beheer/boekjaren/page": "app/beheer/boekjaren/page.js",
+  "/beheer/debiteuren/page": "app/beheer/debiteuren/page.js",
   "/beheer/evenementen/[id]/bewerken/page": "app/beheer/evenementen/[id]/bewerken/page.js",
   "/beheer/evenementen/[id]/page": "app/beheer/evenementen/[id]/page.js",
   "/beheer/evenementen/nieuw/page": "app/beheer/evenementen/nieuw/page.js",

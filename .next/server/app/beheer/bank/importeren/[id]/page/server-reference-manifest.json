@@ -1,6 +1,6 @@
 {
   "node": {
-    "0037a2453f5795828f1bffe0ea3d6aebebf6a99f0c": {
+    "00dac3de80571673b32c85f223efe417756788d8c3": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60d563376b6da65d3596a5a4e64a45ad7f216f994d": {
+    "601213f7e1f44fe2484e48b176605cd279bc66d21c": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40fa1a4c6a697b526fe260f837b2ebc43abcbc0fc0": {
+    "4054cc9ef82f107ea6588bceea3c0182f1fd45c044": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -33,40 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6023b74a61048648dd34b87c371226f705504e3ea9": {
-      "workers": {
-        "app/beheer/bank/importeren/[id]/page": {
-          "moduleId": 10111,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwerkBankmutatie",
-      "filename": "src/app/beheer/bank/importeren/acties.ts"
-    },
-    "606ec7b8905e9d49f09aaed9ee7c206aa3227fbea0": {
-      "workers": {
-        "app/beheer/bank/importeren/[id]/page": {
-          "moduleId": 10111,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "bevestigBankimport",
-      "filename": "src/app/beheer/bank/importeren/acties.ts"
-    },
-    "608ec1fc7570c2eebcc7dbb3cfc16561d963339bbc": {
-      "workers": {
-        "app/beheer/bank/importeren/[id]/page": {
-          "moduleId": 10111,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "importeerBankbestand",
-      "filename": "src/app/beheer/bank/importeren/acties.ts"
-    },
-    "60d89567e9b54897ddeac2c2b62c604f168e90ad77": {
+    "60193e0ddd8af4051ee88d86c389cab5870dfb6cc5": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -77,7 +44,40 @@
       "exportedName": "ontkoppelBankmutatie",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     },
-    "60f17cb0e07c66dc7ed5387a4663a6e5d305d7a6f7": {
+    "6043c5d946dccb170534e3321a21fb349cdde848aa": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwerkBankmutatie",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "6054111a3c649d9473a75f9dde83c24251c6d04f80": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "boekBankregelsSnel",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "609b6d9ba5be403837ac331b60b3940fc6bc691444": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "importeerBankbestand",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "60c78437628bd380b23bf48269b59d858c61b9f60b": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -86,6 +86,17 @@
         }
       },
       "exportedName": "koppelSelectie",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "60d87385b4009670c6669ce5ab95d1c4cee2ff1c54": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bevestigBankimport",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     }
   },

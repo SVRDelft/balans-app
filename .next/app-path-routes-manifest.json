@@ -21,6 +21,7 @@
   "/beheer/begroting/nieuw/page": "/beheer/begroting/nieuw",
   "/beheer/begroting/page": "/beheer/begroting",
   "/beheer/boekjaren/page": "/beheer/boekjaren",
+  "/beheer/debiteuren/page": "/beheer/debiteuren",
   "/beheer/evenementen/[id]/bewerken/page": "/beheer/evenementen/[id]/bewerken",
   "/beheer/evenementen/[id]/page": "/beheer/evenementen/[id]",
   "/beheer/evenementen/nieuw/page": "/beheer/evenementen/nieuw",

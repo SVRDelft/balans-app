@@ -217,6 +217,12 @@
       "namedRegex": "^/beheer/boekjaren(?:/)?$"
     },
     {
+      "page": "/beheer/debiteuren",
+      "regex": "^/beheer/debiteuren(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/debiteuren(?:/)?$"
+    },
+    {
       "page": "/beheer/evenementen",
       "regex": "^/beheer/evenementen(?:/)?$",
       "routeKeys": {},
