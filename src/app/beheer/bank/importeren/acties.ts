@@ -74,7 +74,10 @@ export async function importeerBankbestand(_staat: ActieStaat, formulier: FormDa
   redirect(`/beheer/bank/importeren/${importId}`);
 }
 
-async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: string, gebruiker: string, formulier?: FormData) {
+type Jaar = { id: string; startDatum: Date };
+
+async function koppel(tx: DbClient, jaar: Jaar, mutatieId: string, doel: string, gebruiker: string, formulier?: FormData) {
+  const jaarId = jaar.id;
   const regel = await tx.bankmutatie.findUnique({ where: { id: mutatieId, boekjaarId: jaarId }, include: { bankimport: true } });
   if (!regel || regel.verwerking !== "open") throw new Error("Deze bankregel is niet meer beschikbaar. Vernieuw de pagina.");
   const [soort, id] = doel.split(":");
@@ -86,22 +89,26 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
     if (!relatieId || !tegenIban) return;
     await tx.relatie.updateMany({ where: { id: relatieId, iban: "" }, data: { iban: tegenIban } });
   };
-  let verwerking = "", betalingId: string | undefined, uitgaveId: string | undefined;
+  let verwerking = "", betalingId: string | undefined, uitgaveId: string | undefined, rekeningpostId: string | undefined;
   const notitie = formulier ? leesTekst(formulier, "notitie") : undefined;
   if (soort === "factuur" && id) {
-    await vergrendelFactuur(tx, id, jaarId);
-    const factuur = await tx.factuur.findUnique({ where: { id, boekjaarId: jaarId }, include: { betalingen: true, ...factuurStandRelaties } });
-    if (!factuur || factuur.status === "concept" || factuur.status === "oninbaar") throw new Error("Kies een verstuurde factuur. Herstel een oninbare factuur eerst.");
+    // Ook een factuur uit een eerder boekjaar: geld komt soms maanden later
+    // binnen. De betaling wordt dan geboekt in het jaar van dit afschrift,
+    // terwijl de factuur in zijn eigen jaar blijft staan.
+    const factuur = await tx.factuur.findUnique({ where: { id }, include: { betalingen: true, boekjaar: { select: { startDatum: true } }, ...factuurStandRelaties } });
+    if (!factuur || factuur.boekjaar.startDatum > jaar.startDatum) throw new Error("Kies een factuur uit dit boekjaar of uit een eerder jaar.");
+    await vergrendelFactuur(tx, id, factuur.boekjaarId);
+    if (factuur.status === "concept" || factuur.status === "oninbaar") throw new Error("Kies een verstuurde factuur. Herstel een oninbare factuur eerst.");
     const open = factuurOpenstaand(factuur);
     if (Math.sign(open) !== Math.sign(regel.bedragCenten) || Math.abs(regel.bedragCenten) > Math.abs(open)) throw new Error("Het bedrag past niet bij het openstaande saldo. Controleer eerdere betalingen en kies zo nodig een al ingevoerde betaling.");
-    betalingId = (await tx.betaling.create({ data: { factuurId: id, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
+    betalingId = (await tx.betaling.create({ data: { factuurId: id, boekjaarId: jaarId, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
     verwerking = "nieuwe_betaling";
     await hertelFactuur(tx, id);
     if (regel.bedragCenten > 0) await onthoudIban(factuur.relatieId);
   } else if (soort === "betaling" && id) {
-    const betaling = await tx.betaling.findUnique({ where: { id, factuur: { boekjaarId: jaarId }, bankmutatie: null } });
+    const betaling = await tx.betaling.findUnique({ where: { id, boekjaarId: jaarId, bankmutatie: null }, include: { factuur: { select: { boekjaarId: true } } } });
     if (!betaling || betaling.bedragCenten !== regel.bedragCenten || betaling.datum.toISOString().slice(0, 10) !== regel.datum.toISOString().slice(0, 10)) throw new Error("Deze bestaande betaling past niet bij bedrag en datum van de bankregel, of is al gekoppeld.");
-    await vergrendelFactuur(tx, betaling.factuurId, jaarId);
+    await vergrendelFactuur(tx, betaling.factuurId, betaling.factuur.boekjaarId);
     betalingId = betaling.id; verwerking = "bestaande_betaling";
   } else if (soort === "uitgave" && id) {
     await vergrendelRij(tx, "Uitgave", id);
@@ -128,7 +135,7 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
       regels: { create: [{ omschrijving, aantal: 1, prijsPerStukCenten: regel.bedragCenten, bedragCenten: regel.bedragCenten, begrotingspostId: postId, volgorde: 0 }] },
     } });
     await hertelFactuur(tx, factuur.id);
-    betalingId = (await tx.betaling.create({ data: { factuurId: factuur.id, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
+    betalingId = (await tx.betaling.create({ data: { factuurId: factuur.id, boekjaarId: jaarId, datum: regel.datum, bedragCenten: regel.bedragCenten, notitie: `Bankimport: ${regel.omschrijving}`, geregistreerdDoor: gebruiker } })).id;
     await hertelFactuur(tx, factuur.id);
     await onthoudIban(relatieId);
     verwerking = "nieuwe_inkomst";
@@ -139,24 +146,38 @@ async function koppel(tx: DbClient, jaarId: string, mutatieId: string, doel: str
     if (!leverancierNaam || !omschrijving || !postId || !await tx.begrotingspost.findUnique({ where: { id: postId, boekjaarId: jaarId, soort: "uitgave" } })) throw new Error("Vul een leverancier, omschrijving en kostenpost uit dit boekjaar in.");
     uitgaveId = (await tx.uitgave.create({ data: { boekjaarId: jaarId, datum: regel.datum, leverancierNaam, omschrijving, bedragCenten: -regel.bedragCenten, begrotingspostId: postId, betaald: true, betaaldOp: regel.datum, bedragDefinitief: true } })).id;
     verwerking = "nieuwe_uitgave";
+  } else if (soort === "rekeningpost" && formulier) {
+    // Privegeld dat door de SVR-rekening liep: geen kosten of opbrengst, maar een
+    // vordering op of een schuld aan een persoon. Een afschrijving betekent dat
+    // die persoon de SVR nog moet betalen, een bijschrijving dat hij terugbetaalt.
+    const relatieId = leesTekst(formulier, "relatieId");
+    const omschrijving = leesTekst(formulier, "omschrijving");
+    if (!relatieId || !omschrijving) throw new Error("Kies de persoon en vul een omschrijving in.");
+    if (!await tx.relatie.findUnique({ where: { id: relatieId } })) throw new Error("Deze relatie bestaat niet meer.");
+    rekeningpostId = (await tx.rekeningpost.create({ data: {
+      boekjaarId: jaarId, relatieId, datum: regel.datum, omschrijving,
+      bedragCenten: -regel.bedragCenten, viaBank: true, aangemaaktDoor: gebruiker,
+      notities: `Uit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
+    } })).id;
+    verwerking = "rekeningpost";
   } else if (soort === "negeren" && notitie) verwerking = "genegeerd";
   else throw new Error("Kies een koppeling, of geef een reden om deze bankregel buiten de administratie te laten.");
-  await tx.bankmutatie.update({ where: { id: regel.id, verwerking: "open" }, data: { verwerking, betalingId, uitgaveId, notitie, verwerktOp: new Date(), verwerktDoor: gebruiker } });
-  await logAudit({ gebruiker, boekjaarId: jaarId, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "gekoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} verwerkt: ${verwerking}.`, details: { betalingId, uitgaveId, notitie } }, tx);
+  await tx.bankmutatie.update({ where: { id: regel.id, verwerking: "open" }, data: { verwerking, betalingId, uitgaveId, rekeningpostId, notitie, verwerktOp: new Date(), verwerktDoor: gebruiker } });
+  await logAudit({ gebruiker, boekjaarId: jaarId, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "gekoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} verwerkt: ${verwerking}.`, details: { betalingId, uitgaveId, rekeningpostId, notitie } }, tx);
 }
 
 /**
  * Verwerkt de voorstellen van de aangevinkte bankregels. De voorstellen worden
  * hier opnieuw berekend, zodat er alleen geboekt wordt wat nu nog klopt.
  */
-async function voorstellenVerwerken(tx: DbClient, jaarId: string, importId: string, gebruiker: string, gekozen: Set<string>) {
-  const regels = await tx.bankmutatie.findMany({ where: { importId, boekjaarId: jaarId, verwerking: "open" }, orderBy: [{ datum: "asc" }, { id: "asc" }] });
-  const keuzes = await bankKeuzes(jaarId, tx);
+async function voorstellenVerwerken(tx: DbClient, jaar: Jaar, importId: string, gebruiker: string, gekozen: Set<string>) {
+  const regels = await tx.bankmutatie.findMany({ where: { importId, boekjaarId: jaar.id, verwerking: "open" }, orderBy: [{ datum: "asc" }, { id: "asc" }] });
+  const keuzes = await bankKeuzes(jaar.id, tx);
   const voorstellen = bankVoorstellen(regels, keuzes.facturen, keuzes.betalingen, keuzes.uitgaven);
   let verwerkt = 0;
   for (const [id, voorstel] of voorstellen) {
     if (!gekozen.has(id)) continue;
-    await koppel(tx, jaarId, id, voorstel.waarde, gebruiker);
+    await koppel(tx, jaar, id, voorstel.waarde, gebruiker);
     verwerkt++;
   }
   return verwerkt;
@@ -189,7 +210,7 @@ export async function koppelSelectie(_staat: ActieStaat, formulier: FormData): P
     if (!id) throw new Error("Kies een bankimport.");
     const gekozen = new Set(formulier.getAll("mutatieId").map(String));
     if (gekozen.size === 0) return { fout: "Vink minstens één voorstel aan." };
-    const aantal = await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); return voorstellenVerwerken(tx, jaar.id, id, sessie.naam, gekozen); }, { timeout: 120_000 });
+    const aantal = await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); return voorstellenVerwerken(tx, jaar, id, sessie.naam, gekozen); }, { timeout: 120_000 });
     vernieuw();
     const overgeslagen = gekozen.size - aantal;
     return { melding: `${aantal} ${aantal === 1 ? "bankregel" : "bankregels"} gekoppeld.${overgeslagen > 0 ? ` ${overgeslagen} voorstel${overgeslagen === 1 ? " klopte" : "len klopten"} inmiddels niet meer en ${overgeslagen === 1 ? "is" : "zijn"} overgeslagen.` : ""}` };
@@ -200,8 +221,62 @@ export async function verwerkBankmutatie(_staat: ActieStaat, formulier: FormData
   const sessie = await vereisBestuur();
   return voerUit(async () => {
     const jaar = await vereisSchrijfbaarBoekjaar();
-    await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); await koppel(tx, jaar.id, leesTekst(formulier, "mutatieId") ?? "", leesTekst(formulier, "doel") ?? "", sessie.naam, formulier); }, { timeout: 30_000 });
+    await db.$transaction(async tx => { await vergrendelJaar(tx, jaar.id); await koppel(tx, jaar, leesTekst(formulier, "mutatieId") ?? "", leesTekst(formulier, "doel") ?? "", sessie.naam, formulier); }, { timeout: 30_000 });
     vernieuw(); return { melding: "Bankregel verwerkt." };
+  });
+}
+
+/**
+ * Boekt een hele stapel bankregels in één keer als nieuwe uitgave, nieuwe
+ * inkomst of rekening-courantpost.
+ *
+ * Hiermee bouw je een oud boekjaar op uit het afschrift: van elke bijschrijving
+ * een betaalde factuur, van elke afschrijving een betaalde uitgave. Elke regel
+ * gaat in zijn eigen transactie, zodat één regel die niet klopt de rest niet
+ * tegenhoudt.
+ */
+export async function boekBankregelsSnel(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+  return voerUit(async () => {
+    const jaar = await vereisSchrijfbaarBoekjaar();
+    const importId = leesTekst(formulier, "importId");
+    if (!importId) throw new Error("Kies een bankimport.");
+    const ids = formulier.getAll("mutatieId").map(String);
+    if (ids.length === 0) return { fout: "Vink minstens één bankregel aan." };
+    const standaardInkomst = leesTekst(formulier, "standaardInkomstenpost");
+    const standaardUitgave = leesTekst(formulier, "standaardUitgavenpost");
+
+    let geboekt = 0;
+    const fouten: string[] = [];
+    for (const id of ids) {
+      const regel = await db.bankmutatie.findUnique({ where: { id, boekjaarId: jaar.id, importId } });
+      if (!regel || regel.verwerking !== "open") continue;
+      const naarRekeningcourant = leesTekst(formulier, `soort-${id}`) === "rekeningpost";
+      const doel = naarRekeningcourant ? "rekeningpost" : regel.bedragCenten > 0 ? "inkomst" : "nieuw";
+      const rij = new FormData();
+      const relatieId = leesTekst(formulier, `relatie-${id}`);
+      if (relatieId) rij.set("relatieId", relatieId);
+      const post = leesTekst(formulier, `post-${id}`) ?? (regel.bedragCenten > 0 ? standaardInkomst : standaardUitgave);
+      if (post) rij.set("begrotingspostId", post);
+      rij.set("omschrijving", leesTekst(formulier, `omschrijving-${id}`) ?? (regel.omschrijving.trim() || "Bankregel zonder omschrijving"));
+      rij.set("leverancierNaam", leesTekst(formulier, `leverancier-${id}`) ?? (regel.tegenpartijNaam.trim() || "Onbekend"));
+      try {
+        await db.$transaction(async tx => {
+          await vergrendelJaar(tx, jaar.id);
+          await koppel(tx, jaar, id, doel, sessie.naam, rij);
+        }, { timeout: 30_000 });
+        geboekt++;
+      } catch (fout) {
+        const bericht = fout instanceof Error ? fout.message : "onbekende fout";
+        fouten.push(`${formatteerEuro(regel.bedragCenten)} op ${regel.datum.toISOString().slice(0, 10)}: ${bericht}`);
+      }
+    }
+    vernieuw();
+    if (geboekt === 0) return { fout: fouten[0] ?? "Er is niets geboekt." };
+    return {
+      melding: `${geboekt} ${geboekt === 1 ? "bankregel" : "bankregels"} geboekt.` +
+        (fouten.length ? ` ${fouten.length} overgeslagen — ${fouten.slice(0, 3).join("; ")}` : ""),
+    };
   });
 }
 
@@ -234,7 +309,7 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
       if (regel.verwerking === "nieuwe_uitgave" && (regel.uitgave?.omslagrondeId || regel.uitgave?.bijlageId)) throw new Error("Aan deze uitgave is een bonnetje of omslag gekoppeld. Verwijder die koppeling eerst of boek een correctie.");
       if (regel.betaling) await vergrendelFactuur(tx, regel.betaling.factuurId, jaar.id);
       if (regel.uitgaveId) await vergrendelRij(tx, "Uitgave", regel.uitgaveId);
-      await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
+      await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, rekeningpostId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
       if (regel.verwerking === "nieuwe_inkomst" && regel.betaling) {
         // De factuur is door de import zelf aangemaakt; die gaat mee terug.
         await tx.betaling.delete({ where: { id: regel.betaling.id } });
@@ -246,6 +321,7 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
       }
       if (regel.verwerking === "uitgave_betaald" && regel.uitgaveId) await tx.uitgave.update({ where: { id: regel.uitgaveId }, data: { betaald: false, betaaldOp: null } });
       if (regel.verwerking === "nieuwe_uitgave" && regel.uitgaveId) await tx.uitgave.delete({ where: { id: regel.uitgaveId } });
+      if (regel.verwerking === "rekeningpost" && regel.rekeningpostId) await tx.rekeningpost.delete({ where: { id: regel.rekeningpostId } });
       await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "ontkoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} ontkoppeld; door de import aangemaakte boeking teruggedraaid.` }, tx);
     }, { timeout: 30_000 });
     vernieuw(); return { melding: "Koppeling ongedaan gemaakt." };

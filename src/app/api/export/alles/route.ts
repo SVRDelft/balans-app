@@ -27,7 +27,7 @@ export async function GET() {
   const [
     instellingen, boekjaren, relaties, begrotingsposten, facturen, factuurregels,
     betalingen, uitgaven, evenementen, deelnemers, omslagrondes, omslagrondeDeelnemers,
-    banksaldi, bankimports, bankmutaties, voorraadposten, auditlog, gebruikers,
+    banksaldi, bankimports, bankmutaties, voorraadposten, rekeningposten, auditlog, gebruikers,
     mededelingen, vergaderingen, portaalbestanden, bijlagen,
   ] = await Promise.all([
     db.instellingen.findMany(),
@@ -46,6 +46,7 @@ export async function GET() {
     db.bankimport.findMany(),
     db.bankmutatie.findMany(),
     db.voorraadpost.findMany(),
+    db.rekeningpost.findMany(),
     db.auditlog.findMany(),
     // Zonder de wachtwoorden: die horen in geen enkele kopie thuis.
     db.gebruiker.findMany({
@@ -93,8 +94,8 @@ export async function GET() {
     instellingen, boekjaren, relaties, begrotingsposten, facturen, factuurregels,
     betalingen, uitgaven, bijlagen: bijlagenZonderData, evenementen, deelnemers,
     omslagrondes, omslagrondeDeelnemers, banksaldi, bankimports, bankmutaties,
-    voorraadposten, gebruikers, mededelingen, vergaderingen, portaalbestanden,
-    auditlog,
+    voorraadposten, rekeningposten, gebruikers, mededelingen, vergaderingen,
+    portaalbestanden, auditlog,
   };
 
   bestanden.unshift({

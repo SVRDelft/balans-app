@@ -79,7 +79,10 @@ export default async function BalansPagina() {
                   Banksaldo volgens de administratie
                   <span className="block text-xs text-muted-foreground">
                     beginsaldo {formatteerEuro(boekjaar.beginsaldoBankCenten)}{" "}
-                    plus ontvangsten min betaalde uitgaven
+                    plus ontvangsten, min betaalde uitgaven
+                    {cijfers.rekeningcourant.viaBankCenten !== 0
+                      ? " en privégeld dat via de rekening liep"
+                      : ""}
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
@@ -97,6 +100,37 @@ export default async function BalansPagina() {
                   <Bedrag centen={balans.debiteurenCenten} />
                 </TableCell>
               </TableRow>
+              {balans.eerdereDebiteurenCenten !== 0 ? (
+                <TableRow>
+                  <TableCell>
+                    <Link href="/beheer/debiteuren" className="hover:underline">
+                      Nog te ontvangen uit eerdere boekjaren
+                    </Link>
+                    <span className="block text-xs text-muted-foreground">
+                      {cijfers.eerdereOpenstaandeFacturen.length} facturen van vorige
+                      jaren die nog openstaan
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Bedrag centen={balans.eerdereDebiteurenCenten} />
+                  </TableCell>
+                </TableRow>
+              ) : null}
+              {balans.teVorderenRekeningcourantCenten !== 0 ? (
+                <TableRow>
+                  <TableCell>
+                    <Link href="/beheer/debiteuren" className="hover:underline">
+                      Te vorderen van personen
+                    </Link>
+                    <span className="block text-xs text-muted-foreground">
+                      rekening-courant: privégeld en voorschotten
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Bedrag centen={balans.teVorderenRekeningcourantCenten} />
+                  </TableCell>
+                </TableRow>
+              ) : null}
               <TableRow>
                 <TableCell>
                   <Link href="/beheer/voorraad" className="hover:underline">
@@ -143,6 +177,21 @@ export default async function BalansPagina() {
                   <Bedrag centen={balans.crediteurenCenten} />
                 </TableCell>
               </TableRow>
+              {balans.teBetalenRekeningcourantCenten !== 0 ? (
+                <TableRow>
+                  <TableCell>
+                    <Link href="/beheer/debiteuren" className="hover:underline">
+                      Nog terug te betalen aan personen
+                    </Link>
+                    <span className="block text-xs text-muted-foreground">
+                      rekening-courant met een negatief saldo
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Bedrag centen={balans.teBetalenRekeningcourantCenten} />
+                  </TableCell>
+                </TableRow>
+              ) : null}
               <TableRow>
                 <TableCell>Eigen vermogen begin boekjaar</TableCell>
                 <TableCell className="text-right">
@@ -165,8 +214,8 @@ export default async function BalansPagina() {
                   <TableCell>
                     Beginbalans: overige vorderingen en schulden
                     <span className="block text-xs text-muted-foreground">
-                      beginsaldo bank plus beginvoorraad, min het eigen vermogen
-                      aan het begin van het jaar
+                      beginsaldo bank, beginvoorraad en de vorderingen uit eerdere
+                      jaren, min het eigen vermogen aan het begin van het jaar
                     </span>
                   </TableCell>
                   <TableCell className="text-right">

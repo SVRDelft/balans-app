@@ -6,7 +6,11 @@ import { z } from "zod";
 
 import { logAudit } from "@/lib/audit";
 import { vereisBestuur } from "@/lib/auth/server";
-import { vereisSchrijfbaarBoekjaar } from "@/lib/boekjaar";
+import {
+  boekjaarVoorDatum,
+  vereisBoekjaarContext,
+  vereisSchrijfbaarBoekjaar,
+} from "@/lib/boekjaar";
 import { controleerKoppelingen } from "@/lib/boekjaar-koppelingen";
 import { db } from "@/lib/db";
 import { datumUitInvoer, telDagenOp, vandaag } from "@/lib/datum";
@@ -435,6 +439,13 @@ export async function verstuurFactuur(
   });
 }
 
+/**
+ * Legt een ontvangst vast. Twee dingen staan hier bewust los van elkaar: de
+ * factuur blijft in het boekjaar waarin hij is gemaakt, en het geld wordt geboekt
+ * in het jaar waarin het binnenkwam. Een vereniging die in oktober een factuur
+ * van mei betaalt, hoeft dus niet in een afgesloten jaar geboekt te worden — en
+ * een betaling die nog bij vorig jaar hoort, kan dat alsnog.
+ */
 export async function registreerBetaling(
   _vorigeStaat: ActieStaat,
   formulier: FormData,
@@ -442,13 +453,15 @@ export async function registreerBetaling(
   const sessie = await vereisBestuur();
 
   return voerUit(async () => {
-    const boekjaar = await vereisSchrijfbaarBoekjaar();
+    const context = await vereisBoekjaarContext();
     const factuurId = leesTekst(formulier, "factuurId");
     if (!factuurId) return { fout: "Onbekende factuur." };
 
+    // Niet beperkt tot het bekeken boekjaar: een factuur uit een afgesloten jaar
+    // mag nog betaald worden.
     const factuur = await db.factuur.findUnique({
-      where: { id: factuurId, boekjaarId: boekjaar.id },
-      include: { betalingen: true },
+      where: { id: factuurId },
+      include: { betalingen: true, boekjaar: { select: { naam: true } } },
     });
     if (!factuur) return { fout: "Deze factuur bestaat niet meer." };
     if (factuur.status === "concept") {
@@ -467,11 +480,30 @@ export async function registreerBetaling(
     const datum = datumUitInvoer(String(formulier.get("datum") ?? ""));
     if (!datum) return { fout: "Vul een geldige datum in." };
 
+    // In welk boekjaar valt dit geld? Standaard het jaar waarin de betaaldatum
+    // valt; wie het anders wil, kiest het jaar zelf in het formulier.
+    const gekozenId = leesTekst(formulier, "boekjaarId");
+    const doelBoekjaar = gekozenId
+      ? context.alleBoekjaren.find((jaar) => jaar.id === gekozenId)
+      : (boekjaarVoorDatum(context.alleBoekjaren, datum) ??
+        context.actiefBoekjaar ??
+        context.boekjaar);
+    if (!doelBoekjaar) {
+      return { fout: "Kies het boekjaar waarin deze betaling thuishoort." };
+    }
+    const anderJaar = doelBoekjaar.id !== factuur.boekjaarId;
+    if (anderJaar && factuur.status === "oninbaar") {
+      return {
+        fout: "Deze factuur is oninbaar verklaard. Herstel hem eerst, zodat de opbrengst in het juiste jaar terechtkomt.",
+      };
+    }
+
     await db.$transaction(async (tx) => {
-      await vergrendelFactuur(tx, factuurId, boekjaar.id);
+      await vergrendelFactuur(tx, factuurId, factuur.boekjaarId);
       await tx.betaling.create({
         data: {
           factuurId,
+          boekjaarId: doelBoekjaar.id,
           datum,
           bedragCenten,
           notitie: leesTekst(formulier, "notitie") ?? null,
@@ -487,14 +519,19 @@ export async function registreerBetaling(
       entiteit: "Betaling",
       entiteitId: factuurId,
       actie: "aangemaakt",
-      samenvatting: `Betaling ${formatteerEuro(bedragCenten)} op ${factuur.nummer}; totaal ontvangen ${formatteerEuro(nieuwBetaald)} van ${formatteerEuro(factuur.totaalCenten)}`,
-      boekjaarId: boekjaar.id,
+      samenvatting:
+        `Betaling ${formatteerEuro(bedragCenten)} op ${factuur.nummer}; totaal ontvangen ${formatteerEuro(nieuwBetaald)} van ${formatteerEuro(factuur.totaalCenten)}` +
+        (anderJaar
+          ? `; geboekt in ${doelBoekjaar.naam}, factuur hoort bij ${factuur.boekjaar.naam}`
+          : ""),
+      boekjaarId: doelBoekjaar.id,
     });
 
-    revalidatePath("/beheer/facturen");
-    revalidatePath(`/beheer/facturen/${factuurId}`);
+    revalidatePath("/", "layout");
     return {
-      melding: `Betaling van ${formatteerEuro(bedragCenten)} vastgelegd.`,
+      melding:
+        `Betaling van ${formatteerEuro(bedragCenten)} vastgelegd` +
+        (anderJaar ? ` in ${doelBoekjaar.naam}.` : "."),
     };
   });
 }
@@ -506,21 +543,26 @@ export async function verwijderBetaling(
   const sessie = await vereisBestuur();
 
   return voerUit(async () => {
-    const boekjaar = await vereisSchrijfbaarBoekjaar();
+    // Net als bij het vastleggen: ook een betaling die in een ander boekjaar is
+    // geboekt, moet terug te draaien zijn.
+    await vereisBoekjaarContext();
     const id = leesTekst(formulier, "id");
     if (!id) return { fout: "Onbekende betaling." };
 
     const betaling = await db.betaling.findUnique({
-      where: { id, factuur: { boekjaarId: boekjaar.id } },
-      include: { factuur: true },
+      where: { id },
+      include: { factuur: true, bankmutatie: { select: { id: true } } },
     });
     if (!betaling) return { fout: "Deze betaling bestaat niet meer." };
+    if (betaling.bankmutatie) {
+      return {
+        fout: "Deze betaling komt uit een bankimport. Maak daar de koppeling ongedaan, dan verdwijnt de betaling mee.",
+      };
+    }
 
     await db.$transaction(async (tx) => {
-      await vergrendelFactuur(tx, betaling.factuurId, boekjaar.id);
-      await tx.betaling.delete({
-        where: { id, factuur: { boekjaarId: boekjaar.id } },
-      });
+      await vergrendelFactuur(tx, betaling.factuurId, betaling.factuur.boekjaarId);
+      await tx.betaling.delete({ where: { id } });
       await hertelFactuur(tx, betaling.factuurId);
     });
 
@@ -530,10 +572,10 @@ export async function verwijderBetaling(
       entiteitId: betaling.factuurId,
       actie: "verwijderd",
       samenvatting: `Betaling ${formatteerEuro(betaling.bedragCenten)} op ${betaling.factuur.nummer} verwijderd`,
-      boekjaarId: boekjaar.id,
+      boekjaarId: betaling.boekjaarId,
     });
 
-    revalidatePath(`/beheer/facturen/${betaling.factuurId}`);
+    revalidatePath("/", "layout");
     return { melding: "Betaling verwijderd." };
   });
 }

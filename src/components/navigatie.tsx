@@ -10,6 +10,7 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  HandCoins,
   LayoutDashboard,
   Receipt,
   Package,
@@ -38,6 +39,7 @@ const GROEPEN: { titel: string; items: NavItem[] }[] = [
       { href: "/beheer", label: "Dashboard", icoon: LayoutDashboard },
       { href: "/beheer/exploitatie", label: "Exploitatie", icoon: Table2 },
       { href: "/beheer/balans", label: "Balans", icoon: Scale },
+      { href: "/beheer/debiteuren", label: "Debiteuren", icoon: HandCoins },
     ],
   },
   {

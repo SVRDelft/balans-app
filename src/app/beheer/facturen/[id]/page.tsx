@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { vereisBoekjaarContext } from "@/lib/boekjaar";
+import { boekjaarVoorDatum, vereisBoekjaarContext } from "@/lib/boekjaar";
 import { db } from "@/lib/db";
 import {
   dagenTussen,
@@ -59,7 +59,8 @@ export const metadata: Metadata = { title: "Factuur" };
 export default async function FactuurPagina({
   params,
 }: PageProps<"/beheer/facturen/[id]">) {
-  const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
+  const { boekjaar, schrijfbaar, actiefBoekjaar, alleBoekjaren } =
+    await vereisBoekjaarContext();
   const { id } = await params;
 
   const factuur = await db.factuur.findUnique({
@@ -70,7 +71,10 @@ export default async function FactuurPagina({
         orderBy: { volgorde: "asc" },
         include: { begrotingspost: { select: { code: true, naam: true } } },
       },
-      betalingen: { orderBy: { datum: "asc" } },
+      betalingen: {
+        orderBy: { datum: "asc" },
+        include: { boekjaar: { select: { id: true, naam: true } } },
+      },
       evenement: { select: { id: true, naam: true } },
       ...factuurStandRelaties,
     },
@@ -303,6 +307,11 @@ export default async function FactuurPagina({
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {betaling.notitie ?? "—"}
+                          {betaling.boekjaarId !== factuur.boekjaarId ? (
+                            <span className="block text-xs font-medium">
+                              geboekt in {betaling.boekjaar.naam}
+                            </span>
+                          ) : null}
                           {betaling.geregistreerdDoor ? (
                             <span className="block text-xs">
                               ingevoerd door {betaling.geregistreerdDoor}
@@ -313,7 +322,8 @@ export default async function FactuurPagina({
                           <Bedrag centen={betaling.bedragCenten} />
                         </TableCell>
                         <TableCell className="text-right">
-                          {schrijfbaar ? (
+                          {schrijfbaar ||
+                          betaling.boekjaarId === actiefBoekjaar?.id ? (
                             <BevestigKnop
                               actie={verwijderBetaling}
                               velden={{ id: betaling.id }}
@@ -331,16 +341,34 @@ export default async function FactuurPagina({
                 </Table>
               )}
 
-              {schrijfbaar &&
-              !isConcept &&
+              {!isConcept &&
               (factuur.status !== "gecrediteerd" || openstaand > 0) ? (
                 <div className="border-t border-border pt-4">
+                  {!schrijfbaar ? (
+                    <Melding toon="info" className="mb-4">
+                      Dit boekjaar is afgesloten, maar een betaling mag altijd nog:
+                      die wordt geboekt in het jaar waarin het geld binnenkwam.
+                    </Melding>
+                  ) : null}
                   <BetalingFormulier
                     factuurId={factuur.id}
                     vandaag={datumNaarInvoer(vandaag())}
                     openstaandInvoer={
                       openstaand === 0 ? "" : centenNaarInvoer(openstaand)
                     }
+                    boekjaren={alleBoekjaren.map((jaar) => ({
+                      id: jaar.id,
+                      naam: jaar.naam,
+                      actief: jaar.actief,
+                    }))}
+                    standaardBoekjaarId={
+                      (
+                        boekjaarVoorDatum(alleBoekjaren, vandaag()) ??
+                        actiefBoekjaar ??
+                        boekjaar
+                      ).id
+                    }
+                    factuurBoekjaarId={factuur.boekjaarId}
                   />
                 </div>
               ) : null}

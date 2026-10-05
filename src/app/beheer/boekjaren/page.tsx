@@ -25,7 +25,7 @@ import { datumNaarInvoer, formatteerDatum } from "@/lib/datum";
 import { centenNaarInvoer } from "@/lib/geld";
 import { haalBoekjaarContext } from "@/lib/boekjaar";
 
-import { activeerBoekjaar } from "./acties";
+import { activeerBoekjaar, zetReconstructie } from "./acties";
 import { BoekjaarFormulier } from "./formulier";
 import { WisFormulier } from "./wisformulier";
 
@@ -48,7 +48,7 @@ export default async function BoekjarenPagina() {
     <>
       <Paginakop
         titel="Boekjaren"
-        beschrijving="Er is altijd precies één actief boekjaar. In de andere kan wel gekeken worden, maar niet geschreven."
+        beschrijving="Er is altijd precies één actief boekjaar. In de andere kan wel gekeken worden, maar niet geschreven — tenzij je een oud jaar bewust openzet om het op te bouwen."
       />
 
       <Card className="mb-6">
@@ -83,6 +83,11 @@ export default async function BoekjarenPagina() {
                       Actief
                     </Badge>
                   ) : null}
+                  {boekjaar.reconstructie ? (
+                    <Badge variant="waarschuwing" className="ml-2">
+                      In reconstructie
+                    </Badge>
+                  ) : null}
                 </TableCell>
                 <TableCell className="cijfers whitespace-nowrap text-muted-foreground">
                   {formatteerDatum(boekjaar.startDatum)} —{" "}
@@ -101,15 +106,30 @@ export default async function BoekjarenPagina() {
                 </TableCell>
                 <TableCell className="text-right">
                   {!boekjaar.actief ? (
-                    <BevestigKnop
-                      actie={activeerBoekjaar}
-                      velden={{ id: boekjaar.id }}
-                      vraag={`${boekjaar.naam} het actieve boekjaar maken? Het huidige actieve boekjaar wordt daarmee alleen-lezen.`}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Activeren
-                    </BevestigKnop>
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <BevestigKnop
+                        actie={activeerBoekjaar}
+                        velden={{ id: boekjaar.id }}
+                        vraag={`${boekjaar.naam} het actieve boekjaar maken? Het huidige actieve boekjaar wordt daarmee alleen-lezen.`}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Activeren
+                      </BevestigKnop>
+                      <BevestigKnop
+                        actie={zetReconstructie}
+                        velden={{ id: boekjaar.id, aan: boekjaar.reconstructie ? "nee" : "ja" }}
+                        vraag={
+                          boekjaar.reconstructie
+                            ? `${boekjaar.naam} weer op alleen-lezen zetten?`
+                            : `${boekjaar.naam} openzetten om op te bouwen? Zolang dat aanstaat kun je in dit afgesloten jaar boeken, en dat staat in het auditlog.`
+                        }
+                        variant="ghost"
+                        size="sm"
+                      >
+                        {boekjaar.reconstructie ? "Sluiten" : "Opbouwen"}
+                      </BevestigKnop>
+                    </div>
                   ) : null}
                 </TableCell>
               </TableRow>
@@ -169,6 +189,49 @@ export default async function BoekjarenPagina() {
           </div>
         </Card>
       ) : null}
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Een oud boekjaar opbouwen</CardTitle>
+          <CardDescription>
+            Begin je net met de app en staat vorig jaar nog nergens in? Dan hoef je
+            het niet met de hand na te typen.
+          </CardDescription>
+        </CardHeader>
+        <div className="px-5 pb-5">
+          <ol className="list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
+            <li>
+              Maak dat oude boekjaar aan met de juiste begin- en einddatum en het
+              beginsaldo van de bank op de eerste dag.
+            </li>
+            <li>
+              Zet het met <strong>Opbouwen</strong> open. Je kijkt er dan naar en
+              mag erin boeken; het echte actieve jaar blijft ongemoeid.
+            </li>
+            <li>
+              Neem de begroting over van een ander jaar, of maak een paar posten
+              aan — elke factuur en uitgave heeft er één nodig.
+            </li>
+            <li>
+              Download bij de bank het MT940-afschrift van dat jaar en lees het in
+              bij <strong>Bankimport</strong>. Kies daar{" "}
+              <strong>Alles in één keer boeken</strong>: van elke bijschrijving
+              maakt de app een factuur die al op betaald staat, van elke
+              afschrijving een betaalde uitgave.
+            </li>
+            <li>
+              Facturen die nooit betaald zijn, voer je er met de hand bij; die staan
+              niet op het afschrift. Daarna sluit je het jaar weer met{" "}
+              <strong>Sluiten</strong>.
+            </li>
+          </ol>
+          <Melding toon="info" className="mt-4">
+            Komt er daarna nog geld binnen van een factuur uit dat oude jaar? Boek
+            dat gewoon in het huidige jaar: bij de bankimport staan openstaande
+            facturen van eerdere jaren er automatisch tussen.
+          </Melding>
+        </div>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -47,6 +47,7 @@ export function MutatieFormulier({
   const prefix = `bankmutatie-${id}`;
   const nieuweUitgave = doel === "nieuw" && bedragCenten < 0;
   const nieuweInkomst = doel === "inkomst" && bedragCenten > 0;
+  const rekeningpost = doel === "rekeningpost";
   // Staat de naam van de betaler als relatie in de app, dan die alvast kiezen.
   const tegenpartijKort = tegenpartij.toLowerCase();
   const bekendeRelatie = relaties.find((r) => r.naam.length >= 2 && tegenpartijKort.includes(r.naam.toLowerCase()))?.id ?? "";
@@ -80,6 +81,11 @@ export function MutatieFormulier({
             {bedragCenten > 0 ? (
               <option value="inkomst">Inkomst zonder factuur boeken</option>
             ) : null}
+            <option value="rekeningpost">
+              {bedragCenten < 0
+                ? "Privé of voorgeschoten: op iemands rekening-courant"
+                : "Terugbetaling op iemands rekening-courant"}
+            </option>
             <option value="negeren">Niet verwerken in de administratie</option>
           </Select>
         </Veld>
@@ -199,6 +205,67 @@ export function MutatieFormulier({
             </Veld>
             <Veld label="Omschrijving" htmlFor={`${prefix}-inkomstomschrijving`} verplicht>
               <Textarea id={`${prefix}-inkomstomschrijving`} name="omschrijving" defaultValue={omschrijving} rows={2} required />
+            </Veld>
+          </div>
+        ) : null}
+
+        {rekeningpost ? (
+          <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-sm">
+              {bedragCenten < 0 ? (
+                <>
+                  Dit bedrag ging van de SVR-rekening af, maar is geen uitgave van de
+                  SVR: <strong>{formatteerEuro(Math.abs(bedragCenten))}</strong> komt
+                  als vordering op de rekening-courant van deze persoon te staan.
+                </>
+              ) : (
+                <>
+                  Dit is een terugbetaling:{" "}
+                  <strong>{formatteerEuro(bedragCenten)}</strong> gaat van de
+                  rekening-courant van deze persoon af.
+                </>
+              )}{" "}
+              Het raakt de begroting niet, alleen de{" "}
+              <Link
+                href="/beheer/debiteuren"
+                className="font-medium text-primary underline underline-offset-2"
+              >
+                debiteurenstand
+              </Link>
+              .
+            </p>
+            <Veld
+              label="Van wie"
+              htmlFor={`${prefix}-rekeningrelatie`}
+              verplicht
+              toelichting="Staat deze persoon er niet tussen? Voeg hem eerst toe bij Relaties."
+            >
+              <Select
+                id={`${prefix}-rekeningrelatie`}
+                name="relatieId"
+                defaultValue={bekendeRelatie}
+                required
+              >
+                <option value="">Kies een persoon of vereniging</option>
+                {relaties.map((relatie) => (
+                  <option key={relatie.id} value={relatie.id}>
+                    {relatie.naam}
+                  </option>
+                ))}
+              </Select>
+            </Veld>
+            <Veld
+              label="Waarvoor"
+              htmlFor={`${prefix}-rekeningomschrijving`}
+              verplicht
+            >
+              <Textarea
+                id={`${prefix}-rekeningomschrijving`}
+                name="omschrijving"
+                defaultValue={omschrijving}
+                rows={2}
+                required
+              />
             </Veld>
           </div>
         ) : null}

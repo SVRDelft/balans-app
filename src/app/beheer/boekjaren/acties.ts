@@ -53,9 +53,11 @@ export async function bewaarBoekjaar(
 
     if (id) {
       const bestaand = await db.boekjaar.findUnique({ where: { id } });
-      if (!bestaand?.actief) return { fout: "Alleen het actieve boekjaar kan gewijzigd worden." };
+      if (!bestaand?.actief && !bestaand?.reconstructie) {
+        return { fout: "Alleen het actieve boekjaar, of een boekjaar in reconstructie, kan gewijzigd worden." };
+      }
       const boekjaar = await db.boekjaar.update({
-        where: { id, actief: true },
+        where: { id },
         data: {
           naam: naam!,
           startDatum: startDatum!,
@@ -113,6 +115,57 @@ export async function bewaarBoekjaar(
     revalidatePath("/beheer/boekjaren");
     revalidatePath("/", "layout");
     return { melding: "Boekjaar opgeslagen." };
+  });
+}
+
+/**
+ * Zet een afgesloten boekjaar open om het alsnog op te bouwen, of sluit het weer.
+ *
+ * Dit is bedoeld voor de eerste ingebruikname: het vorige bestuursjaar staat nog
+ * nergens in de app, en je wilt het invoeren uit de oude bankafschriften. Zolang
+ * de schakelaar aanstaat, mag er in dat jaar geboekt worden alsof het actief is.
+ * Daarom staat het in het auditlog en is het één knop om het weer dicht te zetten.
+ */
+export async function zetReconstructie(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    const id = leesTekst(formulier, "id");
+    const aan = leesTekst(formulier, "aan") === "ja";
+    if (!id) return { fout: "Onbekend boekjaar." };
+
+    const boekjaar = await db.boekjaar.findUnique({ where: { id } });
+    if (!boekjaar) return { fout: "Dit boekjaar bestaat niet meer." };
+    if (boekjaar.actief) {
+      return { fout: "Het actieve boekjaar is altijd al te bewerken; reconstructie is daar niet voor nodig." };
+    }
+
+    await db.boekjaar.update({ where: { id }, data: { reconstructie: aan } });
+    if (aan) {
+      // Meteen naar dat jaar kijken, anders boek je per ongeluk in het actieve.
+      (await cookies()).set(BOEKJAAR_COOKIE, id, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 31536000 });
+    }
+
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Boekjaar",
+      entiteitId: id,
+      actie: aan ? "reconstructie gestart" : "reconstructie afgesloten",
+      samenvatting: aan
+        ? `Boekjaar ${boekjaar.naam} staat open om op te bouwen uit oude afschriften`
+        : `Boekjaar ${boekjaar.naam} is weer alleen-lezen`,
+      boekjaarId: id,
+    });
+
+    revalidatePath("/", "layout");
+    return {
+      melding: aan
+        ? `${boekjaar.naam} staat open. Je kijkt er nu naar; vergeet hem niet weer te sluiten als je klaar bent.`
+        : `${boekjaar.naam} is weer alleen-lezen.`,
+    };
   });
 }
 

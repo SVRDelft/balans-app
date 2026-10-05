@@ -11,9 +11,12 @@ import type { Boekjaar } from "@/lib/types";
 export interface BoekjaarContext {
   /** Het boekjaar waar de gebruiker nu naar kijkt. */
   boekjaar: Boekjaar;
-  /** Het enige boekjaar waarin geschreven mag worden. */
+  /** Het boekjaar waarin het dagelijkse werk geboekt wordt. */
   actiefBoekjaar: Boekjaar | null;
-  /** Of het getoonde boekjaar ook het actieve is. */
+  /**
+   * Of er in het getoonde boekjaar geschreven mag worden: het actieve jaar, of
+   * een oud jaar dat in reconstructie staat.
+   */
   schrijfbaar: boolean;
   alleBoekjaren: Boekjaar[];
 }
@@ -44,9 +47,35 @@ export async function haalBoekjaarContext(): Promise<BoekjaarContext | null> {
   return {
     boekjaar,
     actiefBoekjaar,
-    schrijfbaar: actiefBoekjaar !== null && boekjaar.id === actiefBoekjaar.id,
+    schrijfbaar: isSchrijfbaar(boekjaar, actiefBoekjaar),
     alleBoekjaren,
   };
+}
+
+/**
+ * In het actieve boekjaar mag altijd geboekt worden. In een oud jaar alleen als
+ * het bewust in reconstructie staat, om het bij de eerste ingebruikname op te
+ * bouwen uit oude bankafschriften.
+ */
+export function isSchrijfbaar(
+  boekjaar: Boekjaar,
+  actiefBoekjaar: Boekjaar | null,
+): boolean {
+  if (boekjaar.reconstructie) return true;
+  return actiefBoekjaar !== null && boekjaar.id === actiefBoekjaar.id;
+}
+
+/**
+ * Het boekjaar waarin een datum valt. Bepaalt waar een betaling thuishoort die
+ * nu binnenkomt op een factuur van een vorig jaar.
+ */
+export function boekjaarVoorDatum(
+  boekjaren: readonly Boekjaar[],
+  datum: Date,
+): Boekjaar | undefined {
+  return boekjaren.find(
+    (jaar) => datum >= jaar.startDatum && datum <= jaar.eindDatum,
+  );
 }
 
 /**
@@ -64,15 +93,16 @@ export async function vereisBoekjaarContext(): Promise<BoekjaarContext> {
 }
 
 /**
- * Voor elke mutatie: er mag alleen in het actieve boekjaar geschreven worden.
- * Gooit een fout die de aanroepende action als melding kan tonen.
+ * Voor elke mutatie: er mag alleen geboekt worden in het actieve boekjaar, of in
+ * een oud jaar dat in reconstructie staat. Gooit een fout die de aanroepende
+ * action als melding kan tonen.
  */
 export async function vereisSchrijfbaarBoekjaar(terugNaar?: string): Promise<Boekjaar> {
   const context = await vereisBoekjaarContext();
   if (!context.schrijfbaar) {
     if (terugNaar) redirect(terugNaar);
     throw new Error(
-      `Boekjaar ${context.boekjaar.naam} is afgesloten en kan niet meer gewijzigd worden. Schakel eerst over naar het actieve boekjaar.`,
+      `Boekjaar ${context.boekjaar.naam} is afgesloten en kan niet meer gewijzigd worden. Schakel over naar het actieve boekjaar, of zet dit jaar bij Boekjaren in reconstructie om het alsnog op te bouwen.`,
     );
   }
   return context.boekjaar;

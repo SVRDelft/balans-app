@@ -7,8 +7,23 @@ export interface BalansInvoer {
   /** Som van de uitgaven die al betaald zijn. */
   betaaldeUitgavenCenten: number;
 
-  /** Openstaand bij de verenigingen en personen. */
+  /** Openstaande facturen uit dit boekjaar. */
   debiteurenCenten: number;
+  /**
+   * Facturen uit eerdere boekjaren die aan het begin van dit jaar nog openstonden,
+   * plus het rekening-courantsaldo van toen. Dit zijn de vorderingen die het jaar
+   * is binnengekomen; ze staan ook in het beginbalansverschil, zodat ze de balans
+   * niet uit elkaar trekken.
+   */
+  overgenomenVorderingenCenten?: number;
+  /** Nog openstaande facturen uit eerdere boekjaren, nu gemeten. */
+  eerdereDebiteurenCenten?: number;
+  /** Rekening-courant: wat nog van personen en verenigingen moet komen. */
+  teVorderenRekeningcourantCenten?: number;
+  /** Rekening-courant: wat de SVR nog moet terugbetalen, als positief getal. */
+  teBetalenRekeningcourantCenten?: number;
+  /** Rekening-courantbedragen die in dit jaar over de SVR-rekening gingen. */
+  rekeningcourantViaBankCenten?: number;
   /** Nog te betalen aan leveranciers. */
   crediteurenCenten: number;
 
@@ -35,6 +50,9 @@ export interface Balans {
   /** Saldo dat uit de administratie volgt. */
   administratiefBanksaldoCenten: number;
   debiteurenCenten: number;
+  eerdereDebiteurenCenten: number;
+  teVorderenRekeningcourantCenten: number;
+  teBetalenRekeningcourantCenten: number;
   totaalActivaCenten: number;
   voorraadCenten: number;
   voorraadMutatieCenten: number;
@@ -67,10 +85,19 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
   const voorraadBeginCenten = invoer.voorraadBeginCenten ?? 0;
   const voorraadCenten = invoer.voorraadCenten ?? 0;
   const voorraadMutatieCenten = voorraadCenten - voorraadBeginCenten;
+  const eerdereDebiteurenCenten = invoer.eerdereDebiteurenCenten ?? 0;
+  const teVorderenRekeningcourantCenten =
+    invoer.teVorderenRekeningcourantCenten ?? 0;
+  const teBetalenRekeningcourantCenten =
+    invoer.teBetalenRekeningcourantCenten ?? 0;
+
+  // Geld dat privé door de SVR-rekening liep, is wél van de rekening af. Zonder
+  // deze regel zou dat in het bankverschil blijven hangen.
   const administratiefBanksaldoCenten =
     invoer.beginsaldoBankCenten +
     invoer.ontvangenBetalingenCenten -
-    invoer.betaaldeUitgavenCenten;
+    invoer.betaaldeUitgavenCenten -
+    (invoer.rekeningcourantViaBankCenten ?? 0);
 
   // Alleen het deel dat nog nergens in zit; de rest zit al in de uitgaven van
   // de begrotingsposten waaraan de spullen hangen.
@@ -84,14 +111,20 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
 
   const beginbalansverschilCenten =
     invoer.beginsaldoBankCenten +
-    voorraadBeginCenten -
+    voorraadBeginCenten +
+    (invoer.overgenomenVorderingenCenten ?? 0) -
     invoer.beginsaldoEigenVermogenCenten;
 
   const totaalActivaCenten =
-    administratiefBanksaldoCenten + invoer.debiteurenCenten + voorraadCenten;
+    administratiefBanksaldoCenten +
+    invoer.debiteurenCenten +
+    eerdereDebiteurenCenten +
+    teVorderenRekeningcourantCenten +
+    voorraadCenten;
 
   const totaalPassivaCenten =
     invoer.crediteurenCenten +
+    teBetalenRekeningcourantCenten +
     invoer.beginsaldoEigenVermogenCenten +
     resultaatCenten +
     beginbalansverschilCenten;
@@ -99,6 +132,9 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
   return {
     administratiefBanksaldoCenten,
     debiteurenCenten: invoer.debiteurenCenten,
+    eerdereDebiteurenCenten,
+    teVorderenRekeningcourantCenten,
+    teBetalenRekeningcourantCenten,
     totaalActivaCenten,
     voorraadCenten,
     voorraadMutatieCenten,

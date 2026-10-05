@@ -12,10 +12,11 @@ import { vereisBoekjaarContext } from "@/lib/boekjaar";
 import { formatteerDatum } from "@/lib/datum";
 import { formatteerEuro } from "@/lib/geld";
 import { bankKeuzes } from "@/lib/bank/gegevens";
-import { bankVoorstellen } from "@/lib/bank/koppelen";
+import { bankVoorstellen, naamStaatIn, normaliseerRekening } from "@/lib/bank/koppelen";
 import { bevestigBankimport, ontkoppelBankmutatie } from "../acties";
 import { MutatieFormulier } from "./mutatie-formulier";
 import { SelectieFormulier } from "./selectie-formulier";
+import { SnelBoeken, type SnelRegel } from "./snel-boeken";
 
 export const metadata: Metadata = { title: "Bankimport controleren" };
 
@@ -31,7 +32,7 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
   const [keuzes, posten, relaties] = await Promise.all([
     bankKeuzes(boekjaar.id),
     db.begrotingspost.findMany({ where: { boekjaarId: boekjaar.id }, orderBy: { code: "asc" }, select: { id: true, code: true, naam: true, soort: true } }),
-    db.relatie.findMany({ where: { actief: true }, orderBy: { naam: "asc" }, select: { id: true, naam: true } }),
+    db.relatie.findMany({ where: { actief: true }, orderBy: { naam: "asc" }, select: { id: true, naam: true, iban: true } }),
   ]);
   const uitgavenposten = posten.filter((p) => p.soort === "uitgave");
   const inkomstenposten = posten.filter((p) => p.soort === "inkomst");
@@ -39,11 +40,16 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
   const open = bestand.mutaties.filter((r) => r.verwerking === "open");
   const voorstellen = bankVoorstellen(open, keuzes.facturen, keuzes.betalingen, keuzes.uitgaven);
 
+  // Een factuur uit een ouder jaar mag ook nu nog betaald worden; dan hoort het
+  // jaar erbij, zodat niemand denkt dat hij naar de verkeerde factuur kijkt.
+  const jaarErbij = (f: { boekjaarId?: string; boekjaarNaam?: string }) =>
+    f.boekjaarId && f.boekjaarId !== boekjaar.id ? ` · ${f.boekjaarNaam}` : "";
+
   const doelLabel = (waarde: string) => {
     const [soort, doelId] = waarde.split(":");
     if (soort === "factuur") {
       const f = keuzes.facturen.find((x) => x.id === doelId);
-      return f ? `Factuur ${f.nummer} · ${f.relatieNaam}` : "Factuur";
+      return f ? `Factuur ${f.nummer} · ${f.relatieNaam}${jaarErbij(f)}` : "Factuur";
     }
     if (soort === "betaling") {
       const b = keuzes.betalingen.find((x) => x.id === doelId);
@@ -53,6 +59,25 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
     const u = keuzes.uitgaven.find((x) => x.id === doelId);
     return u ? `Uitgave · ${u.leverancierNaam} · ${u.omschrijving}` : "Uitgave";
   };
+
+  const raadRelatie = (regel: { tegenpartijIban: string; tegenpartijNaam: string; omschrijving: string }) => {
+    const iban = normaliseerRekening(regel.tegenpartijIban);
+    const opIban = iban
+      ? relaties.find((relatie) => relatie.iban && normaliseerRekening(relatie.iban) === iban)
+      : undefined;
+    if (opIban) return opIban.id;
+    const zoektekst = `${regel.tegenpartijNaam} ${regel.omschrijving}`;
+    return relaties.find((relatie) => naamStaatIn(relatie.naam, zoektekst))?.id ?? "";
+  };
+
+  const snelRegels: SnelRegel[] = open.map((regel) => ({
+    id: regel.id,
+    datum: formatteerDatum(regel.datum),
+    bedragCenten: regel.bedragCenten,
+    omschrijving: regel.omschrijving,
+    tegenpartij: regel.tegenpartijNaam,
+    relatieId: raadRelatie(regel),
+  }));
 
   const selectie = open
     .filter((r) => voorstellen.has(r.id))
@@ -113,11 +138,42 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
 
     {!open.length ? <Melding toon="goed" className="mb-4">Alle bankregels uit dit bestand zijn afgehandeld. Controleer bij Banksaldo of het verschil met de administratie nul is.</Melding> : null}
 
+    {schrijfbaar && open.length > 0 ? (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Alles in één keer boeken</CardTitle>
+          <CardDescription>
+            Voor een boekjaar dat je opbouwt uit oude afschriften: van elke
+            bijschrijving maakt de app een factuur die meteen op betaald staat, en
+            van elke afschrijving een betaalde uitgave. Privégeld zet je op de
+            rekening-courant van die persoon. Controleer per regel de post en de
+            relatie; wat je niet aanvinkt, blijft openstaan.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <details>
+            <summary className="cursor-pointer text-sm font-medium text-primary">
+              {open.length} open bankregels klaarzetten
+            </summary>
+            <div className="mt-4">
+              <SnelBoeken
+                importId={id}
+                regels={snelRegels}
+                relaties={relaties}
+                inkomstenposten={inkomstenposten}
+                uitgavenposten={uitgavenposten}
+              />
+            </div>
+          </details>
+        </CardContent>
+      </Card>
+    ) : null}
+
     {open.length > 0 ? <h2 className="mb-3 mt-8 text-lg font-semibold">Alle bankregels</h2> : null}
     <div className="space-y-3">{bestand.mutaties.map((regel) => {
       const voorstel = voorstellen.get(regel.id);
       const opties = [
-        ...keuzes.facturen.filter((f) => f.status !== "oninbaar" && Math.sign(f.openstaandCenten) === Math.sign(regel.bedragCenten) && Math.abs(f.openstaandCenten) >= Math.abs(regel.bedragCenten)).map((f) => ({ waarde: `factuur:${f.id}`, label: `${f.nummer} · ${f.relatieNaam} · ${formatteerEuro(f.openstaandCenten)} open` })),
+        ...keuzes.facturen.filter((f) => f.status !== "oninbaar" && Math.sign(f.openstaandCenten) === Math.sign(regel.bedragCenten) && Math.abs(f.openstaandCenten) >= Math.abs(regel.bedragCenten)).map((f) => ({ waarde: `factuur:${f.id}`, label: `${f.nummer} · ${f.relatieNaam} · ${formatteerEuro(f.openstaandCenten)} open${jaarErbij(f)}` })),
         ...keuzes.betalingen.filter((b) => b.bedragCenten === regel.bedragCenten && b.datum.toISOString().slice(0, 10) === regel.datum.toISOString().slice(0, 10)).map((b) => ({ waarde: `betaling:${b.id}`, label: `Al ingevoerd: ${keuzes.facturen.find((f) => f.id === b.factuurId)?.nummer ?? "betaling"} · ${formatteerEuro(b.bedragCenten)}` })),
         ...keuzes.uitgaven.filter((u) => regel.bedragCenten < 0 && u.bedragCenten === -regel.bedragCenten).map((u) => ({ waarde: `uitgave:${u.id}`, label: `${u.betaald ? "Al betaald: " : "Uitgave: "}${u.leverancierNaam} · ${u.omschrijving}` })),
       ];

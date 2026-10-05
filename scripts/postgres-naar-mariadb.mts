@@ -30,6 +30,7 @@ const TABELLEN = [
   "Bankimport",
   "Bankmutatie",
   "Voorraadpost",
+  "Rekeningpost",
   "Auditlog",
 ] as const;
 type Tabel = (typeof TABELLEN)[number];
@@ -78,12 +79,19 @@ function centenSom(rijen: Record<string, unknown>[]) {
 }
 
 const verschillen: string[] = [];
+/** Per factuur het boekjaar, om betalingen in het juiste jaar te zetten. */
+const factuurJaren = new Map<string, string>();
 
 try {
   for (const tabel of TABELLEN) {
     const { rows } = await bron.query<Record<string, unknown>>(
       `SELECT * FROM "${tabel}"`,
     );
+    if (tabel === "Factuur") {
+      for (const rij of rows) {
+        factuurJaren.set(String(rij.id), String(rij.boekjaarId));
+      }
+    }
     const alAanwezig = await model(tabel).count();
 
     if (schrijf && rows.length > 0) {
@@ -103,10 +111,17 @@ try {
                 crediteertFactuurId: String(rij.crediteertFactuurId),
               }))
           : [];
+      // De oude database kende nog geen boekjaar op een betaling; dat volgt uit
+      // de factuur waar de betaling bij hoort.
       const teSchrijven =
         tabel === "Factuur"
           ? rows.map((rij) => ({ ...rij, crediteertFactuurId: null }))
-          : rows;
+          : tabel === "Betaling"
+            ? rows.map((rij) => ({
+                ...rij,
+                boekjaarId: rij.boekjaarId ?? factuurJaren.get(String(rij.factuurId)),
+              }))
+            : rows;
 
       // Bonnetjes kunnen megabytes zijn: in kleine groepjes wegschrijven.
       const groep = tabel === "Bijlage" ? 5 : 200;

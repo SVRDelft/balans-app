@@ -174,6 +174,16 @@ bestaan. Het eerste boekjaar wordt automatisch actief. Bij het aanmaken van een
 volgend jaar kun je de begrotingsposten en bedragen kopiëren. Activeer dat jaar
 wanneer je erin wilt gaan werken en neem de voorraad over via *Spullen & voorraad*.
 
+**Een oud jaar alsnog invoeren.** Begin je net met de app, dan staat het vorige
+bestuursjaar nog nergens in. Maak dat jaar aan en zet het bij *Boekjaren* op
+**Opbouwen**: zolang die schakelaar aanstaat mag je in dat afgesloten jaar boeken,
+precies zoals in het actieve jaar. Lees daarna het MT940-afschrift van dat jaar in
+en gebruik *Alles in één keer boeken*: van elke bijschrijving maakt de app een
+factuur die al op betaald staat, van elke afschrijving een betaalde uitgave.
+Facturen die nooit betaald zijn staan niet op het afschrift; die voer je er met de
+hand bij. Zet de schakelaar daarna weer uit. Elke keer dat je hem omzet komt in
+het auditlog te staan.
+
 ### Begroting
 
 De begroting kent twee soorten posten:
@@ -198,6 +208,13 @@ hergebruikt**, ook niet als je een concept verwijdert. Een gat in de reeks is
 verklaarbaar; een hergebruikt nummer niet.
 
 Deelbetalingen kunnen: de status volgt automatisch uit de som van de betalingen.
+
+Een betaling hoort bij het boekjaar waarin het **geld** binnenkwam, en dat is niet
+altijd het jaar van de factuur. Betaalt een vereniging in oktober de factuur van
+mei, dan kies je bij de betaling het nieuwe jaar: de vordering blijft in het oude
+jaar staan en het geld telt in het nieuwe jaar mee. Beide balansen blijven zo
+kloppen. Daarom mag je een betaling ook vastleggen op een factuur uit een
+afgesloten boekjaar — als enige handeling in zo'n jaar.
 
 Een creditfactuur telt mee zodra je deze op *verstuurd* zet. De app verrekent
 de credit met het origineel en laat een eventuele terugbetaling apart zien.
@@ -268,6 +285,39 @@ Voer het banksaldo regelmatig in vanuit je bankapp. De app zet dat af tegen het
 saldo dat uit de administratie volgt. **Dat verschil is het beste signaal dat er
 iets vergeten is.**
 
+### Debiteuren en de rekening-courant
+
+Onder *Debiteuren* staat alles wat de SVR nog moet krijgen. Dat zijn twee dingen
+die los van elkaar staan:
+
+- **Openstaande facturen**, met de ouderdom gerekend vanaf de factuurdatum.
+  Facturen uit eerdere boekjaren staan er apart bij, want dat geld komt in dit jaar
+  binnen.
+- **De rekening-courant**: geld dat buiten facturen om heen en weer gaat met één
+  persoon of vereniging. De aanleiding is de praktijk — er wordt iets privés met de
+  SVR-pas betaald, of iemand schiet iets voor. Zonder administratie daarvan
+  verdwijnt zoiets in het bankverschil en weet een jaar later niemand meer wie wat
+  moet betalen.
+
+Een post op de rekening-courant heeft een richting in woorden en geen minteken dat
+je moet onthouden: *moet de SVR nog betalen* of *de SVR moet nog betalen*. Een
+saldo loopt door over boekjaren heen, tot het verrekend is. Dit geldt voor
+iedereen die je wilt bijhouden, niet alleen voor het bestuur zelf.
+
+Het vinkje **dit bedrag ging via de SVR-rekening** bepaalt wat er met de cijfers
+gebeurt:
+
+- **Aan** (het normale geval): het bedrag staat op het afschrift en gaat van het
+  banksaldo af, met een vordering op die persoon ertegenover. Het raakt de
+  begroting niet, want het is geen uitgave van de SVR.
+- **Uit**: er is geen bankmutatie, dus het is een correctie — bijvoorbeeld een
+  bedrag dat de SVR alsnog voor eigen rekening neemt. Dan hoort er een
+  begrotingspost bij en komt het als kosten of opbrengst in de exploitatie.
+
+Bij een bankimport zet je zo'n bedrag met één keuze op de rekening-courant van de
+juiste persoon; een terugbetaling boek je op dezelfde manier en haalt het saldo
+weer omlaag.
+
 ### Bankafschriften inlezen
 
 Onder *Banksaldo › Bankafschriften* lees je een MT940-bestand in dat je bij ABN
@@ -285,10 +335,17 @@ De app herkent een betaling op, van zeker naar minder zeker:
 - **Alleen bedrag**: er is precies één open factuur of uitgave met dit bedrag.
   Dit staat niet aangevinkt; vink het zelf aan als het klopt.
 
+Openstaande facturen uit **eerdere boekjaren** staan gewoon tussen de keuzes: komt
+het geld van vorig jaar nu binnen, dan koppel je dat hier en wordt de betaling in
+dit jaar geboekt.
+
 Zekere voorstellen en naam-plus-bedrag staan alvast aangevinkt; met één knop
 koppel je ze allemaal. Wat niet herkend is koppel je per regel, of boek je als
-nieuwe uitgave of als *inkomst zonder factuur* (dan maakt de app een betaalde
-factuur aan, zodat de ontvangst in de administratie staat). Na een koppeling
+nieuwe uitgave, als *inkomst zonder factuur* (dan maakt de app een betaalde
+factuur aan, zodat de ontvangst in de administratie staat) of op de
+**rekening-courant** van een persoon. Met *Alles in één keer boeken* doe je dat
+voor een hele stapel regels tegelijk; dat is bedoeld voor het opbouwen van een oud
+boekjaar. Na een koppeling
 onthoudt de app het rekeningnummer van de relatie, zodat die de volgende keer
 zeker herkend wordt. Draai je de koppeling terug, dan vergeet hij dat nummer weer.
 Het banksaldo overnemen is een aparte knop en boekt niets.

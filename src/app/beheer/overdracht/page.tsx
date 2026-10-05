@@ -39,6 +39,16 @@ export default async function OverdrachtPagina() {
       `${cijfers.openstaandeFacturen.length} facturen staan nog open, samen ${formatteerEuro(cijfers.ouderdom.totaal)}.`,
     );
   }
+  if (cijfers.eerdereOpenstaandeFacturen.length > 0) {
+    punten.push(
+      `${cijfers.eerdereOpenstaandeFacturen.length} facturen uit eerdere boekjaren staan nog open; dat geld komt in dit jaar binnen.`,
+    );
+  }
+  if (cijfers.rekeningcourant.nettoCenten !== 0) {
+    punten.push(
+      `Op de rekening-courant staat nog ${formatteerEuro(cijfers.rekeningcourant.teVorderenCenten)} te vorderen van personen en ${formatteerEuro(cijfers.rekeningcourant.teBetalenCenten)} terug te betalen. Verreken dat voor de overdracht.`,
+    );
+  }
   if (cijfers.openstaandeUitgaven.length > 0) {
     punten.push(
       `${cijfers.openstaandeUitgaven.length} uitgaven zijn nog niet betaald, samen ${formatteerEuro(cijfers.balans.crediteurenCenten)}.`,

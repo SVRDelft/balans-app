@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
-import { LogOut, Lock } from "lucide-react";
+import { LogOut, Lock, History } from "lucide-react";
 
 import { Navigatie } from "@/components/navigatie";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,11 @@ export default async function AppLayout({
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/20 px-2.5 py-1 text-xs font-medium">
                   <Lock className="size-3.5" />
                   Alleen lezen — dit boekjaar is niet actief
+                </span>
+              ) : context.boekjaar.reconstructie ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/20 px-2.5 py-1 text-xs font-medium">
+                  <History className="size-3.5" />
+                  In reconstructie — je boekt in een afgesloten jaar
                 </span>
               ) : null}
             </>

@@ -66,6 +66,19 @@ Wachtwoorden geef je dus zelf door.
 
 ---
 
+## 4b. Wat er nog openstaat
+
+Loop voor de overdracht de pagina *Debiteuren* langs:
+
+- **Openstaande facturen.** Facturen uit jouw jaar die nog niet betaald zijn,
+  blijven in jouw jaar staan. Komt dat geld later binnen, dan boekt het volgende
+  bestuur de betaling in zijn eigen jaar; de app doet dat vanzelf goed als zij het
+  afschrift inlezen. Zet in de notities van het boekjaar wat je nog verwacht.
+- **De rekening-courant.** Staat er nog een saldo bij een persoon — iets dat privé
+  met de SVR-pas is betaald, of een voorschot — verreken dat voordat je overdraagt.
+  Lukt dat niet, schrijf dan in de overdracht wie het nog moet betalen; het saldo
+  loopt gewoon door naar het volgende jaar.
+
 ## 5. Back-ups
 
 - **Dagelijks, automatisch**: Plesk, *Backup & Restore*. Controleer bij de

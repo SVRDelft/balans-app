@@ -229,7 +229,10 @@ export async function maakOverdrachtWerkboek(
   ];
   kopRij(debiteuren, 1);
 
-  for (const factuur of cijfers.openstaandeFacturen) {
+  for (const factuur of [
+    ...cijfers.openstaandeFacturen,
+    ...cijfers.eerdereOpenstaandeFacturen,
+  ]) {
     debiteuren.addRow([
       factuur.nummer,
       factuur.relatieNaam,
@@ -246,6 +249,23 @@ export async function maakOverdrachtWerkboek(
   debiteuren.addRow(["Ouderdom", "tot 30 dagen", cijfers.ouderdom.tot30 / 100]);
   debiteuren.addRow(["", "30 tot 60 dagen", cijfers.ouderdom.van30tot60 / 100]);
   debiteuren.addRow(["", "meer dan 60 dagen", cijfers.ouderdom.meer60 / 100]);
+
+  // De rekening-courant: geld buiten facturen om, dat net zo goed terug moet.
+  if (cijfers.rekeningcourant.saldi.length > 0) {
+    debiteuren.addRow([]);
+    debiteuren.addRow(["Rekening-courant", "Saldo", "Laatste post"]);
+    for (const saldo of cijfers.rekeningcourant.saldi) {
+      debiteuren.addRow([
+        saldo.relatieNaam,
+        saldo.saldoCenten / 100,
+        formatteerDatum(saldo.laatsteDatum),
+      ]);
+    }
+    debiteuren.addRow([
+      "Samen",
+      cijfers.rekeningcourant.nettoCenten / 100,
+    ]);
+  }
 
   // --- Facturen ----------------------------------------------------------
   const facturenBlad = werkboek.addWorksheet("Facturen");

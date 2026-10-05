@@ -12,6 +12,9 @@ export interface FactuurKeuze {
   iban: string;
   openstaandCenten: number;
   status: string;
+  /** Een factuur uit een eerder boekjaar mag ook nu nog betaald worden. */
+  boekjaarId?: string;
+  boekjaarNaam?: string;
 }
 export interface BetalingKeuze {
   id: string;

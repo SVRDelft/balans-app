@@ -60,6 +60,10 @@ model Boekjaar {
   eindDatum     DateTime
   /// Precies één boekjaar is actief; in de rest kan niet geschreven worden.
   actief        Boolean  @default(false)
+  /// Een afgesloten jaar dat je alsnog opbouwt uit oude bankafschriften. Zolang
+  /// dit aanstaat mag er in dit jaar geschreven worden, net als in het actieve
+  /// jaar. Bedoeld om bij de eerste ingebruikname het vorige jaar in te voeren.
+  reconstructie Boolean  @default(false)
 
   beginsaldoBankCenten          Int @default(0)
   beginsaldoEigenVermogenCenten Int @default(0)
@@ -80,6 +84,8 @@ model Boekjaar {
   voorraadposten   Voorraadpost[]
   bankimports      Bankimport[]
   bankmutaties     Bankmutatie[]
+  betalingen       Betaling[]
+  rekeningposten   Rekeningpost[]
 }
 
 // ---------------------------------------------------------------------------
@@ -117,6 +123,7 @@ model Relatie {
   deelnemers Deelnemer[]
   gebruikers Gebruiker[]
   vergaderingen Vergadering[]
+  rekeningposten Rekeningpost[]
 
   @@index([type])
 }
@@ -144,6 +151,7 @@ model Begrotingspost {
   factuurregels Factuurregel[]
   uitgaven      Uitgave[]
   voorraadposten Voorraadpost[]
+  rekeningposten Rekeningpost[]
 
   evenementenAlsKostenpost    Evenement[] @relation("EvenementKostenpost")
   evenementenAlsOpbrengstpost Evenement[] @relation("EvenementOpbrengstpost")
@@ -232,6 +240,13 @@ model Betaling {
   factuurId String
   factuur   Factuur @relation(fields: [factuurId], references: [id], onDelete: Cascade)
 
+  /// Het boekjaar waarin het geld is binnengekomen. Dat is niet altijd het jaar
+  /// van de factuur: een vereniging die in oktober een factuur van mei betaalt,
+  /// hoort met dat geld in het nieuwe jaar, terwijl de vordering in het oude
+  /// jaar open bleef staan.
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id])
+
   datum        DateTime
   bedragCenten Int
   notitie      String? @db.Text
@@ -241,6 +256,7 @@ model Betaling {
   bankmutatie Bankmutatie?
 
   @@index([factuurId])
+  @@index([boekjaarId])
 }
 
 // ---------------------------------------------------------------------------
@@ -312,6 +328,53 @@ model Bijlage {
   geuploadDoor String?
 
   uitgave Uitgave?
+}
+
+// ---------------------------------------------------------------------------
+// Rekening-courant
+// ---------------------------------------------------------------------------
+
+/// Geld dat heen en weer loopt tussen de SVR en één persoon of vereniging,
+/// buiten facturen om. De aanleiding is de praktijk: er wordt iets privés met de
+/// SVR-pinpas betaald, of iemand krijgt per ongeluk geld van de rekening. Zonder
+/// administratie daarvan verdwijnt dat in het bankverschil.
+///
+/// Het saldo van alle posten van één relatie is de debiteurenstand van die
+/// persoon: positief betekent dat hij de SVR nog moet betalen, negatief dat de
+/// SVR hem nog iets schuldig is.
+model Rekeningpost {
+  id         String   @id @default(cuid())
+  boekjaarId String
+  boekjaar   Boekjaar @relation(fields: [boekjaarId], references: [id], onDelete: Cascade)
+
+  relatieId String
+  relatie   Relatie @relation(fields: [relatieId], references: [id])
+
+  datum        DateTime
+  omschrijving String   @db.Text
+  /// Positief: deze relatie moet de SVR nog betalen. Negatief: de SVR moet nog
+  /// betalen aan deze relatie.
+  bedragCenten Int
+
+  /// Is dit bedrag echt over de SVR-rekening gegaan? Zo ja, dan hoort het in het
+  /// banksaldo; zo nee, dan is het een correctie of een afboeking en hoort er
+  /// een begrotingspost bij, zodat het als kosten of opbrengst zichtbaar wordt.
+  viaBank Boolean @default(true)
+
+  begrotingspostId String?
+  begrotingspost   Begrotingspost? @relation(fields: [begrotingspostId], references: [id])
+
+  notities String? @db.Text
+
+  aangemaaktOp   DateTime @default(now())
+  aangemaaktDoor String   @default("")
+  bijgewerktOp   DateTime @updatedAt
+
+  bankmutatie Bankmutatie?
+
+  @@index([boekjaarId, datum])
+  @@index([relatieId])
+  @@index([begrotingspostId])
 }
 
 // ---------------------------------------------------------------------------
@@ -483,13 +546,15 @@ model Bankmutatie {
   tegenpartijNaam String @default("") @db.Text
   tegenpartijIban String @default("")
   bankReferentie String?
-  /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | genegeerd
+  /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | nieuwe_inkomst | rekeningpost | genegeerd
   verwerking String @default("open")
   notitie String? @db.Text
   betalingId String? @unique
   betaling Betaling? @relation(fields: [betalingId], references: [id], onDelete: Restrict)
   uitgaveId String? @unique
   uitgave Uitgave? @relation(fields: [uitgaveId], references: [id], onDelete: Restrict)
+  rekeningpostId String? @unique
+  rekeningpost Rekeningpost? @relation(fields: [rekeningpostId], references: [id], onDelete: Restrict)
   verwerktOp DateTime?
   verwerktDoor String?
   @@index([boekjaarId, verwerking, datum])
