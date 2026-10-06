@@ -1,6 +1,6 @@
 {
   "node": {
-    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
+    "0083206ca389080b93b908bc066302cc87dbafd397": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
+    "6085e5ae02b7288b71f429eeef505dd4b3f2084adb": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
+    "405f7fc289c7817324d6743050ef0f4aad1a66ce4e": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6000ba7205817b6c2971aaa89be19e39331f7912e7": {
+    "60c1d323d596d4f49c48909f29f52b0926df120171": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -44,7 +44,7 @@
       "exportedName": "bewaarRekeningpost",
       "filename": "src/app/beheer/debiteuren/acties.ts"
     },
-    "60633a2e1ead32ff767c7de98c2d3c379f2028de09": {
+    "60fa8216c27a37d6d3b972205c4478f65aa0d5a521": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,

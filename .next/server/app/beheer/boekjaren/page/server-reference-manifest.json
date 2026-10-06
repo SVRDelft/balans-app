@@ -1,6 +1,6 @@
 {
   "node": {
-    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
+    "0083206ca389080b93b908bc066302cc87dbafd397": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
+    "6085e5ae02b7288b71f429eeef505dd4b3f2084adb": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
+    "405f7fc289c7817324d6743050ef0f4aad1a66ce4e": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -33,29 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60071510dbf77a532e263cbf6512e8d2217a2fc5fc": {
-      "workers": {
-        "app/beheer/boekjaren/page": {
-          "moduleId": 31020,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "wisBoekingen",
-      "filename": "src/app/beheer/boekjaren/acties.ts"
-    },
-    "6081dfc9805bfe7df7c48eed6e4d224694a7b18e57": {
-      "workers": {
-        "app/beheer/boekjaren/page": {
-          "moduleId": 31020,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "activeerBoekjaar",
-      "filename": "src/app/beheer/boekjaren/acties.ts"
-    },
-    "60e083feab214357741f9bf61775cec05613a49942": {
+    "60502511ba87ddcdf3f00fbb0247835126b57af097": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -66,7 +44,7 @@
       "exportedName": "zetReconstructie",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     },
-    "60ebc5f1d71c598e5b15bd1ec98eeb3813e64a9d0b": {
+    "605310256aaf4470eaef0a7535eb81d9062722ce31": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -75,6 +53,28 @@
         }
       },
       "exportedName": "bewaarBoekjaar",
+      "filename": "src/app/beheer/boekjaren/acties.ts"
+    },
+    "6070c891a40a81106858dcd4c95c47e6ff97de3235": {
+      "workers": {
+        "app/beheer/boekjaren/page": {
+          "moduleId": 31020,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "wisBoekingen",
+      "filename": "src/app/beheer/boekjaren/acties.ts"
+    },
+    "6085c8db2713aae60184a55c080dd5f51517865e4c": {
+      "workers": {
+        "app/beheer/boekjaren/page": {
+          "moduleId": 31020,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "activeerBoekjaar",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     }
   },

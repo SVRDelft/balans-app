@@ -581,6 +581,11 @@ model Bankimport {
   eindSaldoCenten Int
   aantalRegels Int
   duplicaten Int @default(0)
+  /// ABN zet desgevraagd de betaalrekening en de spaarrekening in één bestand.
+  /// Dit is die tweede rekening, met het eindsaldo dat erbij hoort.
+  spaarRekening String?
+  spaarEindSaldoCenten Int?
+  spaarEindDatum DateTime?
   bevestigdOp DateTime?
   banksaldoId String? @unique
   banksaldo Banksaldo? @relation(fields: [banksaldoId], references: [id], onDelete: Restrict)
@@ -605,7 +610,7 @@ model Bankmutatie {
   tegenpartijNaam String @default("") @db.Text
   tegenpartijIban String @default("")
   bankReferentie String?
-  /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | nieuwe_inkomst | rekeningpost | spaarmutatie | genegeerd
+  /// open | nieuwe_betaling | bestaande_betaling | uitgave_betaald | bestaande_uitgave | nieuwe_uitgave | nieuwe_inkomst | rekeningpost | spaarmutatie | spaar_tegenkant | genegeerd
   verwerking String @default("open")
   notitie String? @db.Text
   betalingId String? @unique
