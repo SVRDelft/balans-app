@@ -48,6 +48,7 @@ export function MutatieFormulier({
   const nieuweUitgave = doel === "nieuw" && bedragCenten < 0;
   const nieuweInkomst = doel === "inkomst" && bedragCenten > 0;
   const rekeningpost = doel === "rekeningpost";
+  const spaar = doel === "spaar";
   // Staat de naam van de betaler als relatie in de app, dan die alvast kiezen.
   const tegenpartijKort = tegenpartij.toLowerCase();
   const bekendeRelatie = relaties.find((r) => r.naam.length >= 2 && tegenpartijKort.includes(r.naam.toLowerCase()))?.id ?? "";
@@ -85,6 +86,11 @@ export function MutatieFormulier({
               {bedragCenten < 0
                 ? "Privé of voorgeschoten: op iemands rekening-courant"
                 : "Terugbetaling op iemands rekening-courant"}
+            </option>
+            <option value="spaar">
+              {bedragCenten < 0
+                ? "Naar de eigen spaarrekening"
+                : "Van de eigen spaarrekening"}
             </option>
             <option value="negeren">Niet verwerken in de administratie</option>
           </Select>
@@ -261,6 +267,46 @@ export function MutatieFormulier({
             >
               <Textarea
                 id={`${prefix}-rekeningomschrijving`}
+                name="omschrijving"
+                defaultValue={omschrijving}
+                rows={2}
+                required
+              />
+            </Veld>
+          </div>
+        ) : null}
+
+        {spaar ? (
+          <div className="space-y-3 rounded-lg border border-border bg-muted/40 p-3">
+            <p className="text-sm">
+              {bedragCenten < 0 ? (
+                <>
+                  <strong>{formatteerEuro(Math.abs(bedragCenten))}</strong> gaat
+                  naar de eigen spaarrekening. Dat is geen uitgave: het geld blijft
+                  van de SVR.
+                </>
+              ) : (
+                <>
+                  <strong>{formatteerEuro(bedragCenten)}</strong> komt terug van de
+                  eigen spaarrekening. Dat is geen opbrengst.
+                </>
+              )}{" "}
+              Het saldo zie je bij{" "}
+              <Link
+                href="/beheer/sparen"
+                className="font-medium text-primary underline underline-offset-2"
+              >
+                Spaarrekening
+              </Link>
+              .
+            </p>
+            <Veld
+              label="Omschrijving"
+              htmlFor={`${prefix}-spaaromschrijving`}
+              verplicht
+            >
+              <Textarea
+                id={`${prefix}-spaaromschrijving`}
                 name="omschrijving"
                 defaultValue={omschrijving}
                 rows={2}

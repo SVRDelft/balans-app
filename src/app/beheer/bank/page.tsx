@@ -38,7 +38,7 @@ export default async function BankPagina() {
 
   const [saldi, cijfers] = await Promise.all([
     db.banksaldo.findMany({
-      where: { boekjaarId: boekjaar.id },
+      where: { boekjaarId: boekjaar.id, rekening: "betaal" },
       orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
     }),
     haalBoekjaarCijfers(boekjaar.id),

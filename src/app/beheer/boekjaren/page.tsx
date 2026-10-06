@@ -157,6 +157,7 @@ export default async function BoekjarenPagina() {
                 startDatum: datumNaarInvoer(huidig.startDatum),
                 eindDatum: datumNaarInvoer(huidig.eindDatum),
                 beginsaldoBank: centenNaarInvoer(huidig.beginsaldoBankCenten),
+                beginsaldoSpaar: centenNaarInvoer(huidig.beginsaldoSpaarCenten),
                 beginsaldoEigenVermogen: centenNaarInvoer(
                   huidig.beginsaldoEigenVermogenCenten,
                 ),
@@ -252,6 +253,7 @@ export default async function BoekjarenPagina() {
               startDatum: "",
               eindDatum: "",
               beginsaldoBank: "",
+              beginsaldoSpaar: "",
               beginsaldoEigenVermogen: "",
               notities: "",
             }}

@@ -181,6 +181,11 @@ export function SnelBoeken({
                             ? "Terugbetaling op rekening-courant"
                             : "Privé of voorgeschoten"}
                         </option>
+                        <option value="spaar">
+                          {regel.bedragCenten > 0
+                            ? "Van de eigen spaarrekening"
+                            : "Naar de eigen spaarrekening"}
+                        </option>
                       </Select>
                     </Veld>
 
@@ -206,7 +211,7 @@ export function SnelBoeken({
                       </Select>
                     </Veld>
 
-                    {soort === "rekeningpost" ? null : (
+                    {soort === "rekeningpost" || soort === "spaar" ? null : (
                       <Veld
                         label="Begrotingspost"
                         htmlFor={"post-" + regel.id}

@@ -166,3 +166,69 @@ describe("berekenBalans met vorderingen buiten facturen om", () => {
     expect(betaald.balansverschilCenten).toBe(0);
   });
 });
+
+describe("berekenBalans met een spaarrekening", () => {
+  it("laat geld naar de spaarrekening verhuizen zonder resultaat", () => {
+    const balans = berekenBalans({
+      ...LEEG,
+      beginsaldoBankCenten: 500_000,
+      beginsaldoEigenVermogenCenten: 500_000,
+      spaarMutatieCenten: 200_000,
+      spaarViaBetaalrekeningCenten: 200_000,
+    });
+
+    expect(balans.administratiefBanksaldoCenten).toBe(300_000);
+    expect(balans.spaarsaldoCenten).toBe(200_000);
+    expect(balans.resultaatCenten).toBe(0);
+    expect(balans.totaalActivaCenten).toBe(500_000);
+    expect(balans.balansverschilCenten).toBe(0);
+  });
+
+  it("telt rente als opbrengst, zonder dat het over de bank ging", () => {
+    const balans = berekenBalans({
+      ...LEEG,
+      beginsaldoBankCenten: 100_000,
+      beginsaldoSpaarCenten: 200_000,
+      beginsaldoEigenVermogenCenten: 300_000,
+      spaarMutatieCenten: 1_500,
+      spaarViaBetaalrekeningCenten: 0,
+      gerealiseerdeInkomstenCenten: 1_500,
+    });
+
+    expect(balans.administratiefBanksaldoCenten).toBe(100_000);
+    expect(balans.spaarsaldoCenten).toBe(201_500);
+    expect(balans.resultaatCenten).toBe(1_500);
+    expect(balans.balansverschilCenten).toBe(0);
+  });
+
+  it("neemt het spaarsaldo van vorig jaar mee in de beginbalans", () => {
+    const balans = berekenBalans({
+      ...LEEG,
+      beginsaldoBankCenten: 100_000,
+      beginsaldoSpaarCenten: 200_000,
+      // Het bestuur vulde alleen het banksaldo in als eigen vermogen.
+      beginsaldoEigenVermogenCenten: 100_000,
+    });
+
+    expect(balans.spaarsaldoCenten).toBe(200_000);
+    expect(balans.beginbalansverschilCenten).toBe(200_000);
+    expect(balans.balansverschilCenten).toBe(0);
+  });
+
+  it("vergelijkt het ingevoerde spaarsaldo met de administratie", () => {
+    const basis = {
+      ...LEEG,
+      beginsaldoSpaarCenten: 200_000,
+      spaarMutatieCenten: 1_500,
+    };
+    expect(berekenBalans(basis).spaarverschilCenten).toBeNull();
+    expect(
+      berekenBalans({ ...basis, ingevoerdSpaarsaldoCenten: 201_500 })
+        .spaarverschilCenten,
+    ).toBe(0);
+    expect(
+      berekenBalans({ ...basis, ingevoerdSpaarsaldoCenten: 203_000 })
+        .spaarverschilCenten,
+    ).toBe(1_500);
+  });
+});

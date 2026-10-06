@@ -98,6 +98,21 @@ export const EVENEMENT_STATUS_LABEL: Record<EvenementStatus, string> = {
 export const OMSLAGRONDE_TYPES = ["initieel", "naheffing"] as const;
 export type OmslagrondeType = (typeof OMSLAGRONDE_TYPES)[number];
 
+export const SPAAR_SOORTEN = [
+  "overboeking",
+  "rente",
+  "kosten",
+  "correctie",
+] as const;
+export type SpaarSoort = (typeof SPAAR_SOORTEN)[number];
+
+export const SPAAR_SOORT_LABEL: Record<SpaarSoort, string> = {
+  overboeking: "Overboeking tussen eigen rekeningen",
+  rente: "Rente",
+  kosten: "Bankkosten",
+  correctie: "Correctie",
+};
+
 export function label<T extends string>(
   kaart: Record<T, string>,
   waarde: string,

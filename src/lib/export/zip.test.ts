@@ -23,6 +23,8 @@ describe("de kleine ZIP-schrijver", () => {
     ]);
   });
 
+  // Deze test start PowerShell op; op een drukke machine duurt dat zo tien
+  // seconden, en dat is geen reden om de hele suite te laten omvallen.
   it("is met een gewone ontpakker uit te pakken", () => {
     const map = mkdtempSync(path.join(tmpdir(), "svr-zip-"));
     const zip = maakZip([
@@ -45,5 +47,5 @@ describe("de kleine ZIP-schrijver", () => {
     expect(
       readFileSync(path.join(map, "uit", "bestanden", "notulen.txt"), "utf8"),
     ).toBe("notulen van de SVR");
-  });
+  }, 30_000);
 });

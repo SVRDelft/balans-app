@@ -24,6 +24,19 @@ export interface BalansInvoer {
   teBetalenRekeningcourantCenten?: number;
   /** Rekening-courantbedragen die in dit jaar over de SVR-rekening gingen. */
   rekeningcourantViaBankCenten?: number;
+
+  /** Saldo van de spaarrekening op de eerste dag van het boekjaar. */
+  beginsaldoSpaarCenten?: number;
+  /** Wat er dit jaar bij of af ging op de spaarrekening. */
+  spaarMutatieCenten?: number;
+  /**
+   * Het deel daarvan dat over de betaalrekening liep: overboekingen tussen de
+   * eigen rekeningen. Rente komt rechtstreeks op de spaarrekening binnen en zit
+   * hier dus niet in.
+   */
+  spaarViaBetaalrekeningCenten?: number;
+  /** Laatst ingevoerde werkelijke spaarsaldo, of null als dat er niet is. */
+  ingevoerdSpaarsaldoCenten?: number | null;
   /** Nog te betalen aan leveranciers. */
   crediteurenCenten: number;
 
@@ -53,6 +66,8 @@ export interface Balans {
   eerdereDebiteurenCenten: number;
   teVorderenRekeningcourantCenten: number;
   teBetalenRekeningcourantCenten: number;
+  /** Wat er op de spaarrekening staat volgens de administratie. */
+  spaarsaldoCenten: number;
   totaalActivaCenten: number;
   voorraadCenten: number;
   voorraadMutatieCenten: number;
@@ -74,6 +89,8 @@ export interface Balans {
 
   /** Ingevoerd banksaldo min het administratieve saldo. */
   bankverschilCenten: number | null;
+  /** Hetzelfde, maar voor de spaarrekening. */
+  spaarverschilCenten: number | null;
 }
 
 /**
@@ -91,13 +108,20 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
   const teBetalenRekeningcourantCenten =
     invoer.teBetalenRekeningcourantCenten ?? 0;
 
+  // Geld dat naar de spaarrekening gaat is geen uitgave: het is nog steeds van
+  // de SVR, maar het staat ergens anders. Daarom gaat het hier van de
+  // betaalrekening af en komt het hieronder bij de activa terug.
+  const beginsaldoSpaarCenten = invoer.beginsaldoSpaarCenten ?? 0;
+  const spaarsaldoCenten = beginsaldoSpaarCenten + (invoer.spaarMutatieCenten ?? 0);
+
   // Geld dat privé door de SVR-rekening liep, is wél van de rekening af. Zonder
   // deze regel zou dat in het bankverschil blijven hangen.
   const administratiefBanksaldoCenten =
     invoer.beginsaldoBankCenten +
     invoer.ontvangenBetalingenCenten -
     invoer.betaaldeUitgavenCenten -
-    (invoer.rekeningcourantViaBankCenten ?? 0);
+    (invoer.rekeningcourantViaBankCenten ?? 0) -
+    (invoer.spaarViaBetaalrekeningCenten ?? 0);
 
   // Alleen het deel dat nog nergens in zit; de rest zit al in de uitgaven van
   // de begrotingsposten waaraan de spullen hangen.
@@ -111,12 +135,14 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
 
   const beginbalansverschilCenten =
     invoer.beginsaldoBankCenten +
+    beginsaldoSpaarCenten +
     voorraadBeginCenten +
     (invoer.overgenomenVorderingenCenten ?? 0) -
     invoer.beginsaldoEigenVermogenCenten;
 
   const totaalActivaCenten =
     administratiefBanksaldoCenten +
+    spaarsaldoCenten +
     invoer.debiteurenCenten +
     eerdereDebiteurenCenten +
     teVorderenRekeningcourantCenten +
@@ -135,6 +161,7 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
     eerdereDebiteurenCenten,
     teVorderenRekeningcourantCenten,
     teBetalenRekeningcourantCenten,
+    spaarsaldoCenten,
     totaalActivaCenten,
     voorraadCenten,
     voorraadMutatieCenten,
@@ -151,5 +178,11 @@ export function berekenBalans(invoer: BalansInvoer): Balans {
       invoer.ingevoerdBanksaldoCenten === null
         ? null
         : invoer.ingevoerdBanksaldoCenten - administratiefBanksaldoCenten,
+
+    spaarverschilCenten:
+      invoer.ingevoerdSpaarsaldoCenten === null ||
+      invoer.ingevoerdSpaarsaldoCenten === undefined
+        ? null
+        : invoer.ingevoerdSpaarsaldoCenten - spaarsaldoCenten,
   };
 }

@@ -11,23 +11,32 @@ import type { ActieStaat } from "@/lib/acties";
 
 import { bewaarBanksaldo } from "./acties";
 
-export function BanksaldoFormulier({ vandaag }: { vandaag: string }) {
+/** Het werkelijke saldo van de betaalrekening of van de spaarrekening. */
+export function BanksaldoFormulier({
+  vandaag,
+  rekening = "betaal",
+}: {
+  vandaag: string;
+  rekening?: "betaal" | "spaar";
+}) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(
     bewaarBanksaldo,
     {},
   );
+  const prefix = rekening === "spaar" ? "spaarsaldo" : "banksaldo";
 
   return (
     <form action={actie} className="space-y-3">
+      <input type="hidden" name="rekening" value={rekening} />
       <div className="grid gap-3 sm:grid-cols-3">
         <Veld
           label="Datum"
-          htmlFor="datum"
+          htmlFor={`${prefix}-datum`}
           verplicht
           fout={staat.veldfouten?.datum}
         >
           <Input
-            id="datum"
+            id={`${prefix}-datum`}
             name="datum"
             type="date"
             defaultValue={vandaag}
@@ -37,15 +46,15 @@ export function BanksaldoFormulier({ vandaag }: { vandaag: string }) {
 
         <Veld
           label="Saldo volgens de bankapp"
-          htmlFor="saldo"
+          htmlFor={`${prefix}-saldo`}
           verplicht
           fout={staat.veldfouten?.saldo}
         >
-          <Bedragveld id="saldo" name="saldo" required />
+          <Bedragveld id={`${prefix}-saldo`} name="saldo" required />
         </Veld>
 
-        <Veld label="Notitie" htmlFor="notitie">
-          <Input id="notitie" name="notitie" placeholder="Optioneel" />
+        <Veld label="Notitie" htmlFor={`${prefix}-notitie`}>
+          <Input id={`${prefix}-notitie`} name="notitie" placeholder="Optioneel" />
         </Veld>
       </div>
 

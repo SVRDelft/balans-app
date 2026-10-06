@@ -81,7 +81,10 @@ export default async function BalansPagina() {
                     beginsaldo {formatteerEuro(boekjaar.beginsaldoBankCenten)}{" "}
                     plus ontvangsten, min betaalde uitgaven
                     {cijfers.rekeningcourant.viaBankCenten !== 0
-                      ? " en privégeld dat via de rekening liep"
+                      ? ", privégeld dat via de rekening liep"
+                      : ""}
+                    {balans.spaarsaldoCenten !== 0
+                      ? " en wat er naar de spaarrekening ging"
                       : ""}
                   </span>
                 </TableCell>
@@ -100,6 +103,21 @@ export default async function BalansPagina() {
                   <Bedrag centen={balans.debiteurenCenten} />
                 </TableCell>
               </TableRow>
+              {balans.spaarsaldoCenten !== 0 ? (
+                <TableRow>
+                  <TableCell>
+                    <Link href="/beheer/sparen" className="hover:underline">
+                      Spaarrekening
+                    </Link>
+                    <span className="block text-xs text-muted-foreground">
+                      geld dat opzij staat; geen uitgave, wel een ander potje
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Bedrag centen={balans.spaarsaldoCenten} />
+                  </TableCell>
+                </TableRow>
+              ) : null}
               {balans.eerdereDebiteurenCenten !== 0 ? (
                 <TableRow>
                   <TableCell>
@@ -214,8 +232,9 @@ export default async function BalansPagina() {
                   <TableCell>
                     Beginbalans: overige vorderingen en schulden
                     <span className="block text-xs text-muted-foreground">
-                      beginsaldo bank, beginvoorraad en de vorderingen uit eerdere
-                      jaren, min het eigen vermogen aan het begin van het jaar
+                      beginsaldo bank en spaarrekening, beginvoorraad en de
+                      vorderingen uit eerdere jaren, min het eigen vermogen aan het
+                      begin van het jaar
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -278,6 +297,34 @@ export default async function BalansPagina() {
               </TableCell>
               <TableCell />
             </TableRow>
+            {balans.spaarsaldoCenten !== 0 || balans.spaarverschilCenten !== null ? (
+              <TableRow>
+                <TableCell>
+                  <Link href="/beheer/sparen" className="hover:underline">
+                    Spaarrekening: verschil met de administratie
+                  </Link>
+                </TableCell>
+                <TableCell className="text-right">
+                  {balans.spaarverschilCenten === null ? (
+                    <span className="text-muted-foreground">—</span>
+                  ) : (
+                    <Bedrag
+                      centen={balans.spaarverschilCenten}
+                      className={
+                        balans.spaarverschilCenten === 0
+                          ? "text-success"
+                          : "text-destructive"
+                      }
+                    />
+                  )}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {balans.spaarverschilCenten === null
+                    ? "Voer het saldo van de spaarrekening in."
+                    : "Hoort nul te zijn."}
+                </TableCell>
+              </TableRow>
+            ) : null}
             <TableRow>
               <TableCell>Verschil met de administratie</TableCell>
               <TableCell className="text-right">

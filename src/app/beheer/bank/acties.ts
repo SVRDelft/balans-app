@@ -31,9 +31,13 @@ export async function bewaarBanksaldo(
       return { fout: "Controleer de ingevulde gegevens.", veldfouten };
     }
 
+    // 'betaal' of 'spaar'; alles wat daar niet op lijkt is de betaalrekening.
+    const rekening = leesTekst(formulier, "rekening") === "spaar" ? "spaar" : "betaal";
+
     await db.banksaldo.create({
       data: {
         boekjaarId: boekjaar.id,
+        rekening,
         datum: datum!,
         saldoCenten: saldoCenten!,
         notitie: leesTekst(formulier, "notitie") ?? null,
@@ -45,14 +49,14 @@ export async function bewaarBanksaldo(
       gebruiker: sessie.naam,
       entiteit: "Banksaldo",
       actie: "aangemaakt",
-      samenvatting: `Banksaldo per ${formatteerDatum(datum!)}: ${formatteerEuro(saldoCenten!)}`,
+      samenvatting: `${rekening === "spaar" ? "Spaarsaldo" : "Banksaldo"} per ${formatteerDatum(datum!)}: ${formatteerEuro(saldoCenten!)}`,
       boekjaarId: boekjaar.id,
     });
 
-    revalidatePath("/beheer/bank");
-    revalidatePath("/beheer/balans");
-    revalidatePath("/");
-    return { melding: "Banksaldo vastgelegd." };
+    revalidatePath("/", "layout");
+    return {
+      melding: rekening === "spaar" ? "Spaarsaldo vastgelegd." : "Banksaldo vastgelegd.",
+    };
   });
 }
 
@@ -77,12 +81,11 @@ export async function verwijderBanksaldo(
       gebruiker: sessie.naam,
       entiteit: "Banksaldo",
       actie: "verwijderd",
-      samenvatting: `Banksaldo per ${formatteerDatum(saldo.datum)} (${formatteerEuro(saldo.saldoCenten)}) verwijderd`,
+      samenvatting: `${saldo.rekening === "spaar" ? "Spaarsaldo" : "Banksaldo"} per ${formatteerDatum(saldo.datum)} (${formatteerEuro(saldo.saldoCenten)}) verwijderd`,
       boekjaarId: boekjaar.id,
     });
 
-    revalidatePath("/beheer/bank");
-    revalidatePath("/beheer/balans");
+    revalidatePath("/", "layout");
     return {};
   });
 }

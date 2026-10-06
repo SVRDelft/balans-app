@@ -35,6 +35,7 @@ const TABELLEN = [
   "Bankmutatie",
   "Voorraadpost",
   "Rekeningpost",
+  "Spaarmutatie",
   "Mededeling",
   "Vergadering",
   "Portaalbestand",

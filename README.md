@@ -304,6 +304,27 @@ Voer het banksaldo regelmatig in vanuit je bankapp. De app zet dat af tegen het
 saldo dat uit de administratie volgt. **Dat verschil is het beste signaal dat er
 iets vergeten is.**
 
+### De spaarrekening
+
+Naast de betaalrekening heeft de SVR een spaarrekening. Geld dat je daarheen
+overmaakt is **geen uitgave**: het blijft van de SVR en staat alleen ergens
+anders. Op de balans staat het daarom als apart bezit, en in de exploitatie zie je
+er niets van terug.
+
+Onder *Spaarrekening* leg je de mutaties vast:
+
+- **Overboeking** tussen de eigen rekeningen. Die staat ook op je afschrift, dus
+  meestal boek je hem bij de bankimport: kies daar *Naar de eigen spaarrekening*.
+- **Rente** en **bankkosten**. Die komen rechtstreeks op de spaarrekening binnen
+  en staan dus nooit op het afschrift van de betaalrekening. Daarom kies je er een
+  begrotingspost bij: rente is een opbrengst, kosten zijn kosten.
+- **Correctie**, voor het geval het saldo om een andere reden afwijkt.
+
+Het beginsaldo van de spaarrekening zet je per boekjaar bij *Boekjaren*, naast het
+beginsaldo van de bank. Net als bij de betaalrekening kun je het werkelijke saldo
+uit je bankapp invoeren; het verschil met de administratie hoort nul te zijn en
+staat ook op de balans.
+
 ### Debiteuren en de rekening-courant
 
 Onder *Debiteuren* staat alles wat de SVR nog moet krijgen. Dat zijn twee dingen

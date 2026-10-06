@@ -89,7 +89,7 @@ async function koppel(tx: DbClient, jaar: Jaar, mutatieId: string, doel: string,
     if (!relatieId || !tegenIban) return;
     await tx.relatie.updateMany({ where: { id: relatieId, iban: "" }, data: { iban: tegenIban } });
   };
-  let verwerking = "", betalingId: string | undefined, uitgaveId: string | undefined, rekeningpostId: string | undefined;
+  let verwerking = "", betalingId: string | undefined, uitgaveId: string | undefined, rekeningpostId: string | undefined, spaarmutatieId: string | undefined;
   const notitie = formulier ? leesTekst(formulier, "notitie") : undefined;
   if (soort === "factuur" && id) {
     // Ook een factuur uit een eerder boekjaar: geld komt soms maanden later
@@ -160,10 +160,22 @@ async function koppel(tx: DbClient, jaar: Jaar, mutatieId: string, doel: string,
       notities: `Uit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
     } })).id;
     verwerking = "rekeningpost";
+  } else if (soort === "spaar" && formulier) {
+    // Geld naar of van de eigen spaarrekening. Geen uitgave en geen opbrengst:
+    // het blijft van de SVR en staat alleen op een andere rekening.
+    const omschrijving = leesTekst(formulier, "omschrijving");
+    if (!omschrijving) throw new Error("Vul een omschrijving in.");
+    spaarmutatieId = (await tx.spaarmutatie.create({ data: {
+      boekjaarId: jaarId, datum: regel.datum, omschrijving,
+      bedragCenten: -regel.bedragCenten, soort: "overboeking", viaBetaalrekening: true,
+      aangemaaktDoor: gebruiker,
+      notities: `Uit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
+    } })).id;
+    verwerking = "spaarmutatie";
   } else if (soort === "negeren" && notitie) verwerking = "genegeerd";
   else throw new Error("Kies een koppeling, of geef een reden om deze bankregel buiten de administratie te laten.");
-  await tx.bankmutatie.update({ where: { id: regel.id, verwerking: "open" }, data: { verwerking, betalingId, uitgaveId, rekeningpostId, notitie, verwerktOp: new Date(), verwerktDoor: gebruiker } });
-  await logAudit({ gebruiker, boekjaarId: jaarId, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "gekoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} verwerkt: ${verwerking}.`, details: { betalingId, uitgaveId, rekeningpostId, notitie } }, tx);
+  await tx.bankmutatie.update({ where: { id: regel.id, verwerking: "open" }, data: { verwerking, betalingId, uitgaveId, rekeningpostId, spaarmutatieId, notitie, verwerktOp: new Date(), verwerktDoor: gebruiker } });
+  await logAudit({ gebruiker, boekjaarId: jaarId, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "gekoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} verwerkt: ${verwerking}.`, details: { betalingId, uitgaveId, rekeningpostId, spaarmutatieId, notitie } }, tx);
 }
 
 /**
@@ -251,8 +263,13 @@ export async function boekBankregelsSnel(_staat: ActieStaat, formulier: FormData
     for (const id of ids) {
       const regel = await db.bankmutatie.findUnique({ where: { id, boekjaarId: jaar.id, importId } });
       if (!regel || regel.verwerking !== "open") continue;
-      const naarRekeningcourant = leesTekst(formulier, `soort-${id}`) === "rekeningpost";
-      const doel = naarRekeningcourant ? "rekeningpost" : regel.bedragCenten > 0 ? "inkomst" : "nieuw";
+      const gekozenSoort = leesTekst(formulier, `soort-${id}`);
+      const doel =
+        gekozenSoort === "rekeningpost" || gekozenSoort === "spaar"
+          ? gekozenSoort
+          : regel.bedragCenten > 0
+            ? "inkomst"
+            : "nieuw";
       const rij = new FormData();
       const relatieId = leesTekst(formulier, `relatie-${id}`);
       if (relatieId) rij.set("relatieId", relatieId);
@@ -309,7 +326,7 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
       if (regel.verwerking === "nieuwe_uitgave" && (regel.uitgave?.omslagrondeId || regel.uitgave?.bijlageId)) throw new Error("Aan deze uitgave is een bonnetje of omslag gekoppeld. Verwijder die koppeling eerst of boek een correctie.");
       if (regel.betaling) await vergrendelFactuur(tx, regel.betaling.factuurId, jaar.id);
       if (regel.uitgaveId) await vergrendelRij(tx, "Uitgave", regel.uitgaveId);
-      await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, rekeningpostId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
+      await tx.bankmutatie.update({ where: { id: regel.id }, data: { verwerking: "open", betalingId: null, uitgaveId: null, rekeningpostId: null, spaarmutatieId: null, notitie: null, verwerktOp: null, verwerktDoor: null } });
       if (regel.verwerking === "nieuwe_inkomst" && regel.betaling) {
         // De factuur is door de import zelf aangemaakt; die gaat mee terug.
         await tx.betaling.delete({ where: { id: regel.betaling.id } });
@@ -322,6 +339,7 @@ export async function ontkoppelBankmutatie(_staat: ActieStaat, formulier: FormDa
       if (regel.verwerking === "uitgave_betaald" && regel.uitgaveId) await tx.uitgave.update({ where: { id: regel.uitgaveId }, data: { betaald: false, betaaldOp: null } });
       if (regel.verwerking === "nieuwe_uitgave" && regel.uitgaveId) await tx.uitgave.delete({ where: { id: regel.uitgaveId } });
       if (regel.verwerking === "rekeningpost" && regel.rekeningpostId) await tx.rekeningpost.delete({ where: { id: regel.rekeningpostId } });
+      if (regel.verwerking === "spaarmutatie" && regel.spaarmutatieId) await tx.spaarmutatie.delete({ where: { id: regel.spaarmutatieId } });
       await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankmutatie", entiteitId: regel.id, actie: "ontkoppeld", samenvatting: `Bankregel ${formatteerEuro(regel.bedragCenten)} ontkoppeld; door de import aangemaakte boeking teruggedraaid.` }, tx);
     }, { timeout: 30_000 });
     vernieuw(); return { melding: "Koppeling ongedaan gemaakt." };

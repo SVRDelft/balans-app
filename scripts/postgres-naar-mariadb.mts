@@ -31,6 +31,7 @@ const TABELLEN = [
   "Bankmutatie",
   "Voorraadpost",
   "Rekeningpost",
+  "Spaarmutatie",
   "Auditlog",
 ] as const;
 type Tabel = (typeof TABELLEN)[number];

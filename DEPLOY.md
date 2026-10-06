@@ -93,6 +93,10 @@ Klik **Apply** en daarna **Restart App**.
 De database is alleen vanaf de server zelf bereikbaar, dus de tabellen worden
 daar aangemaakt:
 
+- Het bestand `prisma.config.ts` naast `server.js` komt uit de build en wordt bij
+  elke nieuwe versie overschreven. Pas het dus niet met de hand aan: hij zoekt
+  `DATABASE_URL` eerst in de omgevingsvariabelen en daarna in het `.env`-bestand
+  naast de app, en zegt het als hij hem nergens vindt.
 - Op de **Node.js**-pagina staat **Run script**. Vul daar `migrate` in en klik
   op uitvoeren. Dat draait `prisma migrate deploy` en maakt alle tabellen aan.
 - Heb je SSH-toegang, dan kan het ook met:

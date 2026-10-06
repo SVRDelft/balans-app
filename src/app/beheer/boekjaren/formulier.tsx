@@ -18,6 +18,7 @@ export interface BoekjaarWaarden {
   startDatum: string;
   eindDatum: string;
   beginsaldoBank: string;
+  beginsaldoSpaar: string;
   beginsaldoEigenVermogen: string;
   notities: string;
 }
@@ -124,10 +125,23 @@ export function BoekjaarFormulier({
           </Veld>
 
           <Veld
+            label="Beginsaldo spaarrekening"
+            fout={staat.veldfouten?.beginsaldoSpaar}
+            htmlFor={`spaar-${waarden.id ?? "nieuw"}`}
+            toelichting="Wat er op de startdatum op de spaarrekening stond. Laat op nul staan als die er niet is."
+          >
+            <Bedragveld
+              id={`spaar-${waarden.id ?? "nieuw"}`}
+              name="beginsaldoSpaar"
+              defaultValue={waarden.beginsaldoSpaar}
+            />
+          </Veld>
+
+          <Veld
             label="Beginsaldo eigen vermogen"
             fout={staat.veldfouten?.beginsaldoEigenVermogen}
             htmlFor={`ev-${waarden.id ?? "nieuw"}`}
-            toelichting="Meestal gelijk aan het banksaldo, tenzij er nog vorderingen of schulden uit het vorige jaar openstaan."
+            toelichting="Meestal het banksaldo plus de spaarrekening, tenzij er nog vorderingen of schulden uit het vorige jaar openstaan."
           >
             <Bedragveld
               id={`ev-${waarden.id ?? "nieuw"}`}

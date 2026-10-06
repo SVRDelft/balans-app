@@ -53,16 +53,54 @@ await cp(
 );
 
 // 4. Een eigen configuratie voor de Prisma-opdrachtregel op de server: geen
-//    verwijzing naar src/, alleen de omgevingsvariabele.
+//    verwijzing naar src/, en hij zoekt zelf naar DATABASE_URL.
+//
+//    Prisma 7 leest .env niet meer vanzelf, en de knop "Run script" in Plesk
+//    draait los van de omgevingsvariabelen van de app. Zonder dit faalt
+//    `npm run migrate` op de server met een lege datasource. Daarom leest deze
+//    configuratie het .env-bestand naast de app zelf, en geeft hij anders een
+//    melding waar je iets aan hebt.
 await writeFile(
   path.join(uit, "prisma.config.ts"),
-  `// Alleen voor \`npm run migrate\` op de server.
+  `// Alleen voor \`npm run migrate\` op de server. Dit bestand komt uit
+// scripts/deploy-bundel.mjs en wordt bij elke nieuwe versie overschreven:
+// pas het dus niet met de hand aan, maar zet de gegevens in .env.
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { defineConfig } from "prisma/config";
+
+/** Leest één sleutel uit het .env-bestand naast deze app. */
+function uitEnvBestand(sleutel: string): string | undefined {
+  try {
+    const inhoud = readFileSync(path.join(process.cwd(), ".env"), "utf8");
+    for (const regel of inhoud.split(/\\r?\\n/)) {
+      const schoon = regel.trim();
+      if (!schoon || schoon.startsWith("#")) continue;
+      const scheiding = schoon.indexOf("=");
+      if (scheiding === -1) continue;
+      if (schoon.slice(0, scheiding).trim() !== sleutel) continue;
+      return schoon
+        .slice(scheiding + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
+    }
+  } catch {
+    // Geen .env naast de app: dan moet de omgevingsvariabele er al zijn.
+  }
+  return undefined;
+}
+
+const url = process.env.DATABASE_URL ?? uitEnvBestand("DATABASE_URL");
+if (!url) {
+  throw new Error(
+    "DATABASE_URL is nergens gevonden. Zet hem in het bestand .env naast deze app (dezelfde map als server.js), of in de omgevingsvariabelen van Node.js in Plesk.",
+  );
+}
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: { path: "prisma/migrations-mysql" },
-  datasource: { url: process.env.DATABASE_URL },
+  datasource: { url },
 });
 `,
 );

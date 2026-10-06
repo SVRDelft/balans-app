@@ -36,6 +36,7 @@ const PAGINAS: Pagina[] = [
   { titel: "Evenementen", href: "/beheer/evenementen", woorden: "lbg borrel gala omslag deelnemers" },
   { titel: "Banksaldo", href: "/beheer/bank", woorden: "saldo controle" },
   { titel: "Bankafschriften", href: "/beheer/bank/importeren", woorden: "mt940 import afschrift koppelen" },
+  { titel: "Spaarrekening", href: "/beheer/sparen", woorden: "sparen spaargeld rente opzij potje" },
   { titel: "Spullen & voorraad", href: "/beheer/voorraad", woorden: "spullen inventaris" },
   { titel: "Per vereniging", href: "/beheer/verenigingen", woorden: "studievereniging overzicht" },
   { titel: "Relaties", href: "/beheer/relaties", woorden: "adresboek contact leverancier persoon" },

@@ -75,6 +75,18 @@ export interface BoekjaarCijfers {
   rekeningcourant: Rekeningcourant;
   openstaandeUitgaven: OpenstaandeUitgaveRegel[];
   laatsteBanksaldo: { datum: Date; saldoCenten: number } | null;
+  laatsteSpaarsaldo: { datum: Date; saldoCenten: number } | null;
+  /** Alle mutaties op de spaarrekening in dit boekjaar, nieuwste eerst. */
+  spaarmutaties: {
+    id: string;
+    datum: Date;
+    omschrijving: string;
+    bedragCenten: number;
+    soort: string;
+    viaBetaalrekening: boolean;
+    begrotingspost: { code: string; naam: string } | null;
+    uitBankimport: boolean;
+  }[];
   evenementen: EvenementAfstemming[];
   uitgavenZonderPost: number;
   conceptFacturen: number;
@@ -127,7 +139,7 @@ export async function haalBoekjaarCijfers(
       orderBy: { datum: "asc" },
     }),
     db.banksaldo.findFirst({
-      where: { boekjaarId },
+      where: { boekjaarId, rekening: "betaal" },
       orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
     }),
     db.evenement.findMany({
@@ -162,7 +174,14 @@ export async function haalBoekjaarCijfers(
   const totEnMetNu = (id: string) => startVan(id) <= boekjaar.startDatum;
   const eerderJaar = (id: string) => startVan(id) < boekjaar.startDatum;
 
-  const [eerdereFacturen, ontvangen, rekeningposten, openBankregels] = await Promise.all([
+  const [
+    eerdereFacturen,
+    ontvangen,
+    rekeningposten,
+    openBankregels,
+    spaarmutaties,
+    spaarsaldo,
+  ] = await Promise.all([
     db.factuur.findMany({
       where: { boekjaarId: { not: boekjaarId }, status: { not: "concept" } },
       include: {
@@ -184,6 +203,18 @@ export async function haalBoekjaarCijfers(
       orderBy: { datum: "asc" },
     }),
     db.bankmutatie.count({ where: { boekjaarId, verwerking: "open" } }),
+    db.spaarmutatie.findMany({
+      where: { boekjaarId },
+      orderBy: [{ datum: "desc" }, { aangemaaktOp: "desc" }],
+      include: {
+        begrotingspost: { select: { id: true, code: true, naam: true, soort: true } },
+        bankmutatie: { select: { id: true } },
+      },
+    }),
+    db.banksaldo.findFirst({
+      where: { boekjaarId, rekening: "spaar" },
+      orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
+    }),
   ]);
 
   // De stand van een factuur zoals die bij dit boekjaar hoort: een betaling die
@@ -252,6 +283,20 @@ export async function haalBoekjaarCijfers(
     } else {
       const huidig = uitgavenPerPost.get(post.begrotingspost.id) ?? 0;
       uitgavenPerPost.set(post.begrotingspost.id, huidig - effect);
+    }
+  }
+
+  // Een overboeking naar de spaarrekening is alleen geld verplaatsen. Rente en
+  // bankkosten op die rekening zijn dat niet: die horen op een begrotingspost,
+  // net als bij een rekening-courantpost buiten de bank om.
+  for (const mutatie of spaarmutaties) {
+    if (mutatie.viaBetaalrekening || !mutatie.begrotingspost) continue;
+    if (mutatie.begrotingspost.soort === "inkomst") {
+      const huidig = inkomstenPerPost.get(mutatie.begrotingspost.id) ?? 0;
+      inkomstenPerPost.set(mutatie.begrotingspost.id, huidig + mutatie.bedragCenten);
+    } else {
+      const huidig = uitgavenPerPost.get(mutatie.begrotingspost.id) ?? 0;
+      uitgavenPerPost.set(mutatie.begrotingspost.id, huidig - mutatie.bedragCenten);
     }
   }
 
@@ -412,6 +457,14 @@ export async function haalBoekjaarCijfers(
     .filter((uitgave) => uitgave.betaald)
     .reduce((som, uitgave) => som + uitgave.bedragCenten, 0);
 
+  const spaarMutatieCenten = spaarmutaties.reduce(
+    (som, mutatie) => som + mutatie.bedragCenten,
+    0,
+  );
+  const spaarViaBetaalrekeningCenten = spaarmutaties
+    .filter((mutatie) => mutatie.viaBetaalrekening)
+    .reduce((som, mutatie) => som + mutatie.bedragCenten, 0);
+
   const balans = berekenBalans({
     beginsaldoBankCenten: boekjaar.beginsaldoBankCenten,
     beginsaldoEigenVermogenCenten: boekjaar.beginsaldoEigenVermogenCenten,
@@ -428,6 +481,10 @@ export async function haalBoekjaarCijfers(
     gerealiseerdeInkomstenCenten: exploitatie.totaalInkomstenGerealiseerdCenten,
     gerealiseerdeUitgavenCenten: exploitatie.totaalUitgavenGerealiseerdCenten,
     ingevoerdBanksaldoCenten: banksaldo?.saldoCenten ?? null,
+    beginsaldoSpaarCenten: boekjaar.beginsaldoSpaarCenten,
+    spaarMutatieCenten,
+    spaarViaBetaalrekeningCenten,
+    ingevoerdSpaarsaldoCenten: spaarsaldo?.saldoCenten ?? null,
     voorraadBeginCenten: voorraad.beginwaardeCenten,
     voorraadCenten: voorraad.waardeCenten,
     // Het toegerekende deel zit al in de gerealiseerde uitgaven hierboven.
@@ -513,6 +570,21 @@ export async function haalBoekjaarCijfers(
     laatsteBanksaldo: banksaldo
       ? { datum: banksaldo.datum, saldoCenten: banksaldo.saldoCenten }
       : null,
+    laatsteSpaarsaldo: spaarsaldo
+      ? { datum: spaarsaldo.datum, saldoCenten: spaarsaldo.saldoCenten }
+      : null,
+    spaarmutaties: spaarmutaties.map((mutatie) => ({
+      id: mutatie.id,
+      datum: mutatie.datum,
+      omschrijving: mutatie.omschrijving,
+      bedragCenten: mutatie.bedragCenten,
+      soort: mutatie.soort,
+      viaBetaalrekening: mutatie.viaBetaalrekening,
+      begrotingspost: mutatie.begrotingspost
+        ? { code: mutatie.begrotingspost.code, naam: mutatie.begrotingspost.naam }
+        : null,
+      uitBankimport: mutatie.bankmutatie !== null,
+    })),
     evenementen: evenementAfstemmingen,
     // Hoort altijd nul te zijn: de begrotingspost is verplicht. Blijft staan als
     // controle op gegevens die van buitenaf in de database komen.

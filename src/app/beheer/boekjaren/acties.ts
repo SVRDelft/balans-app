@@ -41,11 +41,14 @@ export async function bewaarBoekjaar(
     }
     const beginsaldoBankCenten =
       parseerBedragNaarCenten(String(formulier.get("beginsaldoBank") || "0"));
+    const beginsaldoSpaarCenten =
+      parseerBedragNaarCenten(String(formulier.get("beginsaldoSpaar") || "0"));
     const beginsaldoEigenVermogenCenten =
       parseerBedragNaarCenten(
         String(formulier.get("beginsaldoEigenVermogen") || "0"),
       );
     if (beginsaldoBankCenten === null) veldfouten.beginsaldoBank = "Vul een geldig bedrag in.";
+    if (beginsaldoSpaarCenten === null) veldfouten.beginsaldoSpaar = "Vul een geldig bedrag in.";
     if (beginsaldoEigenVermogenCenten === null) veldfouten.beginsaldoEigenVermogen = "Vul een geldig bedrag in.";
     if (Object.keys(veldfouten).length > 0) return { fout: "Controleer de ingevulde gegevens.", veldfouten };
 
@@ -63,6 +66,7 @@ export async function bewaarBoekjaar(
           startDatum: startDatum!,
           eindDatum: eindDatum!,
           beginsaldoBankCenten: beginsaldoBankCenten!,
+          beginsaldoSpaarCenten: beginsaldoSpaarCenten!,
           beginsaldoEigenVermogenCenten: beginsaldoEigenVermogenCenten!,
           notities: leesTekst(formulier, "notities") ?? null,
         },
@@ -73,7 +77,7 @@ export async function bewaarBoekjaar(
         entiteit: "Boekjaar",
         entiteitId: boekjaar.id,
         actie: "gewijzigd",
-        samenvatting: `Boekjaar ${boekjaar.naam}: beginsaldo bank ${formatteerEuro(beginsaldoBankCenten!)}, eigen vermogen ${formatteerEuro(beginsaldoEigenVermogenCenten!)}`,
+        samenvatting: `Boekjaar ${boekjaar.naam}: beginsaldo bank ${formatteerEuro(beginsaldoBankCenten!)}, spaarrekening ${formatteerEuro(beginsaldoSpaarCenten!)}, eigen vermogen ${formatteerEuro(beginsaldoEigenVermogenCenten!)}`,
         boekjaarId: boekjaar.id,
       });
     } else {
@@ -87,6 +91,7 @@ export async function bewaarBoekjaar(
           startDatum: startDatum!,
           eindDatum: eindDatum!,
           beginsaldoBankCenten: beginsaldoBankCenten!,
+          beginsaldoSpaarCenten: beginsaldoSpaarCenten!,
           beginsaldoEigenVermogenCenten: beginsaldoEigenVermogenCenten!,
           notities: leesTekst(formulier, "notities") ?? null,
           actief: eerste,
