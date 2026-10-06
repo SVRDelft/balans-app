@@ -361,7 +361,15 @@ weer omlaag.
 ### Bankafschriften inlezen
 
 Onder *Banksaldo › Bankafschriften* lees je een MT940-bestand in dat je bij ABN
-AMRO downloadt. De app stelt koppelingen voor tussen de mutaties en je openstaande
+AMRO downloadt onder **Bij- en afschrijvingen**, met *Bestandsformaat: MT940* en
+een periode die binnen het boekjaar valt. Vink je daar zowel de bestuurrekening
+als de spaarrekening aan, dan zet ABN ze in één bestand; de app herkent dat en
+houdt de twee uit elkaar. De regels van de spaarrekening krijgen hun eigen blok,
+want daar hoort nooit een factuur of uitgave bij: een overboeking tussen de eigen
+rekeningen boek je op de regel van de betaalrekening en vink je bij de
+spaarrekening alleen af, en rente of bankkosten boek je daar met een
+begrotingspost erbij. Het eindsaldo van beide rekeningen wordt in één keer
+overgenomen. De app stelt koppelingen voor tussen de mutaties en je openstaande
 facturen en uitgaven; je bevestigt die zelf voordat er iets geboekt wordt.
 
 De app herkent een betaling op, van zeker naar minder zeker:
@@ -389,6 +397,11 @@ boekjaar. Na een koppeling
 onthoudt de app het rekeningnummer van de relatie, zodat die de volgende keer
 zeker herkend wordt. Draai je de koppeling terug, dan vergeet hij dat nummer weer.
 Het banksaldo overnemen is een aparte knop en boekt niets.
+
+Loopt de download over een jaargrens heen, dan zegt de app welke periode in het
+bestand staat en welke bij dit boekjaar hoort. Download in dat geval per boekjaar
+een apart bestand; voor een jaar dat je achteraf opbouwt, zet je dat boekjaar
+eerst op *Opbouwen* (zie Boekjaren).
 
 Dit is een **handmatige import van een bestand dat jij downloadt**, geen
 koppeling met de bank: de app praat nooit zelf met ABN AMRO en heeft geen

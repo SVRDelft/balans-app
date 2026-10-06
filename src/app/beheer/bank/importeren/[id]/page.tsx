@@ -17,6 +17,7 @@ import { bevestigBankimport, ontkoppelBankmutatie } from "../acties";
 import { MutatieFormulier } from "./mutatie-formulier";
 import { SelectieFormulier } from "./selectie-formulier";
 import { SnelBoeken, type SnelRegel } from "./snel-boeken";
+import { SpaarRegelFormulier } from "./spaar-formulier";
 
 export const metadata: Metadata = { title: "Bankimport controleren" };
 
@@ -37,7 +38,15 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
   const uitgavenposten = posten.filter((p) => p.soort === "uitgave");
   const inkomstenposten = posten.filter((p) => p.soort === "inkomst");
 
-  const open = bestand.mutaties.filter((r) => r.verwerking === "open");
+  // De spaarrekening kan in hetzelfde bestand zitten. Die regels hebben hun eigen
+  // afhandeling: er hoort nooit een factuur of uitgave bij.
+  const isSpaarregel = (regel: { rekening: string }) =>
+    bestand.spaarRekening !== null && regel.rekening === bestand.spaarRekening;
+  const betaalMutaties = bestand.mutaties.filter((r) => !isSpaarregel(r));
+  const spaarMutaties = bestand.mutaties.filter(isSpaarregel);
+
+  const open = betaalMutaties.filter((r) => r.verwerking === "open");
+  const openSpaar = spaarMutaties.filter((r) => r.verwerking === "open");
   const voorstellen = bankVoorstellen(open, keuzes.facturen, keuzes.betalingen, keuzes.uitgaven);
 
   // Een factuur uit een ouder jaar mag ook nu nog betaald worden; dan hoort het
@@ -92,8 +101,11 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
 
     <div className="mb-6 grid gap-3 sm:grid-cols-3">
       <Kerngetal label={`Banksaldo per ${formatteerDatum(bestand.eindDatum)}`} waarde={formatteerEuro(bestand.eindSaldoCenten)} toelichting={bestand.bevestigdOp ? "Overgenomen als banksaldo" : "Nog niet overgenomen"} />
+      {bestand.spaarEindSaldoCenten !== null && bestand.spaarEindDatum ? (
+        <Kerngetal label={`Spaarsaldo per ${formatteerDatum(bestand.spaarEindDatum)}`} waarde={formatteerEuro(bestand.spaarEindSaldoCenten)} toelichting={`Rekening ${bestand.spaarRekening}`} />
+      ) : null}
       <Kerngetal label="Herkend" waarde={String(selectie.length)} toelichting="Voorstellen klaar om te koppelen" />
-      <Kerngetal label="Zelf doen" waarde={String(zonderVoorstel)} toelichting={`${bestand.mutaties.length - open.length} al verwerkt`} />
+      <Kerngetal label="Zelf doen" waarde={String(zonderVoorstel + openSpaar.length)} toelichting={`${bestand.mutaties.length - open.length - openSpaar.length} al verwerkt`} />
     </div>
 
     {bestand.duplicaten > 0 ? <Melding toon="info" className="mb-4">{bestand.duplicaten} bankregels waren al eerder ingelezen en zijn overgeslagen.</Melding> : null}
@@ -124,8 +136,9 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <BevestigKnop actie={bevestigBankimport} velden={{ importId: id }} vraag={`Banksaldo ${formatteerEuro(bestand.eindSaldoCenten)} per ${formatteerDatum(bestand.eindDatum)} overnemen?`} variant="outline">
+          <BevestigKnop actie={bevestigBankimport} velden={{ importId: id }} vraag={`Banksaldo ${formatteerEuro(bestand.eindSaldoCenten)} per ${formatteerDatum(bestand.eindDatum)} overnemen?${bestand.spaarEindSaldoCenten !== null ? ` Het spaarsaldo ${formatteerEuro(bestand.spaarEindSaldoCenten)} wordt ook overgenomen.` : ""}`} variant="outline">
             Saldo {formatteerEuro(bestand.eindSaldoCenten)} overnemen
+            {bestand.spaarEindSaldoCenten !== null ? " (met spaarsaldo)" : ""}
           </BevestigKnop>
         </CardContent>
       </Card>
@@ -136,7 +149,7 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
       </div>
     ) : null}
 
-    {!open.length ? <Melding toon="goed" className="mb-4">Alle bankregels uit dit bestand zijn afgehandeld. Controleer bij Banksaldo of het verschil met de administratie nul is.</Melding> : null}
+    {!open.length && !openSpaar.length ? <Melding toon="goed" className="mb-4">Alle bankregels uit dit bestand zijn afgehandeld. Controleer bij Banksaldo of het verschil met de administratie nul is.</Melding> : null}
 
     {schrijfbaar && open.length > 0 ? (
       <Card className="mb-6">
@@ -169,8 +182,45 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
       </Card>
     ) : null}
 
-    {open.length > 0 ? <h2 className="mb-3 mt-8 text-lg font-semibold">Alle bankregels</h2> : null}
-    <div className="space-y-3">{bestand.mutaties.map((regel) => {
+    {spaarMutaties.length > 0 ? (
+      <>
+        <h2 className="mb-1 mt-8 text-lg font-semibold">Spaarrekening {bestand.spaarRekening}</h2>
+        <p className="mb-3 max-w-3xl text-sm text-muted-foreground">
+          Deze regels staan op de spaarrekening. Een overboeking tussen de eigen
+          rekeningen boek je op de regel van de betaalrekening en vink je hier af;
+          rente en kosten boek je hier, met een begrotingspost erbij.
+        </p>
+        <div className="mb-8 space-y-3">{spaarMutaties.map((regel) => (
+          <article key={regel.id} data-bankregel={regel.id} className="rounded-xl border bg-card p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{formatteerDatum(regel.datum)}{regel.tegenpartijNaam ? ` · ${regel.tegenpartijNaam}` : ""}</p>
+                <p className="mt-1 whitespace-pre-wrap break-words text-sm">{regel.omschrijving || "Zonder omschrijving"}</p>
+              </div>
+              <span className={`cijfers shrink-0 font-semibold ${regel.bedragCenten > 0 ? "text-success" : ""}`}>{formatteerEuro(regel.bedragCenten)}</span>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Badge variant={regel.verwerking === "open" ? "waarschuwing" : "goed"}>
+                {regel.verwerking === "open" ? "Zelf verwerken" : regel.verwerking === "genegeerd" ? "Buiten administratie" : regel.verwerking === "spaar_tegenkant" ? "Tegenkant, al geboekt" : "Geboekt op de spaarrekening"}
+              </Badge>
+            </div>
+            {regel.notitie ? <p className="mt-2 text-sm text-muted-foreground">{regel.notitie}</p> : null}
+            {schrijfbaar ? regel.verwerking === "open" ? (
+              <div className="mt-3 max-w-2xl border-t pt-3">
+                <SpaarRegelFormulier id={regel.id} bedragCenten={regel.bedragCenten} omschrijving={regel.omschrijving} posten={posten} />
+              </div>
+            ) : (
+              <div className="mt-3">
+                <BevestigKnop actie={ontkoppelBankmutatie} velden={{ mutatieId: regel.id }} vraag="Deze verwerking ongedaan maken? Een hierdoor aangemaakte mutatie op de spaarrekening wordt teruggedraaid." size="sm" variant="ghost">Ongedaan maken</BevestigKnop>
+              </div>
+            ) : null}
+          </article>
+        ))}</div>
+      </>
+    ) : null}
+
+    {betaalMutaties.length > 0 ? <h2 className="mb-3 mt-8 text-lg font-semibold">{spaarMutaties.length > 0 ? `Betaalrekening ${bestand.rekening}` : "Alle bankregels"}</h2> : null}
+    <div className="space-y-3">{betaalMutaties.map((regel) => {
       const voorstel = voorstellen.get(regel.id);
       const opties = [
         ...keuzes.facturen.filter((f) => f.status !== "oninbaar" && Math.sign(f.openstaandCenten) === Math.sign(regel.bedragCenten) && Math.abs(f.openstaandCenten) >= Math.abs(regel.bedragCenten)).map((f) => ({ waarde: `factuur:${f.id}`, label: `${f.nummer} · ${f.relatieNaam} · ${formatteerEuro(f.openstaandCenten)} open${jaarErbij(f)}` })),

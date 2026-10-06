@@ -15,6 +15,7 @@ import { bankVoorstellen, normaliseerRekening } from "@/lib/bank/koppelen";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
 import { hertelFactuur, vergrendelFactuur, volgendFactuurnummer, type DbClient } from "@/lib/facturen";
+import { formatteerDatum } from "@/lib/datum";
 import { formatteerEuro } from "@/lib/geld";
 
 const hash = (tekst: string) => createHash("sha256").update(tekst).digest("hex");
@@ -22,7 +23,12 @@ const utc = (datum: string) => new Date(`${datum}T00:00:00Z`);
 function vernieuw() { revalidatePath("/", "layout"); }
 async function vergrendelJaar(tx: DbClient, id: string) {
   await vergrendelRij(tx, "Boekjaar", id);
-  if (!(await tx.boekjaar.findUnique({ where: { id } }))?.actief) throw new Error("Dit boekjaar is niet meer actief.");
+  // Ook een oud jaar dat in reconstructie staat mag hier geboekt worden: dat is
+  // juist de bedoeling als je het opbouwt uit oude afschriften.
+  const jaar = await tx.boekjaar.findUnique({ where: { id } });
+  if (!jaar?.actief && !jaar?.reconstructie) {
+    throw new Error("Dit boekjaar is niet meer actief. Zet het bij Boekjaren op \"Opbouwen\" als je er alsnog in wilt boeken.");
+  }
 }
 
 export async function importeerBankbestand(_staat: ActieStaat, formulier: FormData): Promise<ActieStaat> {
@@ -38,20 +44,41 @@ export async function importeerBankbestand(_staat: ActieStaat, formulier: FormDa
     catch { inhoud = new TextDecoder("windows-1252").decode(bytes); }
     const data = parseerMt940(inhoud);
     if (data.transacties.length > 2000) return { fout: "Dit bestand heeft meer dan 2.000 bankregels. Download een kortere periode bij de bank." };
-    const eerste = data.afschriften[0], laatste = data.afschriften.at(-1)!;
-    if (utc(laatste.eindDatum) > jaar.eindDatum || utc(laatste.eindDatum) < jaar.startDatum || data.transacties.some(t => utc(t.boekdatum) < jaar.startDatum || utc(t.boekdatum) > jaar.eindDatum)) return { fout: "De datums vallen buiten het actieve boekjaar. Download een bestand voor dit boekjaar." };
-    const rekening = normaliseerRekening(data.rekening);
+    const alleDatums = data.afschriften.flatMap(a => [a.beginDatum, a.eindDatum]).sort();
+    if (utc(alleDatums.at(-1)!) > jaar.eindDatum || utc(alleDatums[0]) < jaar.startDatum || data.transacties.some(t => utc(t.boekdatum) < jaar.startDatum || utc(t.boekdatum) > jaar.eindDatum)) {
+      return { fout: `Dit bestand loopt van ${formatteerDatum(utc(alleDatums[0]))} t/m ${formatteerDatum(utc(alleDatums.at(-1)!))}, en dat valt buiten ${jaar.naam} (${formatteerDatum(jaar.startDatum)} t/m ${formatteerDatum(jaar.eindDatum)}). Download bij de bank precies de periode van dit boekjaar. Gaat het om een ouder jaar, maak dat boekjaar dan aan en zet het bij Boekjaren op "Opbouwen".` };
+    }
+
+    // ABN levert desgevraagd de betaalrekening en de spaarrekening in één
+    // bestand. De rekening uit Instellingen is de betaalrekening; een tweede
+    // rekening in hetzelfde bestand is dan de spaarrekening.
     const instellingen = await db.instellingen.findUnique({ where: { id: "svr" } });
     const eigenIban = normaliseerRekening(instellingen?.iban ?? "");
-    if (eigenIban && rekening !== eigenIban && !(/^\d{9,10}$/.test(rekening) && eigenIban.startsWith("NL") && eigenIban.endsWith(rekening.padStart(10, "0")) )) return { fout: "De rekening in dit bestand wijkt af van het IBAN bij Instellingen. Controleer of je de SVR-rekening hebt gedownload." };
+    const rekeningen = data.rekeningen.map(normaliseerRekening);
+    const isEigen = (nummer: string) =>
+      nummer === eigenIban ||
+      (/^\d{9,10}$/.test(nummer) && eigenIban.startsWith("NL") && eigenIban.endsWith(nummer.padStart(10, "0")));
+    const rekening = eigenIban ? rekeningen.find(isEigen) : rekeningen[0];
+    if (!rekening) {
+      return { fout: `Geen van de rekeningen in dit bestand (${rekeningen.join(", ")}) is de SVR-rekening uit Instellingen. Controleer of je het juiste afschrift hebt gedownload.` };
+    }
+    const overige = rekeningen.filter(nummer => nummer !== rekening);
+    if (overige.length > 1) {
+      return { fout: `Dit bestand bevat ${rekeningen.length} rekeningen. Download de betaalrekening, eventueel samen met de spaarrekening, maar niet meer dan dat.` };
+    }
+    const spaarRekening = overige[0] ?? null;
+    const reeksVan = (nummer: string) => data.afschriften.filter(a => normaliseerRekening(a.rekening) === nummer);
+    const eigenReeks = reeksVan(rekening);
+    const eerste = eigenReeks[0], laatste = eigenReeks.at(-1)!;
+    const spaarReeks = spaarRekening ? reeksVan(spaarRekening) : [];
     const bestandHash = hash(inhoud.replace(/\r\n?/g, "\n").trim());
     const voorkomens = new Map<string, number>();
     // ABN's bank reference can be a transaction code, so never deduplicate on that alone.
     const regels = data.transacties.map(t => {
-      const basis = JSON.stringify([rekening, t.boekdatum, t.valutadatum, t.bedragCenten, t.bankReferentie, t.klantReferentie, t.omschrijving.replace(/\s+/g, " ").trim()]);
+      const basis = JSON.stringify([normaliseerRekening(t.rekening), t.boekdatum, t.valutadatum, t.bedragCenten, t.bankReferentie, t.klantReferentie, t.omschrijving.replace(/\s+/g, " ").trim()]);
       const keer = (voorkomens.get(basis) ?? 0) + 1;
       voorkomens.set(basis, keer);
-      return { sleutel: hash(`${basis}|${keer}`), rekening, datum: utc(t.boekdatum), bedragCenten: t.bedragCenten, omschrijving: t.omschrijving, tegenpartijNaam: t.tegenpartijNaam ?? "", tegenpartijIban: t.tegenpartijIban ?? "", bankReferentie: t.bankReferentie };
+      return { sleutel: hash(`${basis}|${keer}`), rekening: normaliseerRekening(t.rekening), datum: utc(t.boekdatum), bedragCenten: t.bedragCenten, omschrijving: t.omschrijving, tegenpartijNaam: t.tegenpartijNaam ?? "", tegenpartijIban: t.tegenpartijIban ?? "", bankReferentie: t.bankReferentie };
     });
     await db.$transaction(async tx => {
       await vergrendelJaar(tx, jaar.id);
@@ -62,10 +89,18 @@ export async function importeerBankbestand(_staat: ActieStaat, formulier: FormDa
       }
       const vorige = await tx.bankimport.findFirst({ where: { boekjaarId: jaar.id } });
       if (vorige && vorige.rekening !== rekening) throw new Error("Dit boekjaar gebruikt al een andere bankrekening. Importeer alleen afschriften van dezelfde SVR-rekening.");
-      const gemaakt = await tx.bankimport.create({ data: { boekjaarId: jaar.id, bestandHash, bestandsnaam: bestand.name.slice(0, 200), rekening, beginDatum: utc(eerste.beginDatum), eindDatum: utc(laatste.eindDatum), beginSaldoCenten: eerste.beginSaldoCenten, eindSaldoCenten: laatste.eindSaldoCenten, aantalRegels: regels.length, aangemaaktDoor: sessie.naam } });
+      const gemaakt = await tx.bankimport.create({ data: {
+        boekjaarId: jaar.id, bestandHash, bestandsnaam: bestand.name.slice(0, 200), rekening,
+        beginDatum: utc(eerste.beginDatum), eindDatum: utc(laatste.eindDatum),
+        beginSaldoCenten: eerste.beginSaldoCenten, eindSaldoCenten: laatste.eindSaldoCenten,
+        spaarRekening,
+        spaarEindSaldoCenten: spaarReeks.at(-1)?.eindSaldoCenten ?? null,
+        spaarEindDatum: spaarReeks.length ? utc(spaarReeks.at(-1)!.eindDatum) : null,
+        aantalRegels: regels.length, aangemaaktDoor: sessie.naam,
+      } });
       const resultaat = await tx.bankmutatie.createMany({ data: regels.map(r => ({ ...r, importId: gemaakt.id, boekjaarId: jaar.id })), skipDuplicates: true });
       await tx.bankimport.update({ where: { id: gemaakt.id }, data: { duplicaten: regels.length - resultaat.count } });
-      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: gemaakt.id, actie: "ingelezen", samenvatting: `${resultaat.count} nieuwe bankregels ingelezen; ${regels.length - resultaat.count} al aanwezig.` }, tx);
+      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: gemaakt.id, actie: "ingelezen", samenvatting: `${resultaat.count} nieuwe bankregels ingelezen; ${regels.length - resultaat.count} al aanwezig.${spaarRekening ? ` Inclusief spaarrekening ${spaarRekening}.` : ""}` }, tx);
       importId = gemaakt.id;
     }, { timeout: 30_000 });
   });
@@ -81,6 +116,18 @@ async function koppel(tx: DbClient, jaar: Jaar, mutatieId: string, doel: string,
   const regel = await tx.bankmutatie.findUnique({ where: { id: mutatieId, boekjaarId: jaarId }, include: { bankimport: true } });
   if (!regel || regel.verwerking !== "open") throw new Error("Deze bankregel is niet meer beschikbaar. Vernieuw de pagina.");
   const [soort, id] = doel.split(":");
+  // Regels van de spaarrekening kunnen niet aan een factuur of uitgave hangen:
+  // daar gaat geen geld van de SVR in of uit, het staat alleen ergens anders.
+  const spaarRekening = regel.bankimport.spaarRekening;
+  const isSpaarregel =
+    spaarRekening !== null &&
+    normaliseerRekening(regel.rekening) === normaliseerRekening(spaarRekening);
+  if (isSpaarregel && !["spaarpost", "tegenkant", "negeren"].includes(soort)) {
+    throw new Error("Dit is een regel van de spaarrekening. Kies rente, kosten of een correctie, of markeer hem als de tegenkant van een overboeking.");
+  }
+  if (!isSpaarregel && ["spaarpost", "tegenkant"].includes(soort)) {
+    throw new Error("Deze keuze hoort bij een regel van de spaarrekening.");
+  }
   const tegenIban = normaliseerRekening(regel.tegenpartijIban);
   // Het rekeningnummer van de betaler onthouden bij de relatie, zodat de
   // volgende betaling van dezelfde rekening zeker herkend wordt. Een al
@@ -160,6 +207,27 @@ async function koppel(tx: DbClient, jaar: Jaar, mutatieId: string, doel: string,
       notities: `Uit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
     } })).id;
     verwerking = "rekeningpost";
+  } else if (soort === "spaarpost" && formulier) {
+    // Rente of kosten op de spaarrekening zelf: die staan niet op het afschrift
+    // van de betaalrekening, dus hier hoort een begrotingspost bij.
+    const postId = leesTekst(formulier, "begrotingspostId");
+    const omschrijving = leesTekst(formulier, "omschrijving");
+    const spaarsoort = leesTekst(formulier, "spaarsoort") ?? "rente";
+    if (!["rente", "kosten", "correctie"].includes(spaarsoort)) throw new Error("Kies rente, kosten of een correctie.");
+    if (!postId || !omschrijving) throw new Error("Kies een begrotingspost en vul een omschrijving in.");
+    if (!await tx.begrotingspost.findUnique({ where: { id: postId, boekjaarId: jaarId } })) throw new Error("Kies een begrotingspost uit dit boekjaar.");
+    spaarmutatieId = (await tx.spaarmutatie.create({ data: {
+      boekjaarId: jaarId, datum: regel.datum, omschrijving,
+      bedragCenten: regel.bedragCenten, soort: spaarsoort, viaBetaalrekening: false,
+      begrotingspostId: postId, aangemaaktDoor: gebruiker,
+      notities: `Uit de bankimport: ${regel.omschrijving}`.slice(0, 2000),
+    } })).id;
+    verwerking = "spaarmutatie";
+  } else if (soort === "tegenkant") {
+    // De andere helft van een overboeking tussen de eigen rekeningen. Die is al
+    // geboekt op de regel van de betaalrekening; hier alleen afvinken, anders
+    // zou hetzelfde geld twee keer verhuizen.
+    verwerking = "spaar_tegenkant";
   } else if (soort === "spaar" && formulier) {
     // Geld naar of van de eigen spaarrekening. Geen uitgave en geen opbrengst:
     // het blijft van de SVR en staat alleen op een andere rekening.
@@ -205,9 +273,12 @@ export async function bevestigBankimport(_staat: ActieStaat, formulier: FormData
       const bankimport = id ? await tx.bankimport.findUnique({ where: { id, boekjaarId: jaar.id } }) : null;
       if (!bankimport) throw new Error("Deze bankimport bestaat niet in dit boekjaar.");
       if (bankimport.bevestigdOp) throw new Error("Deze import is al bevestigd. Het banksaldo wordt niet nogmaals opgeslagen.");
-      const saldo = await tx.banksaldo.create({ data: { boekjaarId: jaar.id, datum: bankimport.eindDatum, saldoCenten: bankimport.eindSaldoCenten, notitie: `MT940: ${bankimport.bestandsnaam}`, ingevoerdDoor: sessie.naam } });
+      const saldo = await tx.banksaldo.create({ data: { boekjaarId: jaar.id, rekening: "betaal", datum: bankimport.eindDatum, saldoCenten: bankimport.eindSaldoCenten, notitie: `MT940: ${bankimport.bestandsnaam}`, ingevoerdDoor: sessie.naam } });
+      if (bankimport.spaarEindSaldoCenten !== null && bankimport.spaarEindDatum) {
+        await tx.banksaldo.create({ data: { boekjaarId: jaar.id, rekening: "spaar", datum: bankimport.spaarEindDatum, saldoCenten: bankimport.spaarEindSaldoCenten, notitie: `MT940: ${bankimport.bestandsnaam}`, ingevoerdDoor: sessie.naam } });
+      }
       await tx.bankimport.update({ where: { id: bankimport.id }, data: { bevestigdOp: new Date(), banksaldoId: saldo.id } });
-      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: bankimport.id, actie: "bevestigd", samenvatting: `Afschrift bevestigd; banksaldo ${formatteerEuro(bankimport.eindSaldoCenten)} overgenomen.` }, tx);
+      await logAudit({ gebruiker: sessie.naam, boekjaarId: jaar.id, entiteit: "Bankimport", entiteitId: bankimport.id, actie: "bevestigd", samenvatting: `Afschrift bevestigd; banksaldo ${formatteerEuro(bankimport.eindSaldoCenten)}${bankimport.spaarEindSaldoCenten !== null ? ` en spaarsaldo ${formatteerEuro(bankimport.spaarEindSaldoCenten)}` : ""} overgenomen.` }, tx);
       return bankimport.eindSaldoCenten;
     }, { timeout: 60_000 });
     vernieuw(); return { melding: `Banksaldo van ${formatteerEuro(verwerkt)} overgenomen.` };
