@@ -1,0 +1,82 @@
+{
+  "node": {
+    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "uitloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "kiesBoekjaar",
+      "filename": "src/app/beheer/acties.ts"
+    },
+    "6014210101da178d91b01957694168a13874bc8ac4": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarBanksaldo",
+      "filename": "src/app/beheer/bank/acties.ts"
+    },
+    "60b76961f22660b9e5a13cd935bebe989599a530a8": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderBanksaldo",
+      "filename": "src/app/beheer/bank/acties.ts"
+    },
+    "6053bda4880140447f1dccc6bddfc91fbca50bbb24": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderSpaarmutatie",
+      "filename": "src/app/beheer/sparen/acties.ts"
+    },
+    "60614d79056f63e74a2ab2daff00b18c4d333566b7": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarSpaarmutatie",
+      "filename": "src/app/beheer/sparen/acties.ts"
+    }
+  },
+  "edge": {}
+}

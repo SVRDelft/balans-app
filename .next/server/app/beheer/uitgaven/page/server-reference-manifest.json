@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055f8282f368e9e15db6835e0893f3c447448be22": {
+    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6032d832a90de4ca879640e364b7855fe413c23237": {
+    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
+    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,

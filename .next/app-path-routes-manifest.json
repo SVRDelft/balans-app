@@ -42,6 +42,7 @@
   "/beheer/relaties/[id]/page": "/beheer/relaties/[id]",
   "/beheer/relaties/nieuw/page": "/beheer/relaties/nieuw",
   "/beheer/relaties/page": "/beheer/relaties",
+  "/beheer/sparen/page": "/beheer/sparen",
   "/beheer/uitgaven/[id]/page": "/beheer/uitgaven/[id]",
   "/beheer/uitgaven/nieuw/page": "/beheer/uitgaven/nieuw",
   "/beheer/uitgaven/page": "/beheer/uitgaven",

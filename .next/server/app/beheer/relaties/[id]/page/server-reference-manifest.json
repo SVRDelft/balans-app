@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055f8282f368e9e15db6835e0893f3c447448be22": {
+    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
       "workers": {
         "app/beheer/relaties/[id]/page": {
           "moduleId": 300,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6032d832a90de4ca879640e364b7855fe413c23237": {
+    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
       "workers": {
         "app/beheer/relaties/[id]/page": {
           "moduleId": 300,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
+    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
       "workers": {
         "app/beheer/relaties/[id]/page": {
           "moduleId": 300,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "607044abdd42b3586412c3a0a8400e1eafcb53a8e6": {
+    "6007c2118754bec92bb0f1393133ac91816cae0a3c": {
       "workers": {
         "app/beheer/relaties/[id]/page": {
           "moduleId": 300,
@@ -44,7 +44,7 @@
       "exportedName": "bewaarRelatie",
       "filename": "src/app/beheer/relaties/acties.ts"
     },
-    "60cc1b7e030959bf77b6db97126f863207112fb8f0": {
+    "60b425990466feafb0698ad67d158054124b069b50": {
       "workers": {
         "app/beheer/relaties/[id]/page": {
           "moduleId": 300,

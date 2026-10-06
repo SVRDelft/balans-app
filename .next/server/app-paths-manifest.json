@@ -42,6 +42,7 @@
   "/beheer/relaties/[id]/page": "app/beheer/relaties/[id]/page.js",
   "/beheer/relaties/nieuw/page": "app/beheer/relaties/nieuw/page.js",
   "/beheer/relaties/page": "app/beheer/relaties/page.js",
+  "/beheer/sparen/page": "app/beheer/sparen/page.js",
   "/beheer/uitgaven/[id]/page": "app/beheer/uitgaven/[id]/page.js",
   "/beheer/uitgaven/nieuw/page": "app/beheer/uitgaven/nieuw/page.js",
   "/beheer/uitgaven/page": "app/beheer/uitgaven/page.js",

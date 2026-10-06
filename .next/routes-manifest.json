@@ -307,6 +307,12 @@
       "namedRegex": "^/beheer/relaties/nieuw(?:/)?$"
     },
     {
+      "page": "/beheer/sparen",
+      "regex": "^/beheer/sparen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/sparen(?:/)?$"
+    },
+    {
       "page": "/beheer/uitgaven",
       "regex": "^/beheer/uitgaven(?:/)?$",
       "routeKeys": {},

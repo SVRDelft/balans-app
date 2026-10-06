@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055f8282f368e9e15db6835e0893f3c447448be22": {
+    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6032d832a90de4ca879640e364b7855fe413c23237": {
+    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
+    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -33,7 +33,18 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60a2f9f9e189c06e82e63766a3d48789dc897b9bf6": {
+    "6025fd30fcdaf5bc85d8493f8e09b5ba2b320f3501": {
+      "workers": {
+        "app/beheer/uitgaven/[id]/page": {
+          "moduleId": 83289,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "zetBedragDefinitief",
+      "filename": "src/app/beheer/uitgaven/acties.ts"
+    },
+    "6036b22d4c2374fce2a3f4e8534ae17f829eb8060b": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -44,18 +55,7 @@
       "exportedName": "bewaarUitgave",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     },
-    "60a33efd85c1d2eea8137e84bafdca72971d2d75e8": {
-      "workers": {
-        "app/beheer/uitgaven/[id]/page": {
-          "moduleId": 83289,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "zetBetaald",
-      "filename": "src/app/beheer/uitgaven/acties.ts"
-    },
-    "60db5d444799b989397bcde7cd3bedb66173903528": {
+    "60546709dce6e0050956c27959d30a7a9ceea2e2bf": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -66,7 +66,7 @@
       "exportedName": "verwijderUitgave",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     },
-    "60ecbafab5f8a12a9fabed21fabe9897a6449c1e60": {
+    "60d1c3ce25cf48fc58a1c524638d35eb3d49c8e076": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -74,7 +74,7 @@
           "codeHash": null
         }
       },
-      "exportedName": "zetBedragDefinitief",
+      "exportedName": "zetBetaald",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     }
   },

@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055f8282f368e9e15db6835e0893f3c447448be22": {
+    "003a4977629739b67d1f38bf2e3a992d9654fa9fa2": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6032d832a90de4ca879640e364b7855fe413c23237": {
+    "6092ab87a517c027765ae41ca1d3f6957e3f3b2de9": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40eabf8933eb225ffe5cada90ff25518d5abe441d7": {
+    "406f96a53d8f4d11eb14a4107dc915d307936f4621": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -33,18 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "606bdd7dc99e65afc4a5f9902b3cea1f87180bbd8f": {
-      "workers": {
-        "app/beheer/boekjaren/page": {
-          "moduleId": 31020,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "activeerBoekjaar",
-      "filename": "src/app/beheer/boekjaren/acties.ts"
-    },
-    "609ffe1e19a41c583ab1d81a861542ed10d9b07a6c": {
+    "60071510dbf77a532e263cbf6512e8d2217a2fc5fc": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -55,7 +44,7 @@
       "exportedName": "wisBoekingen",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     },
-    "60d707c76eaa69aab2bc9a5e2a307bf40d29f4a38e": {
+    "6081dfc9805bfe7df7c48eed6e4d224694a7b18e57": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -63,10 +52,10 @@
           "codeHash": null
         }
       },
-      "exportedName": "bewaarBoekjaar",
+      "exportedName": "activeerBoekjaar",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     },
-    "60f18ebf01e41ef1f99e60c52db20b175b9d1cd50a": {
+    "60e083feab214357741f9bf61775cec05613a49942": {
       "workers": {
         "app/beheer/boekjaren/page": {
           "moduleId": 31020,
@@ -75,6 +64,17 @@
         }
       },
       "exportedName": "zetReconstructie",
+      "filename": "src/app/beheer/boekjaren/acties.ts"
+    },
+    "60ebc5f1d71c598e5b15bd1ec98eeb3813e64a9d0b": {
+      "workers": {
+        "app/beheer/boekjaren/page": {
+          "moduleId": 31020,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarBoekjaar",
       "filename": "src/app/beheer/boekjaren/acties.ts"
     }
   },
