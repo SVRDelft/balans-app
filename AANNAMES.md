@@ -350,6 +350,10 @@ Eén onderdeel is wél per vereniging: **jullie facturen**. Een vereniging ziet 
 haar eigen facturen met het openstaande bedrag, en kan de PDF downloaden. Dat
 scheelt het bestuur het heen-en-weer mailen van "wat staat er nog open?".
 
+Zo'n account hangt aan precies één relatie, en dat hoeft geen studievereniging te
+zijn: ORAS en Lijst Bèta krijgen ook facturen van de SVR en kunnen er dus net zo
+goed een krijgen.
+
 De regel daarbij: filteren op `relatieId` uit de **sessie** en nooit op een id uit
 de URL. Dat gebeurt op twee plekken, en nergens anders:
 

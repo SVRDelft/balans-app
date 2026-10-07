@@ -32,16 +32,18 @@ export async function maakAccount(
     if (!naam) return { fout: "Vul de naam in die in het auditlog moet komen." };
     if (rol !== "BESTUUR" && rol !== "SV") return { fout: "Kies een rol." };
     if (rol === "SV" && !relatieId) {
-      return { fout: "Kies bij een verenigingsaccount de studievereniging." };
+      return { fout: "Kies bij een verenigingsaccount de relatie waar het account bij hoort." };
     }
     if (rol === "BESTUUR" && relatieId) {
       return { fout: "Een bestuursaccount hoort niet bij één vereniging." };
     }
 
     if (relatieId) {
+      // Niet alleen studieverenigingen: ORAS en Lijst Bèta krijgen ook facturen
+      // van de SVR, en horen die dus net zo goed in het portaal te kunnen zien.
       const relatie = await db.relatie.findUnique({ where: { id: relatieId } });
-      if (!relatie || relatie.type !== "studievereniging") {
-        return { fout: "Kies een studievereniging uit de lijst." };
+      if (!relatie || !relatie.actief) {
+        return { fout: "Kies een actieve relatie uit de lijst." };
       }
     }
 

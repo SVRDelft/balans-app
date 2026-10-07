@@ -30,10 +30,12 @@ export default async function AccountsPagina() {
       orderBy: [{ rol: "asc" }, { email: "asc" }],
       include: { relatie: { select: { naam: true } } },
     }),
+    // Elke actieve relatie kan een portaalaccount krijgen; wie facturen van de
+    // SVR ontvangt, hoort ze te kunnen inzien.
     db.relatie.findMany({
-      where: { type: "studievereniging", actief: true },
-      orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      where: { actief: true },
+      orderBy: [{ type: "asc" }, { naam: "asc" }],
+      select: { id: true, naam: true, type: true },
     }),
   ]);
 

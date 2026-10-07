@@ -14,7 +14,7 @@ import { maakAccount } from "./acties";
 export function AccountFormulier({
   verenigingen,
 }: {
-  verenigingen: { id: string; naam: string }[];
+  verenigingen: { id: string; naam: string; type?: string }[];
 }) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(maakAccount, {});
   const [rol, setRol] = useState("SV");
@@ -37,16 +37,19 @@ export function AccountFormulier({
 
           {rol === "SV" ? (
             <Veld
-              label="Vereniging"
+              label="Hoort bij"
               htmlFor="relatieId"
               verplicht
-              toelichting="Dit account ziet alleen gegevens van deze vereniging."
+              toelichting="Dit account ziet alleen de gegevens van deze relatie. Ook ORAS en Lijst Bèta kunnen er een krijgen; zij ontvangen immers ook facturen."
             >
               <Select id="relatieId" name="relatieId" required>
                 <option value="">Kies…</option>
                 {verenigingen.map((vereniging) => (
                   <option key={vereniging.id} value={vereniging.id}>
                     {vereniging.naam}
+                    {vereniging.type && vereniging.type !== "studievereniging"
+                      ? ` (${vereniging.type})`
+                      : ""}
                   </option>
                 ))}
               </Select>
