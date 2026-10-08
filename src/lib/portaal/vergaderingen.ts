@@ -30,7 +30,7 @@ export const VERGADERINGEN_2026_2027: {
   { reeks: "SVR-O", datum: "2026-12-15", tijd: "14:00", gastheer: "PS" },
   { reeks: "SVR", datum: "2027-01-12", tijd: "14:00", gastheer: "CH" },
   { reeks: "SVR", datum: "2027-02-16", tijd: "14:00", gastheer: "Curius" },
-  { reeks: "SVR-O", datum: "2027-02-23", tijd: "14:00", gastheer: "i.d" },
+  { reeks: "SVR-O", datum: "2027-02-23", tijd: "14:00", gastheer: "ID" },
   { reeks: "SVjwR", datum: "2027-03-02", tijd: "16:00", gastheer: "Stylos" },
   { reeks: "SVeuRo", datum: "2027-03-09", tijd: "14:00", gastheer: "Hooke" },
   { reeks: "SVR", datum: "2027-03-16", tijd: "14:00", gastheer: "Leeghwater" },

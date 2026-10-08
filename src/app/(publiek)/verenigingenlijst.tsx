@@ -5,8 +5,9 @@ import { useState } from "react";
 import type { Vereniging } from "@/lib/content";
 
 /**
- * De vijftien, met een filter op faculteit. Zonder JavaScript staan ze er
- * gewoon allemaal; het filter is een extraatje, geen voorwaarde.
+ * De vijftien, op volgorde van oprichting en met een filter op faculteit. Zonder
+ * JavaScript staan ze er gewoon allemaal; het filter is een extraatje, geen
+ * voorwaarde.
  */
 export function Verenigingenlijst({ verenigingen }: { verenigingen: Vereniging[] }) {
   const faculteiten = [...new Set(verenigingen.map((v) => v.faculteit))].sort();
@@ -56,7 +57,10 @@ export function Verenigingenlijst({ verenigingen }: { verenigingen: Vereniging[]
               )}
               <span className="wie">
                 <strong>{vereniging.naam}</strong>
-                <span>{vereniging.faculteit}</span>
+                <span>
+                  {vereniging.faculteit}
+                  {vereniging.opgericht ? ` · sinds ${vereniging.opgericht}` : ""}
+                </span>
               </span>
               {vereniging.website ? (
                 <svg className="naarbuiten" viewBox="0 0 16 16" aria-hidden focusable="false">

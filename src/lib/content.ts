@@ -40,6 +40,8 @@ export interface Vereniging {
   kort: string;
   slug: string;
   faculteit: string;
+  /** Jaar van oprichting; bepaalt de volgorde op de site, oudste eerst. */
+  opgericht?: number;
   /** Officiële website; leeg laten als die niet zeker is. */
   website?: string;
   /** Wordt tijdens de build gevuld als public/img/sv/<slug>.png bestaat. */

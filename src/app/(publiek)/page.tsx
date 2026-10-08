@@ -62,8 +62,9 @@ export default function Home() {
           <div className="hero-tafel">
             <Tafel verenigingen={verenigingen} logo={logoBestand()} />
             <p className="tafel-uitleg">
-              Vijftien stoelen, vijftien verenigingen. Wijs een stoel aan voor de
-              faculteit, of klik door naar hun site.
+              Vijftien stoelen, vijftien verenigingen, op volgorde van oprichting
+              met de oudste bovenaan. Wijs een stoel aan voor de faculteit, of klik
+              door naar hun site.
             </p>
           </div>
         </div>
@@ -255,7 +256,10 @@ export default function Home() {
       <section className="vlak wit" id="verenigingen">
         <div className="binnen">
           <h2>De vijftien</h2>
-          <p>Deze studieverenigingen zijn aangesloten bij de SVR.</p>
+          <p>
+            Deze studieverenigingen zijn aangesloten bij de SVR, op volgorde van
+            oprichting.
+          </p>
           <Verenigingenlijst verenigingen={verenigingen} />
         </div>
       </section>
