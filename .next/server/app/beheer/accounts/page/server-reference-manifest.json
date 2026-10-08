@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f59d1ec883c52e615b0b63cf55a7bff89f6b4eee": {
+    "00f148cb531ce2eba364ce058e0552b6a6e152ff44": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "603788de6de1d65d57419579ae4a84c4aa5f23775d": {
+    "600921c490b38297bb6a93232cb51d4f427315067c": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40807fa476136379d4c29c34bbf34f17b7457c1d02": {
+    "405914d95e039c9da68044f81fa6826a8baab19d3e": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "607f6980331dbcbfaa3cf6d2bc5bec36e54217f967": {
+    "606f4723330010e2f9346d45ce6fbff31cfe88acb4": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,7 +44,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "602cf0b3989166c9a18ae0c90b660f092847e4f193": {
+    "6034e2c6772d93dc83277c1368bd25484a65844c36": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -55,7 +55,7 @@
       "exportedName": "zetActief",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60c3417ec7092bafb59d502c4bcd4ab7341ce61a25": {
+    "60e785ff94779f557b2bebd2d2fc64c86972210740": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,

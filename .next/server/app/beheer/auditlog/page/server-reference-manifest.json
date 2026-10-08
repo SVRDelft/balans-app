@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f59d1ec883c52e615b0b63cf55a7bff89f6b4eee": {
+    "00f148cb531ce2eba364ce058e0552b6a6e152ff44": {
       "workers": {
         "app/beheer/auditlog/page": {
           "moduleId": 51286,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "603788de6de1d65d57419579ae4a84c4aa5f23775d": {
+    "600921c490b38297bb6a93232cb51d4f427315067c": {
       "workers": {
         "app/beheer/auditlog/page": {
           "moduleId": 51286,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40807fa476136379d4c29c34bbf34f17b7457c1d02": {
+    "405914d95e039c9da68044f81fa6826a8baab19d3e": {
       "workers": {
         "app/beheer/auditlog/page": {
           "moduleId": 51286,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60affc4bf9d6a61422b011b80ac593f21cf47b1605": {
+    "6010f9f58ff26d5eca6627e859d3bceaffa5749325": {
       "workers": {
         "app/beheer/auditlog/page": {
           "moduleId": 51286,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f59d1ec883c52e615b0b63cf55a7bff89f6b4eee": {
+    "00f148cb531ce2eba364ce058e0552b6a6e152ff44": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "603788de6de1d65d57419579ae4a84c4aa5f23775d": {
+    "600921c490b38297bb6a93232cb51d4f427315067c": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40807fa476136379d4c29c34bbf34f17b7457c1d02": {
+    "405914d95e039c9da68044f81fa6826a8baab19d3e": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60bd711f01b80eea29325d5fa26d70e30114019f52": {
+    "60fc43e339a24a141766b2e82b523741af7c9bc96c": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -44,7 +44,7 @@
       "exportedName": "bewaarVoorraad",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "002307fe3727c2602215a82c6a47ffc09b7050a4ab": {
+    "00bc6f06561e36a991a51c9826ef37f6278d2d5957": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -55,7 +55,7 @@
       "exportedName": "neemVoorraadOver",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "6028b1cf99167d1cdebd33c70df3708cae29263540": {
+    "60175176ac3a89046526ff1c62e3da47d5d5134878": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -66,7 +66,7 @@
       "exportedName": "verwijderVoorraad",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "60875932559ffdfa93d7846993555ca7b4f5cb2a00": {
+    "60abc7c1929835872d55b647e48a97b985e4b61243": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,

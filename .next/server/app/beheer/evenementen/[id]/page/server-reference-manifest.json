@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f59d1ec883c52e615b0b63cf55a7bff89f6b4eee": {
+    "00f148cb531ce2eba364ce058e0552b6a6e152ff44": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "603788de6de1d65d57419579ae4a84c4aa5f23775d": {
+    "600921c490b38297bb6a93232cb51d4f427315067c": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40807fa476136379d4c29c34bbf34f17b7457c1d02": {
+    "405914d95e039c9da68044f81fa6826a8baab19d3e": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6055ed165feba3a4e077083b1e8a7b91e1a2a5b407": {
+    "60c38d561f98baaa5264108e16cefef19649014d20": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -44,7 +44,7 @@
       "exportedName": "verwijderDeelnemer",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "6075545345a0d48efaae58a1762df6eb194dac51d0": {
+    "609c62f122281abf6aba41679e702bc8ea8d2e9404": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -55,7 +55,7 @@
       "exportedName": "voegDeelnemerToe",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60df1b95ef410f64342aef165154f7b9e67ed638d1": {
+    "609b2364b16c992e1c106cb4d35eca66880ccbf044": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -66,7 +66,7 @@
       "exportedName": "wijzigDeelnemer",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60350fa5cee140ec01f1b59c12873524da8857f871": {
+    "600d691ce918fdc7eb37c113922b33ec557a2abd1b": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -77,7 +77,7 @@
       "exportedName": "berekenOmslagActie",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "601a7b10cee93cab1a55b13c3575d2f9c79438a7fe": {
+    "6092bc52777edc5fdf35f4ef7d5b39806bad00d943": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -88,7 +88,7 @@
       "exportedName": "boekTenLasteVanSvr",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60533a81f8cca55166875d2266424ff78bca626608": {
+    "60b985947fa073dd3bfc612cf31db3399c06cd2ca0": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -99,7 +99,7 @@
       "exportedName": "heropenEvenement",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "608d93e63053df3b343abc75956fd94bb5cfcc7c43": {
+    "601887f4d8519138877f2b3df059bcbeaa738612a6": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -110,7 +110,7 @@
       "exportedName": "sluitEvenement",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "6046e7873187bc15f6c9aa38ecb054f0a9d8308a9d": {
+    "606ad26c61f70909436373bcc0e378025213da1455": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
