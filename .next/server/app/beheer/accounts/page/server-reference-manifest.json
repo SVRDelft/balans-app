@@ -1,6 +1,6 @@
 {
   "node": {
-    "00507728f7b84128ebd48dde2b64598e9346e11f63": {
+    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60a6152eb7aee6aa2c7332ef7e30446def6d3e47b1": {
+    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60abf514e8420526ee54e27d76c4936427a2193c66": {
+    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40f7e2e33777e1449a69d23402948b7f089bad953c": {
+    "4053178a88623940675b97a495370a48ccbf23b6b2": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60f3615ff479dd95b8e75d575a3f893cbed1c8dc81": {
+    "606c95c060ca31ec0e211dcfd30b04e576200dc3cb": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -55,7 +55,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "603a871f09e4949eeabe345c6d27dd6ee000d4a28e": {
+    "60531664bf968e28bb477569207add5c64bd6da45f": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -66,7 +66,7 @@
       "exportedName": "zetActief",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60ebf089d8eda5b23cc7e182e69dd4960f8cac983b": {
+    "60681085473802cbc0f719c7d942f5615a4901a619": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,

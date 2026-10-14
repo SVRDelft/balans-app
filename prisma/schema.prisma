@@ -127,6 +127,7 @@ model Relatie {
   gebruikers Gebruiker[]
   vergaderingen Vergadering[]
   rekeningposten Rekeningpost[]
+  portaaltoegangen Portaaltoegang[]
 
   @@index([type])
 }
@@ -734,10 +735,16 @@ model Portaaltoegang {
   /// Uit: tijdelijk geblokkeerd, ook voor wie al ingelogd is.
   actief                Boolean   @default(true)
 
+  /// De relatie in de administratie waarvan deze login de openstaande
+  /// facturen ziet. Leeg: geen facturen. Het bestuur legt de koppeling vast.
+  relatieId String?
+  relatie   Relatie? @relation(fields: [relatieId], references: [id], onDelete: SetNull)
+
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt
 
   @@index([groep, volgorde])
+  @@index([relatieId])
 }
 
 /// Mislukte inlogpogingen, per e-mailadres en per IP. Staat in de database en

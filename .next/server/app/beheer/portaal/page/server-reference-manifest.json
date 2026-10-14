@@ -1,6 +1,6 @@
 {
   "node": {
-    "00507728f7b84128ebd48dde2b64598e9346e11f63": {
+    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60a6152eb7aee6aa2c7332ef7e30446def6d3e47b1": {
+    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60abf514e8420526ee54e27d76c4936427a2193c66": {
+    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40f7e2e33777e1449a69d23402948b7f089bad953c": {
+    "4053178a88623940675b97a495370a48ccbf23b6b2": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6073e75ac5412f9ca4a9c29485e2e8c8ed0468a091": {
+    "60b680e10bf02055b3dba5b5fedfc76a19ec463678": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -55,7 +55,7 @@
       "exportedName": "bewaarMededeling",
       "filename": "src/app/beheer/portaal/acties.ts"
     },
-    "603512c168a0f493e3dee207dd304ed7c9be6d0cfa": {
+    "60fe120d0167c6b83b4bf80b2e732a6a370762bce3": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -66,7 +66,7 @@
       "exportedName": "bewaarVergadering",
       "filename": "src/app/beheer/portaal/acties.ts"
     },
-    "60f38f616b0b29af33b338e9c5a3ee7784cbecf72f": {
+    "60c1fd1e65febf840a40d8599e05449a98f4c60044": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -77,7 +77,18 @@
       "exportedName": "uploadBestand",
       "filename": "src/app/beheer/portaal/acties.ts"
     },
-    "6054ced7111e946a337c3255cde43aba5a628e2ef9": {
+    "60087dea4385f08cd74fa1693d5426e7af2930c409": {
+      "workers": {
+        "app/beheer/portaal/page": {
+          "moduleId": 3129,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderVergadering",
+      "filename": "src/app/beheer/portaal/acties.ts"
+    },
+    "6071d5dbac562318805df7d61f09d5571995dd7974": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -88,7 +99,7 @@
       "exportedName": "verwijderMededeling",
       "filename": "src/app/beheer/portaal/acties.ts"
     },
-    "609e7823260a47c2c4cb5a2c6be5332f9fb4d05595": {
+    "609e130d218a85ef6748ad38bcfc729e0ed6de77fa": {
       "workers": {
         "app/beheer/portaal/page": {
           "moduleId": 3129,
@@ -97,17 +108,6 @@
         }
       },
       "exportedName": "verwijderPortaalbestand",
-      "filename": "src/app/beheer/portaal/acties.ts"
-    },
-    "60d3f465b0373760d9c265d434dd72480c9518c630": {
-      "workers": {
-        "app/beheer/portaal/page": {
-          "moduleId": 3129,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderVergadering",
       "filename": "src/app/beheer/portaal/acties.ts"
     }
   },
