@@ -22,6 +22,7 @@ import {
   Users,
   Menu,
   KeyRound,
+  LockKeyhole,
   Megaphone,
 } from "lucide-react";
 
@@ -68,6 +69,7 @@ const GROEPEN: { titel: string; items: NavItem[] }[] = [
       { href: "/beheer/overdracht", label: "Overdracht", icoon: ArrowLeftRight },
       { href: "/beheer/boekjaren", label: "Boekjaren", icoon: CalendarDays },
       { href: "/beheer/portaal", label: "Portaal", icoon: Megaphone },
+      { href: "/beheer/portaaltoegang", label: "Portaaltoegang", icoon: LockKeyhole },
       { href: "/beheer/accounts", label: "Accounts", icoon: KeyRound },
       { href: "/beheer/auditlog", label: "Auditlog", icoon: ClipboardList },
       { href: "/beheer/instellingen", label: "Instellingen", icoon: Settings },

@@ -707,6 +707,39 @@ model Gebruiker {
   @@index([relatieId])
 }
 
+/// Inloggen als vereniging: één gedeeld wachtwoord per studievereniging of
+/// informant, gekozen uit een lijst ("Wie ben je?"). Staat naast de persoonlijke
+/// accounts hierboven en vervangt ze niet.
+///
+/// Een sessie van deze soort komt alleen in het portaal: nooit in /beheer en
+/// nooit bij gegevens uit de administratie, ook niet bij de eigen facturen.
+model Portaaltoegang {
+  id      String @id @default(cuid())
+  /// Studievereniging: de slug uit content/verenigingen.json. Informant: afgeleid
+  /// van de naam. Dit is wat het keuzemenu als waarde meestuurt.
+  sleutel String @unique
+  /// 'studievereniging' | 'informant'
+  groep   String
+  /// Zoals het in het keuzemenu staat.
+  naam    String
+  /// Volgorde van de informanten; studieverenigingen volgen content/.
+  volgorde Int @default(0)
+
+  /// Leeg zolang het bestuur nog geen wachtwoord heeft ingesteld; dan kan er
+  /// niemand met deze naam inloggen.
+  wachtwoordHash        String?   @db.Text
+  /// Elke sessie die vóór dit moment is uitgegeven, vervalt.
+  wachtwoordGewijzigdOp DateTime?
+  laatsteInlog          DateTime?
+  /// Uit: tijdelijk geblokkeerd, ook voor wie al ingelogd is.
+  actief                Boolean   @default(true)
+
+  aangemaaktOp DateTime @default(now())
+  bijgewerktOp DateTime @updatedAt
+
+  @@index([groep, volgorde])
+}
+
 /// Mislukte inlogpogingen, per e-mailadres en per IP. Staat in de database en
 /// niet in het geheugen: Passenger draait meerdere processen naast elkaar, en
 /// een teller per proces houdt niemand tegen.

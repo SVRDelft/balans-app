@@ -99,7 +99,11 @@ export default async function PortaalPagina() {
     haalDocumenten(),
     // Alleen een vereniging heeft een eigen rekening; het bestuur ziet die in de
     // administratie, niet hier.
-    sessie.relatieId ? haalEigenRekening(sessie.relatieId) : null,
+    // Groepssessies (inloggen als vereniging) zien geen facturen; dat zijn
+    // gegevens uit de administratie.
+    sessie.rol === "SV" && sessie.relatieId
+      ? haalEigenRekening(sessie.relatieId)
+      : null,
   ]);
 
   return (
@@ -112,7 +116,7 @@ export default async function PortaalPagina() {
           <h1 className="text-2xl font-semibold">Portaal</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Ingelogd als {sessie.naam}
-            {sessie.rol === "SV" ? "" : " (SVR-bestuur)"}
+            {sessie.rol === "BESTUUR" ? " (SVR-bestuur)" : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">

@@ -5,6 +5,14 @@
 // account nog bestaat en nog actief is, wordt bij elk verzoek opnieuw in de
 // database gecontroleerd (src/lib/auth/server.ts): een cookie dat blijft
 // hangen mag nooit toegang houden nadat een account is uitgezet.
+//
+// Er zijn twee soorten sessies:
+//
+// - een account: één persoon of één functioneel adres, met de rol BESTUUR of SV.
+//   Dat is het cookie zoals het altijd was; het formaat is niet veranderd, zodat
+//   wie al ingelogd is dat blijft.
+// - een groep: inloggen "als vereniging" met het gedeelde wachtwoord uit de
+//   lijst. De rol is PORTAAL, en die komt nergens anders dan in het portaal.
 
 import { cookieAlleenOverHttps } from "@/lib/beveiliging";
 
@@ -12,20 +20,47 @@ export const SESSIE_COOKIE = "svr_sessie";
 export const BOEKJAAR_COOKIE = "svr_boekjaar";
 
 const SESSIE_DUUR_MS = 30 * 24 * 60 * 60 * 1000;
+/** Wie als vereniging inlogt, hoeft dat maar één keer per jaar te doen. */
+const GROEP_SESSIE_DUUR_MS = 365 * 24 * 60 * 60 * 1000;
 
-export type Rol = "BESTUUR" | "SV";
+export type AccountRol = "BESTUUR" | "SV";
+export type Rol = AccountRol | "PORTAAL";
 
-export interface Sessie {
+export interface AccountSessie {
+  /** Ontbreekt in cookies van voor de groepslogin; die zijn allemaal een account. */
+  soort?: "account";
   /** Id van het account. */
   gebruikerId: string;
   /** Naam die in het auditlog komt te staan. */
   naam: string;
-  rol: Rol;
+  rol: AccountRol;
   /** Alleen bij een SV-account: de vereniging waar dit account bij hoort. */
   relatieId?: string;
   /** Epoch in milliseconden. */
   verlooptOp: number;
 }
+
+export interface GroepSessie {
+  soort: "groep";
+  /** Id van de Portaaltoegang waarmee is ingelogd. */
+  toegangId: string;
+  /** De vereniging of informant, zoals in het keuzemenu. */
+  naam: string;
+  rol: "PORTAAL";
+  /** Epoch in milliseconden. */
+  verlooptOp: number;
+  /**
+   * Wanneer dit cookie is uitgegeven. Is het wachtwoord daarna gewijzigd, dan
+   * telt het cookie niet meer: zo werkt een oud wachtwoord ook niet via een
+   * sessie die nog openstaat.
+   */
+  uitgegevenOp: number;
+}
+
+export type Sessie = AccountSessie | GroepSessie;
+
+export const isGroepSessie = (sessie: Sessie): sessie is GroepSessie =>
+  sessie.soort === "groep";
 
 function tekstNaarBytes(tekst: string): Uint8Array<ArrayBuffer> {
   // TextEncoder levert altijd een gewone ArrayBuffer; het bredere type dat
@@ -92,16 +127,36 @@ function gelijkInVasteTijd(a: string, b: string): boolean {
   return verschil === 0;
 }
 
-export async function maakSessieCookie(
-  gebruiker: Pick<Sessie, "gebruikerId" | "naam" | "rol" | "relatieId">,
-): Promise<string> {
-  const sessie: Sessie = {
-    ...gebruiker,
-    verlooptOp: Date.now() + SESSIE_DUUR_MS,
-  };
+async function verpak(sessie: Sessie): Promise<string> {
   const inhoud = naarBase64Url(tekstNaarBytes(JSON.stringify(sessie)));
   const handtekening = await onderteken(inhoud, haalGeheim());
   return `${inhoud}.${handtekening}`;
+}
+
+/** Het cookie van een account. Precies zoals het altijd was. */
+export async function maakSessieCookie(
+  gebruiker: Pick<AccountSessie, "gebruikerId" | "naam" | "rol" | "relatieId">,
+): Promise<string> {
+  return verpak({
+    ...gebruiker,
+    verlooptOp: Date.now() + SESSIE_DUUR_MS,
+  });
+}
+
+/** Het cookie van wie als vereniging inlogt: een jaar geldig. */
+export async function maakGroepSessieCookie(toegang: {
+  toegangId: string;
+  naam: string;
+}): Promise<string> {
+  const nu = Date.now();
+  return verpak({
+    soort: "groep",
+    toegangId: toegang.toegangId,
+    naam: toegang.naam,
+    rol: "PORTAAL",
+    verlooptOp: nu + GROEP_SESSIE_DUUR_MS,
+    uitgegevenOp: nu,
+  });
 }
 
 export async function leesSessieCookie(
@@ -131,14 +186,27 @@ export async function leesSessieCookie(
     if (typeof sessie.naam !== "string" || sessie.naam.trim() === "") {
       return null;
     }
+    if (typeof sessie.verlooptOp !== "number" || sessie.verlooptOp < Date.now()) {
+      return null;
+    }
+
+    if (sessie.soort === "groep") {
+      // Een groepssessie is altijd PORTAAL. Een cookie dat iets anders beweert,
+      // is niet door deze app gemaakt.
+      if (sessie.rol !== "PORTAAL") return null;
+      if (typeof sessie.toegangId !== "string" || sessie.toegangId === "") {
+        return null;
+      }
+      if (typeof sessie.uitgegevenOp !== "number") return null;
+      return sessie;
+    }
+
+    if (sessie.soort !== undefined && sessie.soort !== "account") return null;
     if (typeof sessie.gebruikerId !== "string" || sessie.gebruikerId === "") {
       return null;
     }
     if (sessie.rol !== "BESTUUR" && sessie.rol !== "SV") return null;
     if (sessie.rol === "SV" && typeof sessie.relatieId !== "string") return null;
-    if (typeof sessie.verlooptOp !== "number" || sessie.verlooptOp < Date.now()) {
-      return null;
-    }
     return sessie;
   } catch {
     return null;
@@ -153,4 +221,9 @@ export const SESSIE_COOKIE_OPTIES = {
   // Zonder https zou een `Secure`-cookie nooit meegestuurd worden; dan kun je
   // dus ook niet inloggen. Zie src/lib/beveiliging.ts.
   secure: cookieAlleenOverHttps(),
+} as const;
+
+export const GROEP_SESSIE_COOKIE_OPTIES = {
+  ...SESSIE_COOKIE_OPTIES,
+  maxAge: GROEP_SESSIE_DUUR_MS / 1000,
 } as const;

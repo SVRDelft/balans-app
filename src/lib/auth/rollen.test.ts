@@ -24,9 +24,9 @@ import {
   vereisEigenRelatie,
   vereisPortaal,
 } from "./server";
-import { maakSessieCookie, type Sessie } from "./sessie";
+import { maakSessieCookie, type AccountSessie } from "./sessie";
 
-const sessieVan = (overrides: Partial<Sessie> = {}): Sessie => ({
+const sessieVan = (overrides: Partial<AccountSessie> = {}): AccountSessie => ({
   gebruikerId: "g1",
   naam: "Proefbestuur",
   rol: "BESTUUR",
@@ -34,7 +34,7 @@ const sessieVan = (overrides: Partial<Sessie> = {}): Sessie => ({
   ...overrides,
 });
 
-async function zetCookie(sessie: Partial<Sessie> = {}) {
+async function zetCookie(sessie: Partial<AccountSessie> = {}) {
   const inhoud = sessieVan(sessie);
   const waarde = await maakSessieCookie({
     gebruikerId: inhoud.gebruikerId,
@@ -75,7 +75,7 @@ describe("wie mag waarbij", () => {
       id: "g2", naam: "Curius", rol: "SV", relatieId: "r1", actief: true,
     });
     const sessie = await vereisPortaal();
-    expect(sessie.relatieId).toBe("r1");
+    expect(sessie.rol === "SV" ? sessie.relatieId : undefined).toBe("r1");
   });
 
   it("weigert een uitgezet account, ook met een geldig cookie", async () => {

@@ -45,6 +45,7 @@ const PAGINAS: Pagina[] = [
   { titel: "Boekjaren", href: "/beheer/boekjaren", woorden: "jaar reconstructie opbouwen" },
   { titel: "Portaal", href: "/beheer/portaal", woorden: "mededelingen vergaderingen notulen agenda" },
   { titel: "Accounts", href: "/beheer/accounts", woorden: "gebruikers wachtwoord inloggen" },
+  { titel: "Portaaltoegang", href: "/beheer/portaaltoegang", woorden: "vereniging gedeeld wachtwoord informant oras lijst beta inloggen" },
   { titel: "Auditlog", href: "/beheer/auditlog", woorden: "geschiedenis wie wat wanneer" },
   { titel: "Instellingen", href: "/beheer/instellingen", woorden: "logo iban adres btw" },
 ];

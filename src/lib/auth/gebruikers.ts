@@ -2,7 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { controleerHash, hashWachtwoord } from "@/lib/auth/wachtwoord";
-import type { Rol, Sessie } from "@/lib/auth/sessie";
+import type { AccountRol, AccountSessie } from "@/lib/auth/sessie";
 
 // Alles rond accounts en inlogpogingen. Niemand kan zichzelf registreren: het
 // bestuur maakt accounts aan, en een SV-account hoort bij precies één
@@ -26,7 +26,15 @@ export async function isGeblokkeerd(sleutels: string[]): Promise<boolean> {
   return geblokkeerd > 0;
 }
 
-export async function telMisluktePoging(sleutels: string[]): Promise<void> {
+/**
+ * Telt een mislukte poging. Na MAX_POGINGEN binnen het venster volgt een
+ * blokkade: een kwartier voor de persoonlijke accounts, korter waar dat is
+ * afgesproken (zie src/lib/auth/portaaltoegang.ts).
+ */
+export async function telMisluktePoging(
+  sleutels: string[],
+  blokkadeMs: number = BLOKKADE_MS,
+): Promise<void> {
   const nu = new Date();
   for (const sleutel of sleutels) {
     const bestaand = await db.inlogpoging.findUnique({ where: { sleutel } });
@@ -45,7 +53,7 @@ export async function telMisluktePoging(sleutels: string[]): Promise<void> {
       data: {
         aantal,
         geblokkeerdTot:
-          aantal >= MAX_POGINGEN ? new Date(nu.getTime() + BLOKKADE_MS) : null,
+          aantal >= MAX_POGINGEN ? new Date(nu.getTime() + blokkadeMs) : null,
       },
     });
   }
@@ -56,7 +64,7 @@ export async function wisPogingen(sleutels: string[]): Promise<void> {
 }
 
 export interface Inloguitkomst {
-  sessie: Pick<Sessie, "gebruikerId" | "naam" | "rol" | "relatieId">;
+  sessie: Pick<AccountSessie, "gebruikerId" | "naam" | "rol" | "relatieId">;
   moetWijzigen: boolean;
 }
 
@@ -88,7 +96,7 @@ export async function controleerInlog(
     sessie: {
       gebruikerId: gebruiker.id,
       naam: gebruiker.naam,
-      rol: gebruiker.rol as Rol,
+      rol: gebruiker.rol as AccountRol,
       relatieId: gebruiker.relatieId ?? undefined,
     },
     moetWijzigen: gebruiker.moetWijzigen,

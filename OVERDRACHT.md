@@ -24,6 +24,38 @@ alles.
 Raakt iemand zijn wachtwoord kwijt: **Accounts › Nieuw wachtwoord**. Het oude
 werkt dan meteen niet meer.
 
+### Twee manieren om in het portaal te komen
+
+Op `/inloggen` staan twee tabbladen:
+
+- **Als vereniging** (staat voorop). Kies wie je bent uit de lijst —
+  *Studieverenigingen* of *Informanten* (ORAS, Lijst Bèta) — en vul het
+  wachtwoord in dat het hele verenigingsbestuur deelt. Je komt alleen in het
+  portaal (mededelingen, vergaderingen, agenda's, notulen, documenten), nooit in
+  de administratie, en je blijft een jaar ingelogd. Iedereen die zo inlogt, ziet
+  hetzelfde; facturen per vereniging zie je alleen met een eigen account.
+- **Met je eigen account**: e-mailadres en wachtwoord, precies zoals altijd. Zo
+  logt het SVR-bestuur in, en de verenigingen die een persoonlijk account hebben.
+
+De gedeelde wachtwoorden beheer je bij **Beheer › Portaaltoegang**. Per
+vereniging en per informant zie je wanneer het wachtwoord voor het laatst is
+gewijzigd en wanneer er voor het laatst is ingelogd, en kun je de toegang
+aan- of uitzetten. Informanten voeg je daar ook toe of haal je weg; de
+studieverenigingen komen uit `content/verenigingen.json`.
+
+**Een vereniging is het wachtwoord vergeten.** Ga naar *Beheer ›
+Portaaltoegang*, typ bij die vereniging een nieuw wachtwoord in het veld
+*Wachtwoord instellen* en klik op *Opslaan*. Geef het door aan hun bestuur. Het
+oude werkt meteen niet meer, en wie er nog mee ingelogd was, moet opnieuw
+inloggen. Een wachtwoord moet minstens 4 tekens hebben, verder niets; kies bij
+voorkeur een paar losse woorden. De vereniging kan het daarna zelf wijzigen
+via *Wachtwoord wijzigen* in het portaal (dan worden hun andere apparaten
+uitgelogd).
+
+Na tien foute pogingen voor dezelfde vereniging moet je een minuut wachten.
+Bij een bestuurswissel van een vereniging is het verstandig een nieuw
+wachtwoord in te stellen.
+
 ---
 
 ## 2. Het nieuwe boekjaar

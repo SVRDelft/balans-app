@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { KeyRound } from "lucide-react";
 
@@ -11,7 +12,15 @@ import type { ActieStaat } from "@/lib/acties";
 
 import { wijzigWachtwoord } from "./acties";
 
-export function WachtwoordFormulier() {
+export function WachtwoordFormulier({
+  minimum,
+  toelichting,
+  terug,
+}: {
+  minimum: number;
+  toelichting: string;
+  terug: string;
+}) {
   const [staat, actie, bezig] = useActionState<ActieStaat, FormData>(
     wijzigWachtwoord,
     {},
@@ -35,7 +44,7 @@ export function WachtwoordFormulier() {
             label="Nieuw wachtwoord"
             htmlFor="nieuw"
             verplicht
-            toelichting="Minstens 12 tekens. Een zin met spaties mag ook en is makkelijker te onthouden."
+            toelichting={toelichting}
           >
             <Input
               id="nieuw"
@@ -43,7 +52,7 @@ export function WachtwoordFormulier() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={12}
+              minLength={minimum}
             />
           </Veld>
 
@@ -54,16 +63,21 @@ export function WachtwoordFormulier() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={12}
+              minLength={minimum}
             />
           </Veld>
 
           {staat.fout ? <Melding toon="fout">{staat.fout}</Melding> : null}
 
-          <Button type="submit" disabled={bezig}>
-            <KeyRound />
-            {bezig ? "Bezig…" : "Wachtwoord opslaan"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" disabled={bezig}>
+              <KeyRound />
+              {bezig ? "Bezig…" : "Wachtwoord opslaan"}
+            </Button>
+            <Link href={terug} className="text-sm text-muted-foreground underline">
+              Terug
+            </Link>
+          </div>
         </form>
       </CardContent>
     </Card>

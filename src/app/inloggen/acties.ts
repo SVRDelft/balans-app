@@ -4,8 +4,10 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
+  GROEP_SESSIE_COOKIE_OPTIES,
   SESSIE_COOKIE,
   SESSIE_COOKIE_OPTIES,
+  maakGroepSessieCookie,
   maakSessieCookie,
 } from "@/lib/auth/sessie";
 import {
@@ -15,6 +17,11 @@ import {
   telMisluktePoging,
   wisPogingen,
 } from "@/lib/auth/gebruikers";
+import {
+  GROEP_BLOKKADE_MS,
+  controleerGroepInlog,
+  pogingSleutel,
+} from "@/lib/auth/portaaltoegang";
 import { logAudit } from "@/lib/audit";
 import type { ActieStaat } from "@/lib/acties";
 import { mageInloggen } from "@/lib/beveiliging";
@@ -88,6 +95,77 @@ export async function inloggen(
       ? "/portaal"
       : gevraagd;
   redirect(doel);
+}
+
+/**
+ * Inloggen als vereniging of informant: kies wie je bent, vul het wachtwoord in
+ * dat je bestuur deelt. Je komt alleen in het portaal, en blijft een jaar
+ * ingelogd.
+ */
+export async function inloggenAlsVereniging(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const kopregels = await headers();
+  if (!mageInloggen(kopregels)) {
+    return {
+      fout: "Inloggen kan zodra de beveiligde verbinding (https) is ingesteld. De publieke pagina's werken wel.",
+    };
+  }
+
+  const sleutel = String(formulier.get("wie") ?? "").trim();
+  const wachtwoord = String(formulier.get("wachtwoord") ?? "");
+  const verder = String(formulier.get("verder") ?? "");
+
+  if (!sleutel) return { fout: "Kies wie je bent." };
+  if (!wachtwoord) return { fout: "Vul het wachtwoord van je vereniging in." };
+
+  // De rem staat per vereniging, niet per bezoeker: het wachtwoord is gedeeld.
+  const sleutels = [pogingSleutel(sleutel)];
+  if (await isGeblokkeerd(sleutels)) {
+    return {
+      fout: "Te veel pogingen voor deze vereniging. Wacht een minuut en probeer het dan opnieuw.",
+    };
+  }
+
+  const uitkomst = await controleerGroepInlog(sleutel, wachtwoord);
+  if (uitkomst.soort === "onbekend") return { fout: "Kies wie je bent uit de lijst." };
+  if (uitkomst.soort === "geenWachtwoord") {
+    return {
+      fout: `Voor ${uitkomst.naam} is nog geen wachtwoord ingesteld. Vraag het SVR-bestuur om er een.`,
+    };
+  }
+  if (uitkomst.soort === "uit") {
+    return {
+      fout: `De toegang voor ${uitkomst.naam} staat op dit moment uit. Neem contact op met het SVR-bestuur.`,
+    };
+  }
+  if (uitkomst.soort === "fout") {
+    await telMisluktePoging(sleutels, GROEP_BLOKKADE_MS);
+    return { fout: "Dat wachtwoord klopt niet." };
+  }
+
+  await wisPogingen(sleutels);
+  const koekjes = await cookies();
+  koekjes.set(
+    SESSIE_COOKIE,
+    await maakGroepSessieCookie({
+      toegangId: uitkomst.toegang.id,
+      naam: uitkomst.toegang.naam,
+    }),
+    GROEP_SESSIE_COOKIE_OPTIES,
+  );
+
+  await logAudit({
+    gebruiker: `${uitkomst.toegang.naam} (portaal)`,
+    entiteit: "Portaaltoegang",
+    entiteitId: uitkomst.toegang.id,
+    actie: "ingelogd",
+    samenvatting: `${uitkomst.toegang.naam} is als vereniging ingelogd op het portaal`,
+  });
+
+  // Alleen binnen het portaal; /beheer is voor deze sessie toch dicht.
+  redirect(verder.startsWith("/portaal") ? verder : "/portaal");
 }
 
 export async function uitloggen(): Promise<void> {

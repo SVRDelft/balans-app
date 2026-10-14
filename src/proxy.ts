@@ -17,10 +17,10 @@ export async function proxy(request: NextRequest) {
     request.cookies.get(SESSIE_COOKIE)?.value,
   );
 
-  if (pathname === INLOGPAD) {
-    if (sessie) return NextResponse.redirect(new URL("/beheer", request.url));
-    return NextResponse.next();
-  }
+  // Op de inlogpagina zelf beslist de pagina: die kijkt in de database of een
+  // sessie nog klopt. Hier wegsturen op alleen het cookie gaf een lus bij een
+  // account of vereniging die intussen was uitgezet.
+  if (pathname === INLOGPAD) return NextResponse.next();
 
   if (!isBeschermd(pathname)) return NextResponse.next();
 

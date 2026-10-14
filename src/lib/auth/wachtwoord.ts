@@ -91,7 +91,23 @@ export function maakWachtwoord(groepen = 4): string {
   return uit;
 }
 
-/** Minimale eisen aan een zelfgekozen wachtwoord. */
+/**
+ * Eisen aan een wachtwoord voor het portaal: dat van een vereniging (gedeeld
+ * met haar hele bestuur) en dat van een persoonlijk verenigingsaccount. Minstens
+ * vier tekens, verder niets. Het portaal toont geen financiële gegevens aan een
+ * groepssessie, en daarom mag dit eenvoudiger dan bij het bestuur.
+ */
+export const PORTAAL_MINIMUM = 4;
+
+export function keurPortaalWachtwoord(wachtwoord: string): string | undefined {
+  if (wachtwoord.length < PORTAAL_MINIMUM) {
+    return `Kies een wachtwoord van minstens ${PORTAAL_MINIMUM} tekens.`;
+  }
+  if (wachtwoord.length > 200) return "Dat wachtwoord is wel erg lang.";
+  return undefined;
+}
+
+/** Minimale eisen aan een zelfgekozen wachtwoord van een bestuursaccount. */
 export function keurWachtwoord(wachtwoord: string): string | undefined {
   if (wachtwoord.length < 12) {
     return "Kies een wachtwoord van minstens 12 tekens. Een zin met spaties mag ook.";
