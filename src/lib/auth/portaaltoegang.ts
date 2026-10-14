@@ -22,6 +22,8 @@ export interface ToegangKeuze {
   sleutel: string;
   naam: string;
   groep: ToegangGroep;
+  /** De korte naam uit content/, alleen bij studieverenigingen. */
+  kort?: string;
 }
 
 export const pogingSleutel = (sleutel: string) => `portaal:${sleutel}`;
@@ -51,6 +53,7 @@ export async function haalToegangKeuzes(): Promise<{
     studieverenigingen: leesVerenigingen().map((vereniging) => ({
       sleutel: vereniging.slug,
       naam: vereniging.naam,
+      kort: vereniging.kort,
       groep: "studievereniging" as const,
     })),
     informanten: informanten.map((informant) => ({
@@ -142,5 +145,53 @@ export async function zetGroepActief(keuze: ToegangKeuze, actief: boolean) {
       actief,
     },
     update: { actief, naam: keuze.naam },
+  });
+}
+
+const vergelijkbaar = (tekst: string) =>
+  tekst
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+/**
+ * Welke relatie hoort waarschijnlijk bij deze keuze? Alleen een voorstel: het
+ * bestuur ziet het op Beheer › Portaaltoegang en legt het vast. Bij twijfel
+ * (geen of meer dan één kandidaat) geen voorstel.
+ */
+export function stelRelatieVoor(
+  keuze: Pick<ToegangKeuze, "naam" | "kort">,
+  relaties: { id: string; naam: string }[],
+): string | undefined {
+  const namen = [keuze.naam, keuze.kort].filter(Boolean).map((n) => vergelijkbaar(n!));
+  const woorden = vergelijkbaar(keuze.naam).split(" ");
+  const initialen = woorden.map((woord) => woord[0]).join("");
+
+  const pogingen: ((relatie: string) => boolean)[] = [
+    (relatie) => namen.includes(relatie),
+    (relatie) => relatie.length > 1 && woorden.includes(relatie),
+    (relatie) => woorden.length > 1 && relatie === initialen,
+  ];
+  for (const past of pogingen) {
+    const kandidaten = relaties.filter((relatie) => past(vergelijkbaar(relatie.naam)));
+    if (kandidaten.length === 1) return kandidaten[0].id;
+    if (kandidaten.length > 1) return undefined;
+  }
+  return undefined;
+}
+
+/** Legt vast van welke relatie deze login de openstaande facturen ziet. */
+export async function zetGroepRelatie(keuze: ToegangKeuze, relatieId: string | null) {
+  return db.portaaltoegang.upsert({
+    where: { sleutel: keuze.sleutel },
+    create: {
+      sleutel: keuze.sleutel,
+      groep: keuze.groep,
+      naam: keuze.naam,
+      relatieId,
+    },
+    update: { relatieId, naam: keuze.naam },
   });
 }

@@ -14,12 +14,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { vereisBestuur } from "@/lib/auth/server";
-import { haalToegangKeuzes, type ToegangKeuze } from "@/lib/auth/portaaltoegang";
+import {
+  haalToegangKeuzes,
+  stelRelatieVoor,
+  type ToegangKeuze,
+} from "@/lib/auth/portaaltoegang";
 import { formatteerTijdstempel } from "@/lib/datum";
 import { db } from "@/lib/db";
 
-import { verwijderInformant, zetToegangAanUit } from "./acties";
-import { InformantToevoegen, WachtwoordInstellen } from "./formulier";
+import { koppelAlleVoorstellen, verwijderInformant, zetToegangAanUit } from "./acties";
+import { InformantToevoegen, RelatieKoppeling, WachtwoordInstellen } from "./formulier";
 
 export const metadata: Metadata = { title: "Portaaltoegang" };
 
@@ -28,14 +32,23 @@ interface Regel extends ToegangKeuze {
   gewijzigdOp: Date | null;
   laatsteInlog: Date | null;
   actief: boolean;
+  relatieId: string | null;
+  voorstel: string | undefined;
 }
+
+type Relaties = { id: string; naam: string }[];
 
 export default async function PortaaltoegangPagina() {
   await vereisBestuur();
 
-  const [keuzes, rijen] = await Promise.all([
+  const [keuzes, rijen, relaties] = await Promise.all([
     haalToegangKeuzes(),
     db.portaaltoegang.findMany(),
+    db.relatie.findMany({
+      where: { actief: true },
+      orderBy: [{ type: "asc" }, { naam: "asc" }],
+      select: { id: true, naam: true },
+    }),
   ]);
   const perSleutel = new Map(rijen.map((rij) => [rij.sleutel, rij]));
   const metStand = (keuze: ToegangKeuze): Regel => {
@@ -46,8 +59,15 @@ export default async function PortaaltoegangPagina() {
       gewijzigdOp: rij?.wachtwoordGewijzigdOp ?? null,
       laatsteInlog: rij?.laatsteInlog ?? null,
       actief: rij?.actief ?? true,
+      relatieId: rij?.relatieId ?? null,
+      voorstel: rij?.relatieId ? undefined : stelRelatieVoor(keuze, relaties),
     };
   };
+  const studieverenigingen = keuzes.studieverenigingen.map(metStand);
+  const informanten = keuzes.informanten.map(metStand);
+  const openVoorstellen = [...studieverenigingen, ...informanten].filter(
+    (regel) => regel.voorstel,
+  ).length;
 
   return (
     <>
@@ -65,16 +85,37 @@ export default async function PortaaltoegangPagina() {
         accounts onder <em>Accounts</em> blijven gewoon werken.
       </Melding>
 
+      <Melding toon="info" className="mb-4" titel="Openstaande facturen">
+        Wie als vereniging inlogt, ziet de openstaande facturen van de relatie
+        bij <em>Facturen van</em>. Betaalde facturen en de rekening-courant
+        blijven voor een eigen account. Bij het instellen van een wachtwoord
+        wordt een duidelijk voorstel op naam meteen gekoppeld.
+        {openVoorstellen > 0 ? (
+          <div className="mt-3">
+            <BevestigKnop
+              actie={koppelAlleVoorstellen}
+              velden={{}}
+              vraag={`${openVoorstellen} voorstel(len) op naam vastleggen? Controleer ze eerst in de kolom Facturen van.`}
+              size="sm"
+            >
+              Alle {openVoorstellen} voorstellen opslaan
+            </BevestigKnop>
+          </div>
+        ) : null}
+      </Melding>
+
       <ToegangTabel
         titel="Studieverenigingen"
         toelichting="De lijst komt uit content/verenigingen.json."
-        regels={keuzes.studieverenigingen.map(metStand)}
+        regels={studieverenigingen}
+        relaties={relaties}
       />
 
       <ToegangTabel
         titel="Informanten"
         toelichting="Deze lijst beheer je hier zelf."
-        regels={keuzes.informanten.map(metStand)}
+        regels={informanten}
+        relaties={relaties}
         informanten
       />
     </>
@@ -85,11 +126,13 @@ function ToegangTabel({
   titel,
   toelichting,
   regels,
+  relaties,
   informanten = false,
 }: {
   titel: string;
   toelichting: string;
   regels: Regel[];
+  relaties: Relaties;
   informanten?: boolean;
 }) {
   return (
@@ -111,13 +154,14 @@ function ToegangTabel({
             <TableHead>Wachtwoord laatst gewijzigd</TableHead>
             <TableHead>Laatst ingelogd</TableHead>
             <TableHead>Wachtwoord instellen</TableHead>
+            <TableHead>Facturen van</TableHead>
             <TableHead className="text-right">Acties</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {regels.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-muted-foreground">
+              <TableCell colSpan={7} className="text-muted-foreground">
                 Nog niemand in deze lijst.
               </TableCell>
             </TableRow>
@@ -142,6 +186,15 @@ function ToegangTabel({
               </TableCell>
               <TableCell>
                 <WachtwoordInstellen sleutel={regel.sleutel} naam={regel.naam} />
+              </TableCell>
+              <TableCell>
+                <RelatieKoppeling
+                  sleutel={regel.sleutel}
+                  naam={regel.naam}
+                  relaties={relaties}
+                  huidig={regel.relatieId}
+                  voorstel={regel.voorstel}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap justify-end gap-2">

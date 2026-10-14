@@ -26,12 +26,15 @@ export async function GET(
   // Het bestuur mag elke factuur. Een vereniging alleen haar eigen facturen, en
   // nooit een concept: dat is nog niet verstuurd en hoort nog nergens rond te gaan.
   // Wie als vereniging inlogt met het gedeelde wachtwoord (rol PORTAAL) ziet
-  // nooit facturen: die horen bij de administratie, niet bij het portaal.
+  // alleen de openstaande facturen van de relatie die het bestuur eraan heeft
+  // gekoppeld.
+  const eigen = Boolean(sessie.relatieId) && sessie.relatieId === factuur.relatieId;
   const magErbij =
     sessie.rol === "BESTUUR" ||
-    (sessie.rol === "SV" &&
-      sessie.relatieId === factuur.relatieId &&
-      factuur.status !== "concept");
+    (sessie.rol === "SV" && eigen && factuur.status !== "concept") ||
+    (sessie.rol === "PORTAAL" &&
+      eigen &&
+      (factuur.status === "verstuurd" || factuur.status === "deels_betaald"));
   if (!magErbij) return new Response("Geen toegang", { status: 403 });
 
   const pdf = await maakFactuurPdf(id);

@@ -6,14 +6,38 @@ import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
 import { logAudit } from "@/lib/audit";
 import { vereisBestuur } from "@/lib/auth/server";
 import {
+  haalToegangKeuzes,
   maakSleutel,
+  stelRelatieVoor,
   zetGroepActief,
+  zetGroepRelatie,
   zetGroepWachtwoord,
   zoekKeuze,
+  type ToegangKeuze,
 } from "@/lib/auth/portaaltoegang";
 import { keurPortaalWachtwoord } from "@/lib/auth/wachtwoord";
 import { leesVerenigingen } from "@/lib/content";
 import { db } from "@/lib/db";
+
+const haalRelaties = () =>
+  db.relatie.findMany({
+    where: { actief: true },
+    select: { id: true, naam: true },
+  });
+
+/** Nog niet gekoppeld en er is een duidelijk voorstel? Dan dat vastleggen. */
+async function koppelVoorstel(keuze: ToegangKeuze): Promise<string | undefined> {
+  const bestaand = await db.portaaltoegang.findUnique({
+    where: { sleutel: keuze.sleutel },
+    select: { relatieId: true },
+  });
+  if (bestaand?.relatieId) return undefined;
+  const relaties = await haalRelaties();
+  const voorstel = stelRelatieVoor(keuze, relaties);
+  if (!voorstel) return undefined;
+  await zetGroepRelatie(keuze, voorstel);
+  return relaties.find((relatie) => relatie.id === voorstel)?.naam;
+}
 
 function vernieuw() {
   revalidatePath("/beheer/portaaltoegang");
@@ -40,17 +64,24 @@ export async function stelToegangWachtwoordIn(
     if (bezwaar) return { fout: bezwaar };
 
     const gezet = await zetGroepWachtwoord(keuze, wachtwoord);
+    const gekoppeld = await koppelVoorstel(keuze);
     await logAudit({
       gebruiker: sessie.naam,
       entiteit: "Portaaltoegang",
       entiteitId: gezet.id,
       actie: "wachtwoord ingesteld",
       // Het wachtwoord zelf komt nooit in het auditlog.
-      samenvatting: `Nieuw gedeeld wachtwoord ingesteld voor ${keuze.naam}`,
+      samenvatting: `Nieuw gedeeld wachtwoord ingesteld voor ${keuze.naam}${
+        gekoppeld ? `; facturen van relatie ${gekoppeld}` : ""
+      }`,
     });
 
     vernieuw();
-    return { melding: `Wachtwoord voor ${keuze.naam} ingesteld. Geef het door aan hun bestuur.` };
+    return {
+      melding: `Wachtwoord voor ${keuze.naam} ingesteld${
+        gekoppeld ? ` en gekoppeld aan de facturen van ${gekoppeld}` : ""
+      }. Geef het door aan hun bestuur.`,
+    };
   });
 }
 
@@ -152,5 +183,62 @@ export async function verwijderInformant(
 
     vernieuw();
     return { melding: `${informant.naam} staat niet meer in de lijst.` };
+  });
+}
+
+/** Van welke relatie ziet deze login de openstaande facturen? Leeg: van geen. */
+export async function koppelToegangRelatie(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    const keuze = await zoekKeuze(leesTekst(formulier, "sleutel") ?? "");
+    if (!keuze) return { fout: "Deze vereniging staat niet in de lijst." };
+    const relatieId = leesTekst(formulier, "relatieId") || null;
+    const relatie = relatieId
+      ? await db.relatie.findUnique({ where: { id: relatieId }, select: { naam: true } })
+      : null;
+    if (relatieId && !relatie) return { fout: "Die relatie bestaat niet meer." };
+
+    const toegang = await zetGroepRelatie(keuze, relatieId);
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Portaaltoegang",
+      entiteitId: toegang.id,
+      actie: "facturen gekoppeld",
+      samenvatting: relatie
+        ? `${keuze.naam} ziet de openstaande facturen van ${relatie.naam}`
+        : `${keuze.naam} ziet geen facturen meer`,
+    });
+
+    vernieuw();
+    return { melding: relatie ? "Gekoppeld." : "Ontkoppeld." };
+  });
+}
+
+/** Elke nog niet gekoppelde regel met een duidelijk voorstel in één keer koppelen. */
+export async function koppelAlleVoorstellen(): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    const { studieverenigingen, informanten } = await haalToegangKeuzes();
+    const gekoppeld: string[] = [];
+    for (const keuze of [...studieverenigingen, ...informanten]) {
+      const relatie = await koppelVoorstel(keuze);
+      if (relatie) gekoppeld.push(`${keuze.naam} → ${relatie}`);
+    }
+    if (gekoppeld.length === 0) return { melding: "Er viel niets meer te koppelen." };
+
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Portaaltoegang",
+      entiteitId: "alle",
+      actie: "facturen gekoppeld",
+      samenvatting: `Op naam gekoppeld: ${gekoppeld.join(", ")}`,
+    });
+    vernieuw();
+    return { melding: `${gekoppeld.length} gekoppeld.` };
   });
 }

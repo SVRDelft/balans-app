@@ -47,6 +47,12 @@ export interface GroepSessie {
   /** De vereniging of informant, zoals in het keuzemenu. */
   naam: string;
   rol: "PORTAAL";
+  /**
+   * De relatie waarvan deze login de openstaande facturen ziet. Staat nooit in
+   * het cookie: haalSessie() leest hem elke keer uit de database, zodat een
+   * gewijzigde koppeling meteen geldt.
+   */
+  relatieId?: string;
   /** Epoch in milliseconden. */
   verlooptOp: number;
   /**

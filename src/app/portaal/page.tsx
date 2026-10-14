@@ -99,12 +99,26 @@ export default async function PortaalPagina() {
     haalDocumenten(),
     // Alleen een vereniging heeft een eigen rekening; het bestuur ziet die in de
     // administratie, niet hier.
-    // Groepssessies (inloggen als vereniging) zien geen facturen; dat zijn
-    // gegevens uit de administratie.
-    sessie.rol === "SV" && sessie.relatieId
+    // Wie als vereniging inlogt, ziet de openstaande facturen van de relatie
+    // die het bestuur eraan heeft gekoppeld.
+    sessie.rol !== "BESTUUR" && sessie.relatieId
       ? haalEigenRekening(sessie.relatieId)
       : null,
   ]);
+  // Het gedeelde wachtwoord laat alleen zien wat nog betaald moet worden; de
+  // hele geschiedenis staat bij een eigen account.
+  const alleenOpen = sessie.rol === "PORTAAL";
+  if (rekening && alleenOpen) {
+    rekening.regels = rekening.regels.filter(
+      (regel) =>
+        regel.openstaandCenten !== 0 &&
+        (regel.status === "verstuurd" || regel.status === "deels_betaald"),
+    );
+    rekening.openstaandCenten = rekening.regels.reduce(
+      (som, regel) => som + regel.openstaandCenten,
+      0,
+    );
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
@@ -139,12 +153,15 @@ export default async function PortaalPagina() {
       {rekening ? (
         <section className="mb-10">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-            <Receipt className="size-5" /> Jullie facturen
+            <Receipt className="size-5" />{" "}
+            {alleenOpen ? "Openstaande facturen" : "Jullie facturen"}
           </h2>
 
           {rekening.regels.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Er staan nog geen facturen voor jullie klaar.
+              {alleenOpen
+                ? "Er staan geen facturen meer open. Alles is betaald."
+                : "Er staan nog geen facturen voor jullie klaar."}
             </p>
           ) : (
             <>
@@ -221,7 +238,7 @@ export default async function PortaalPagina() {
             </>
           )}
 
-          {rekening.rekeningSaldoCenten !== 0 ? (
+          {!alleenOpen && rekening.rekeningSaldoCenten !== 0 ? (
             <div className="mt-3 rounded-xl border border-border bg-card p-4">
               <p className="font-semibold">
                 {rekening.rekeningSaldoCenten > 0

@@ -84,3 +84,33 @@ describe("factuur-PDF", () => {
     expect((await haal()).status).toBe(404);
   });
 });
+
+describe("factuur-PDF bij inloggen als vereniging", () => {
+  const groep = (relatieId?: string) => ({
+    soort: "groep", toegangId: "t1", naam: "Lijst Bèta", rol: "PORTAAL", relatieId,
+  });
+
+  it("geeft een openstaande factuur van de gekoppelde relatie", async () => {
+    mocks.sessie.mockResolvedValue(groep("beta"));
+    expect((await haal()).status).toBe(200);
+    mocks.factuur.mockResolvedValue({ relatieId: "beta", status: "deels_betaald" });
+    expect((await haal()).status).toBe(200);
+  });
+
+  it("weigert een betaalde factuur of een concept", async () => {
+    mocks.sessie.mockResolvedValue(groep("beta"));
+    for (const status of ["betaald", "concept", "gecrediteerd", "oninbaar"]) {
+      mocks.factuur.mockResolvedValue({ relatieId: "beta", status });
+      expect((await haal()).status).toBe(403);
+    }
+    expect(mocks.pdf).not.toHaveBeenCalled();
+  });
+
+  it("weigert zonder koppeling of bij een andere relatie", async () => {
+    mocks.sessie.mockResolvedValue(groep(undefined));
+    expect((await haal()).status).toBe(403);
+    mocks.sessie.mockResolvedValue(groep("curius"));
+    expect((await haal()).status).toBe(403);
+    expect(mocks.pdf).not.toHaveBeenCalled();
+  });
+});

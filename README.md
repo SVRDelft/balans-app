@@ -84,7 +84,7 @@ Boekingen wissen doe je apart bij *Boekjaren*, ook met je wachtwoord.
 |---|---|---|
 | **SVR-bestuur** | de administratie (`/beheer`) en het portaal | per persoon een account |
 | **Vereniging** | alleen het portaal, en alleen de eigen relatie | per vereniging één account op het functionele adres, bijvoorbeeld `thesaurier@curius.nl`. Ook ORAS en Lijst Bèta kunnen er een krijgen; zij ontvangen immers ook facturen |
-| **Als vereniging** (portaal) | alleen het portaal; ziet wat iedereen ziet, geen facturen | geen account maar een keuze uit de lijst en één gedeeld wachtwoord per vereniging of informant, in te stellen bij *Beheer › Portaaltoegang*. Blijft een jaar ingelogd |
+| **Als vereniging** (portaal) | alleen het portaal, plus de openstaande facturen van de relatie die het bestuur eraan koppelt | geen account maar een keuze uit de lijst en één gedeeld wachtwoord per vereniging of informant, in te stellen bij *Beheer › Portaaltoegang*. Blijft een jaar ingelogd |
 
 Niemand kan zichzelf aanmelden. Accounts worden niet verwijderd maar uitgezet,
 zodat het auditlog blijft kloppen. Vergeet iemand zijn wachtwoord, dan geeft het

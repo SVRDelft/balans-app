@@ -39,6 +39,7 @@ export async function haalSessie(): Promise<Sessie | null> {
         actief: true,
         wachtwoordHash: true,
         wachtwoordGewijzigdOp: true,
+        relatieId: true,
       },
     });
     if (!toegang?.actief || !toegang.wachtwoordHash) return null;
@@ -48,7 +49,11 @@ export async function haalSessie(): Promise<Sessie | null> {
     ) {
       return null;
     }
-    return { ...sessie, naam: toegang.naam };
+    return {
+      ...sessie,
+      naam: toegang.naam,
+      relatieId: toegang.relatieId ?? undefined,
+    };
   }
 
   // Het cookie staat 30 dagen; een account dat is uitgezet of een rol die is
@@ -93,19 +98,19 @@ export async function vereisPortaal(): Promise<Sessie> {
 /**
  * De vereniging waarvan deze sessie gegevens mag zien. Het bestuur mag alles
  * zien (undefined betekent: geen beperking); een SV-account alleen zichzelf.
- * Een groepssessie hoort bij geen enkele relatie en mag dus niets zien: dat
- * geeft een fout in plaats van "geen beperking".
+ * Een groepssessie alleen de relatie die het bestuur eraan heeft gekoppeld; is
+ * er geen koppeling, dan geeft dat een fout in plaats van "geen beperking".
  */
 export function beperkingOpRelatie(sessie: Sessie): string | undefined {
   if (sessie.rol === "BESTUUR") return undefined;
-  if (sessie.rol === "SV" && !isGroepSessie(sessie)) return sessie.relatieId;
+  if (sessie.relatieId) return sessie.relatieId;
   throw new Error("Deze sessie mag geen gegevens van een vereniging inzien.");
 }
 
 /** Gooit als deze sessie niet bij deze vereniging hoort. */
 export function vereisEigenRelatie(sessie: Sessie, relatieId: string): void {
   if (sessie.rol === "BESTUUR") return;
-  if (isGroepSessie(sessie) || sessie.relatieId !== relatieId) {
+  if (!sessie.relatieId || sessie.relatieId !== relatieId) {
     throw new Error("Deze gegevens horen bij een andere vereniging.");
   }
 }

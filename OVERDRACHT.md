@@ -32,8 +32,10 @@ Op `/inloggen` staan twee tabbladen:
   *Studieverenigingen* of *Informanten* (ORAS, Lijst Bèta) — en vul het
   wachtwoord in dat het hele verenigingsbestuur deelt. Je komt alleen in het
   portaal (mededelingen, vergaderingen, agenda's, notulen, documenten), nooit in
-  de administratie, en je blijft een jaar ingelogd. Iedereen die zo inlogt, ziet
-  hetzelfde; facturen per vereniging zie je alleen met een eigen account.
+  de administratie, en je blijft een jaar ingelogd. Daarnaast zie je de
+  **openstaande facturen** van je eigen vereniging (en kun je die als PDF
+  downloaden); betaalde facturen en de rekening-courant staan alleen bij een
+  eigen account.
 - **Met je eigen account**: e-mailadres en wachtwoord, precies zoals altijd. Zo
   logt het SVR-bestuur in, en de verenigingen die een persoonlijk account hebben.
 
@@ -42,6 +44,12 @@ vereniging en per informant zie je wanneer het wachtwoord voor het laatst is
 gewijzigd en wanneer er voor het laatst is ingelogd, en kun je de toegang
 aan- of uitzetten. Informanten voeg je daar ook toe of haal je weg; de
 studieverenigingen komen uit `content/verenigingen.json`.
+
+In de kolom **Facturen van** staat van welke relatie in de administratie een
+vereniging de openstaande facturen ziet. De app stelt die koppeling op naam
+voor (Christiaan Huygens → CH, Lijst Bèta → Bèta) en legt hem vast zodra je een
+wachtwoord instelt, of in één keer met *Alle voorstellen opslaan*. Controleer
+de kolom even; staat er *Geen facturen*, dan ziet die vereniging er geen.
 
 **Een vereniging is het wachtwoord vergeten.** Ga naar *Beheer ›
 Portaaltoegang*, typ bij die vereniging een nieuw wachtwoord in het veld

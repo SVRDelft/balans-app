@@ -14,6 +14,7 @@ interface Toegang {
   wachtwoordGewijzigdOp: Date | null;
   laatsteInlog: Date | null;
   actief: boolean;
+  relatieId?: string | null;
 }
 interface Gebruiker {
   id: string;
@@ -69,8 +70,17 @@ vi.mock("@/lib/content", () => ({
   leesVerenigingen: () => [
     { slug: "leeghwater", naam: "W.S.V. 'Leeghwater'" },
     { slug: "curius", naam: "W.i.s.V. Christiaan Huygens" },
+    { slug: "christiaan-huygens", naam: "Christiaan Huygens", kort: "CH" },
   ],
 }));
+const RELATIES = [
+  { id: "r-ch", naam: "CH" },
+  { id: "r-leeghwater", naam: "Leeghwater" },
+  { id: "r-oras", naam: "ORAS" },
+  { id: "r-beta", naam: "Bèta" },
+  { id: "r-vsv", naam: "VSV" },
+];
+
 vi.mock("@/lib/db", () => {
   const { toegangen, gebruikers, pogingen } = mocks;
   let teller = 0;
@@ -132,6 +142,11 @@ vi.mock("@/lib/db", () => {
           return toegangen.splice(plek, 1)[0];
         },
       },
+      relatie: {
+        findMany: async () => RELATIES,
+        findUnique: async ({ where }: { where: { id: string } }) =>
+          RELATIES.find((relatie) => relatie.id === where.id) ?? null,
+      },
       gebruiker: {
         findUnique: async ({ where }: { where: { id?: string; email?: string } }) =>
           gebruikers.find((g) => (where.id ? g.id === where.id : g.email === where.email)) ??
@@ -178,8 +193,12 @@ vi.mock("@/lib/db", () => {
 
 import { inloggen, inloggenAlsVereniging } from "@/app/inloggen/acties";
 import { wijzigWachtwoord } from "@/app/wachtwoord/acties";
-import { stelToegangWachtwoordIn } from "@/app/beheer/portaaltoegang/acties";
+import {
+  koppelToegangRelatie,
+  stelToegangWachtwoordIn,
+} from "@/app/beheer/portaaltoegang/acties";
 import { beperkingOpRelatie, haalSessie, vereisBestuur, vereisPortaal } from "./server";
+import { stelRelatieVoor } from "./portaaltoegang";
 import { SESSIE_COOKIE, leesSessieCookie } from "./sessie";
 import { hashWachtwoord } from "./wachtwoord";
 
@@ -368,10 +387,10 @@ describe("een portaalsessie komt nooit in de administratie", () => {
     expect(mocks.toegangen.find((t) => t.sleutel === "oras")?.wachtwoordHash).toBeNull();
   });
 
-  it("vraagt nooit gegevens van een relatie op", async () => {
+  it("ziet alleen de eigen gekoppelde relatie, nooit alles", async () => {
     await logInAlsLeeghwater();
     const sessie = await haalSessie();
-    expect(() => beperkingOpRelatie(sessie!)).toThrow();
+    expect(beperkingOpRelatie(sessie!)).toBe("r-leeghwater");
   });
 
   it("een vervalst cookie met rol BESTUUR en soort groep telt niet", async () => {
@@ -483,5 +502,58 @@ describe("wachtwoorden van een vereniging", () => {
       formulier({ huidig: "een-lang-bestuurswachtwoord", nieuw: "kort", herhaling: "kort" }),
     );
     expect(bestuur.fout).toBeTruthy();
+  });
+});
+
+describe("openstaande facturen bij inloggen als vereniging", () => {
+  it("stelt de relatie op naam voor, en twijfelt liever dan te gokken", () => {
+    expect(stelRelatieVoor({ naam: "Christiaan Huygens", kort: "CH" }, RELATIES)).toBe("r-ch");
+    expect(stelRelatieVoor({ naam: "Christiaan Huygens" }, RELATIES)).toBe("r-ch");
+    expect(stelRelatieVoor({ naam: "Lijst Bèta" }, RELATIES)).toBe("r-beta");
+    expect(stelRelatieVoor({ naam: "VSV 'Leonardo da Vinci'", kort: "VSV" }, RELATIES)).toBe("r-vsv");
+    expect(stelRelatieVoor({ naam: "ORAS" }, RELATIES)).toBe("r-oras");
+    expect(stelRelatieVoor({ naam: "Onbekend" }, RELATIES)).toBeUndefined();
+    expect(
+      stelRelatieVoor({ naam: "Delta" }, [
+        { id: "a", naam: "Delta" },
+        { id: "b", naam: "delta" },
+      ]),
+    ).toBeUndefined();
+  });
+
+  it("koppelt bij het instellen van een wachtwoord, en de sessie krijgt die relatie", async () => {
+    await zetBestuurIn();
+    const uitkomst = await stelToegangWachtwoordIn({}, formulier({ sleutel: "oras", wachtwoord: "boot" }));
+    expect(uitkomst.melding).toContain("gekoppeld aan de facturen van ORAS");
+
+    mocks.koekjes.clear();
+    await omleidingVan(alsVereniging("oras", "boot"));
+    const sessie = await haalSessie();
+    expect(sessie).toMatchObject({ soort: "groep", relatieId: "r-oras" });
+    expect(beperkingOpRelatie(sessie!)).toBe("r-oras");
+    // De koppeling staat niet in het cookie: dat kan dus niet vervalst worden.
+    expect(await leesSessieCookie(mocks.koekjes.get(SESSIE_COOKIE))).not.toHaveProperty("relatieId");
+  });
+
+  it("een gewijzigde koppeling geldt meteen; ontkoppeld betekent geen facturen", async () => {
+    await zetBestuurIn();
+    await stelToegangWachtwoordIn({}, formulier({ sleutel: "oras", wachtwoord: "boot" }));
+    await koppelToegangRelatie({}, formulier({ sleutel: "oras", relatieId: "" }));
+
+    mocks.koekjes.clear();
+    await omleidingVan(alsVereniging("oras", "boot"));
+    const sessie = await haalSessie();
+    expect(sessie?.relatieId).toBeUndefined();
+    expect(() => beperkingOpRelatie(sessie!)).toThrow();
+  });
+
+  it("alleen het bestuur kan koppelen", async () => {
+    await zetBestuurIn();
+    await stelToegangWachtwoordIn({}, formulier({ sleutel: "leeghwater", wachtwoord: "boot" }));
+    mocks.koekjes.clear();
+    await omleidingVan(alsVereniging("leeghwater", "boot"));
+    await expect(
+      koppelToegangRelatie({}, formulier({ sleutel: "leeghwater", relatieId: "r-oras" })),
+    ).rejects.toThrow("REDIRECT:/portaal");
   });
 });
