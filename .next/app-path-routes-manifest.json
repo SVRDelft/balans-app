@@ -39,6 +39,7 @@
   "/beheer/overdracht/page": "/beheer/overdracht",
   "/beheer/page": "/beheer",
   "/beheer/portaal/page": "/beheer/portaal",
+  "/beheer/portaaltoegang/page": "/beheer/portaaltoegang",
   "/beheer/relaties/[id]/page": "/beheer/relaties/[id]",
   "/beheer/relaties/nieuw/page": "/beheer/relaties/nieuw",
   "/beheer/relaties/page": "/beheer/relaties",

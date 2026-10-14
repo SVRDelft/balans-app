@@ -1,6 +1,6 @@
 {
   "node": {
-    "60ceabd44e0b1d9c12383e39e2dcebaac2e521fdae": {
+    "60abf514e8420526ee54e27d76c4936427a2193c66": {
       "workers": {
         "app/inloggen/page": {
           "moduleId": 7716,
@@ -9,6 +9,17 @@
         }
       },
       "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "60a6152eb7aee6aa2c7332ef7e30446def6d3e47b1": {
+      "workers": {
+        "app/inloggen/page": {
+          "moduleId": 7716,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     }
   },

@@ -39,6 +39,7 @@
   "/beheer/overdracht/page": "app/beheer/overdracht/page.js",
   "/beheer/page": "app/beheer/page.js",
   "/beheer/portaal/page": "app/beheer/portaal/page.js",
+  "/beheer/portaaltoegang/page": "app/beheer/portaaltoegang/page.js",
   "/beheer/relaties/[id]/page": "app/beheer/relaties/[id]/page.js",
   "/beheer/relaties/nieuw/page": "app/beheer/relaties/nieuw/page.js",
   "/beheer/relaties/page": "app/beheer/relaties/page.js",

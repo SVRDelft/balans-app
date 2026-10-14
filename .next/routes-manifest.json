@@ -295,6 +295,12 @@
       "namedRegex": "^/beheer/portaal(?:/)?$"
     },
     {
+      "page": "/beheer/portaaltoegang",
+      "regex": "^/beheer/portaaltoegang(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/beheer/portaaltoegang(?:/)?$"
+    },
+    {
       "page": "/beheer/relaties",
       "regex": "^/beheer/relaties(?:/)?$",
       "routeKeys": {},

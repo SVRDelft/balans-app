@@ -1,6 +1,6 @@
 {
   "node": {
-    "00c2580dcf53e5958a538113ee0755b9782d015eac": {
+    "00507728f7b84128ebd48dde2b64598e9346e11f63": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 4863,
@@ -11,7 +11,18 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60ceabd44e0b1d9c12383e39e2dcebaac2e521fdae": {
+    "60a6152eb7aee6aa2c7332ef7e30446def6d3e47b1": {
+      "workers": {
+        "app/portaal/page": {
+          "moduleId": 4863,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "60abf514e8420526ee54e27d76c4936427a2193c66": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 4863,
