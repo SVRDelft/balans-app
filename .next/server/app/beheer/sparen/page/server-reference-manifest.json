@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f148cb531ce2eba364ce058e0552b6a6e152ff44": {
+    "00c2580dcf53e5958a538113ee0755b9782d015eac": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "600921c490b38297bb6a93232cb51d4f427315067c": {
+    "60ceabd44e0b1d9c12383e39e2dcebaac2e521fdae": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "405914d95e039c9da68044f81fa6826a8baab19d3e": {
+    "401121dee3ebe4f6a84e6deab85409b1040cd6800d": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -33,7 +33,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60ff54a7f29836529650ace4e11250b97e45900806": {
+    "60ba604a3d4eb6caccc5a4a0c7048a6f5ba7b9306f": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -44,7 +44,7 @@
       "exportedName": "bewaarBanksaldo",
       "filename": "src/app/beheer/bank/acties.ts"
     },
-    "60e7b80418f69f8c515f7262e7a79c55b74cbad3ca": {
+    "60b1a1c3bae8be5309add809228aea6e81927245c1": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -55,7 +55,7 @@
       "exportedName": "verwijderBanksaldo",
       "filename": "src/app/beheer/bank/acties.ts"
     },
-    "600317cf52e41735c2751d1893a4c0e2903bcd6072": {
+    "603dd0a7080d7f8221e6ce749dda7298fa38d4b4a5": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -66,7 +66,7 @@
       "exportedName": "bewaarSpaarmutatie",
       "filename": "src/app/beheer/sparen/acties.ts"
     },
-    "6065e3f45e3849114272a656cedb7ed1e14ddcb74c": {
+    "607925891cc4b9edce3e0612eedc4512dfa93a47e9": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
