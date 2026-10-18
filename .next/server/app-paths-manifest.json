@@ -1,7 +1,10 @@
 {
   "/(publiek)/bestuur-worden/page": "app/(publiek)/bestuur-worden/page.js",
+  "/(publiek)/bestuur/page": "app/(publiek)/bestuur/page.js",
+  "/(publiek)/geschiedenis/page": "app/(publiek)/geschiedenis/page.js",
   "/(publiek)/page": "app/(publiek)/page.js",
   "/(publiek)/privacy/page": "app/(publiek)/privacy/page.js",
+  "/(publiek)/wat-we-doen/page": "app/(publiek)/wat-we-doen/page.js",
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/api/bijlagen/[id]/route": "app/api/bijlagen/[id]/route.js",
@@ -50,6 +53,7 @@
   "/beheer/verenigingen/[id]/page": "app/beheer/verenigingen/[id]/page.js",
   "/beheer/verenigingen/page": "app/beheer/verenigingen/page.js",
   "/beheer/voorraad/page": "app/beheer/voorraad/page.js",
+  "/delen/[sleutel]/route": "app/delen/[sleutel]/route.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/icon.svg/route": "app/icon.svg/route.js",
   "/inloggen/page": "app/inloggen/page.js",

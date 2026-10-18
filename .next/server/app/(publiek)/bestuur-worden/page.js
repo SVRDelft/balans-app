@@ -1,7 +1,7 @@
 var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/(publiek)/bestuur-worden/page.js")
 R.c("server/chunks/ssr/[root-of-the-server]__18sbw9v._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
-R.c("server/chunks/ssr/[root-of-the-server]__1s2-4b3._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0o905p9._.js")
 R.c("server/chunks/ssr/[root-of-the-server]__038l5oq._.js")
 R.c("server/chunks/ssr/node_modules_next_dist_compiled_@opentelemetry_api_index_1oy1nwh.js")
 R.c("server/chunks/ssr/src_app_layout_tsx_0r5yz5t._.js")

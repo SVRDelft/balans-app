@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
+    "00932ce8ee89f87284d36f61d1f1e5ae8d613e8a2e": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
-      "workers": {
-        "app/beheer/uitgaven/page": {
-          "moduleId": 69834,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
+    "60755c6525056423a9d005857e899e79d441ff14ca": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,
@@ -33,7 +22,18 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4053178a88623940675b97a495370a48ccbf23b6b2": {
+    "60b4ed86c8c28922bd3b9ce97abdb900edba9a89c2": {
+      "workers": {
+        "app/beheer/uitgaven/page": {
+          "moduleId": 69834,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "409d53a3db918facb65611409bbb82ff150376033b": {
       "workers": {
         "app/beheer/uitgaven/page": {
           "moduleId": 69834,

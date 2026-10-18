@@ -1,7 +1,10 @@
 {
   "/(publiek)/bestuur-worden/page": "/bestuur-worden",
+  "/(publiek)/bestuur/page": "/bestuur",
+  "/(publiek)/geschiedenis/page": "/geschiedenis",
   "/(publiek)/page": "/",
   "/(publiek)/privacy/page": "/privacy",
+  "/(publiek)/wat-we-doen/page": "/wat-we-doen",
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
   "/api/bijlagen/[id]/route": "/api/bijlagen/[id]",
@@ -50,6 +53,7 @@
   "/beheer/verenigingen/[id]/page": "/beheer/verenigingen/[id]",
   "/beheer/verenigingen/page": "/beheer/verenigingen",
   "/beheer/voorraad/page": "/beheer/voorraad",
+  "/delen/[sleutel]/route": "/delen/[sleutel]",
   "/favicon.ico/route": "/favicon.ico",
   "/icon.svg/route": "/icon.svg",
   "/inloggen/page": "/inloggen",

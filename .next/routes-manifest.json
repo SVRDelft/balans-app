@@ -117,6 +117,14 @@
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/beheer/verenigingen/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/delen/[sleutel]",
+      "regex": "^/delen/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPsleutel": "nxtPsleutel"
+      },
+      "namedRegex": "^/delen/(?<nxtPsleutel>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -343,6 +351,12 @@
       "namedRegex": "^/beheer/voorraad(?:/)?$"
     },
     {
+      "page": "/bestuur",
+      "regex": "^/bestuur(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/bestuur(?:/)?$"
+    },
+    {
       "page": "/bestuur-worden",
       "regex": "^/bestuur\\-worden(?:/)?$",
       "routeKeys": {},
@@ -353,6 +367,12 @@
       "regex": "^/favicon\\.ico(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/geschiedenis",
+      "regex": "^/geschiedenis(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/geschiedenis(?:/)?$"
     },
     {
       "page": "/icon.svg",
@@ -395,6 +415,12 @@
       "regex": "^/wachtwoord(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/wachtwoord(?:/)?$"
+    },
+    {
+      "page": "/wat-we-doen",
+      "regex": "^/wat\\-we\\-doen(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/wat\\-we\\-doen(?:/)?$"
     }
   ],
   "dataRoutes": [],

@@ -5,7 +5,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 87457,
+      "htmlSize": 61012,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -86,11 +86,39 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/bestuur": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 17256,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/bestuur",
+      "dataRoute": "/bestuur.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/bestuur-worden": {
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 18053,
+      "htmlSize": 18094,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -146,6 +174,34 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/geschiedenis": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 27980,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/geschiedenis",
+      "dataRoute": "/geschiedenis.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/icon.svg": {
       "initialHeaders": {
         "cache-control": "public, max-age=0, must-revalidate",
@@ -182,7 +238,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 16481,
+      "htmlSize": 16522,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -269,13 +325,41 @@
         "x-next-revalidated-tags",
         "x-next-revalidate-tag-token"
       ]
+    },
+    "/wat-we-doen": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 39110,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/wat-we-doen",
+      "dataRoute": "/wat-we-doen.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
     }
   },
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "68e76723ebb175f30a9d44443f630fbb",
-    "previewModeSigningKey": "3cbd7e5d26e9e5a5bede91992d304f352e1700dbea1b5b22f83e14625b5f2a01",
-    "previewModeEncryptionKey": "fdc376f6c941f716aab814caeb58c75227c9f8523f5c2050d5d2dccbe187ee70"
+    "previewModeId": "58c26617bfb368c777ad2520e62a95d0",
+    "previewModeSigningKey": "02b49dc7dbaaeba693e97c73efe1e9ae18c412a5583d201d14ad9ee6e259b016",
+    "previewModeEncryptionKey": "7c0611a1bd4f1ade70d3b3a22863c4a8305560e1948c6d47f181b5dc0d7e0b8e"
   }
 }

@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
+    "00932ce8ee89f87284d36f61d1f1e5ae8d613e8a2e": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
-      "workers": {
-        "app/beheer/accounts/page": {
-          "moduleId": 99773,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
+    "60755c6525056423a9d005857e899e79d441ff14ca": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +22,18 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4053178a88623940675b97a495370a48ccbf23b6b2": {
+    "60b4ed86c8c28922bd3b9ce97abdb900edba9a89c2": {
+      "workers": {
+        "app/beheer/accounts/page": {
+          "moduleId": 99773,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "409d53a3db918facb65611409bbb82ff150376033b": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "606c95c060ca31ec0e211dcfd30b04e576200dc3cb": {
+    "60d67826b746ed363cc1e0bd9612cfc1a4ed969cfa": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -55,18 +55,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60531664bf968e28bb477569207add5c64bd6da45f": {
-      "workers": {
-        "app/beheer/accounts/page": {
-          "moduleId": 99773,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "zetActief",
-      "filename": "src/app/beheer/accounts/acties.ts"
-    },
-    "60681085473802cbc0f719c7d942f5615a4901a619": {
+    "6003be4e2f5ea56ae72fa9a85a207a37845e91756a": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -75,6 +64,17 @@
         }
       },
       "exportedName": "nieuwWachtwoord",
+      "filename": "src/app/beheer/accounts/acties.ts"
+    },
+    "60abb5d5dde2d63a07883783f78b6e1837f942e4b4": {
+      "workers": {
+        "app/beheer/accounts/page": {
+          "moduleId": 99773,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "zetActief",
       "filename": "src/app/beheer/accounts/acties.ts"
     }
   },

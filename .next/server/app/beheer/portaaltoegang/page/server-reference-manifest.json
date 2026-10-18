@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
+    "00932ce8ee89f87284d36f61d1f1e5ae8d613e8a2e": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
+    "60755c6525056423a9d005857e899e79d441ff14ca": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -33,7 +22,18 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4053178a88623940675b97a495370a48ccbf23b6b2": {
+    "60b4ed86c8c28922bd3b9ce97abdb900edba9a89c2": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "409d53a3db918facb65611409bbb82ff150376033b": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "009216af0bed549c4c668a30296d4e6245d3145816": {
+    "008166d27c4ca414c093ddb89da7b94b77466c0fe3": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -55,18 +55,7 @@
       "exportedName": "koppelAlleVoorstellen",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "6010a15258e4f2e95d78836290674636e93d573921": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "voegInformantToe",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "603722a283a9447e9eb63942a86eb13d5b94a24fa5": {
+    "600de7a942d7f7b37655b6e8cb6e5639788c6d8188": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -77,7 +66,7 @@
       "exportedName": "stelToegangWachtwoordIn",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "608b4d8d329065ee9d73b68d9e25481a1b01782c6e": {
+    "60349a2c06b4c110012624fef4013a175f04395f33": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -85,10 +74,10 @@
           "codeHash": null
         }
       },
-      "exportedName": "verwijderInformant",
+      "exportedName": "zetToegangAanUit",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "60a6cbc555a66d58093856ecf0e6c1a640eecff6a4": {
+    "605d91e754ae72a9cbd9fddc186aa2e7a4ddf0430b": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -99,7 +88,7 @@
       "exportedName": "koppelToegangRelatie",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "60fc26a4936946292162dc5edfc75b6814a12f9c30": {
+    "60adc6ae9ce466847ea0a177af9d11fcb3b103222c": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -107,7 +96,18 @@
           "codeHash": null
         }
       },
-      "exportedName": "zetToegangAanUit",
+      "exportedName": "verwijderInformant",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60bce77c6bad104112c0912358511e86cacbd50715": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "voegInformantToe",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     }
   },

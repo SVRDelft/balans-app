@@ -1,9 +1,20 @@
 {
   "node": {
-    "00a194c77890703c13eef02b3feb06e43b8ea506f9": {
+    "40209a9e5610977485a768937dddf3be7fde5d70a8": {
       "workers": {
         "app/portaal/page": {
-          "moduleId": 4863,
+          "moduleId": 42382,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "haalDeellink",
+      "filename": "src/app/portaal/acties.ts"
+    },
+    "00932ce8ee89f87284d36f61d1f1e5ae8d613e8a2e": {
+      "workers": {
+        "app/portaal/page": {
+          "moduleId": 42382,
           "async": false,
           "codeHash": null
         }
@@ -11,26 +22,26 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "605420da1dd511fa61e3734c87d2baf9b97a96d81c": {
+    "60755c6525056423a9d005857e899e79d441ff14ca": {
       "workers": {
         "app/portaal/page": {
-          "moduleId": 4863,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60f7e7de74953e590ca8106c8c31efd6b2e6d62270": {
-      "workers": {
-        "app/portaal/page": {
-          "moduleId": 4863,
+          "moduleId": 42382,
           "async": false,
           "codeHash": null
         }
       },
       "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "60b4ed86c8c28922bd3b9ce97abdb900edba9a89c2": {
+      "workers": {
+        "app/portaal/page": {
+          "moduleId": 42382,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     }
   },
