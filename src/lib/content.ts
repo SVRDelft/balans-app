@@ -142,6 +142,23 @@ export const leesGeschiedenis = () => leesJson<Mijlpaal[]>("geschiedenis.json");
 export const leesSamenwerking = () => leesJson<Samenwerking[]>("samenwerking.json");
 export const leesVragen = () => leesJson<Vraag[]>("vragen.json");
 
+export interface Prestatie {
+  titel: string;
+  tekst: string;
+}
+export const leesBereikt = () => leesJson<Prestatie[]>("bereikt.json");
+
+/** Een eerder dagelijks bestuur, voor de lijst op /bestuur. */
+export interface OudBestuur {
+  nummer: number;
+  /** Bijvoorbeeld "2025-2026". */
+  jaar: string;
+  /** Naam en functie, bijvoorbeeld "Jan Jansen (voorzitter)". */
+  leden: string[];
+}
+export const leesOudBesturen = (): OudBestuur[] =>
+  leesJson<OudBestuur[]>("oud-besturen.json").sort((a, b) => b.nummer - a.nummer);
+
 export const leesJaar = () => leesJson<{ momenten: Jaarmoment[] }>("jaar.json");
 
 /** De evenementen; een foto verschijnt alleen als het bestand er is. */

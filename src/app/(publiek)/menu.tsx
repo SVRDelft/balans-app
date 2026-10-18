@@ -28,31 +28,20 @@ export function Menu() {
         data-open={open ? "ja" : "nee"}
       >
         <ul>
-          <li>
-            <Link href="/#wat-we-doen" onClick={() => setOpen(false)}>
-              Wat we doen
-            </Link>
-          </li>
-          <li>
-            <Link href="/#overleggen" onClick={() => setOpen(false)}>
-              Overleggen
-            </Link>
-          </li>
-          <li>
-            <Link href="/#verenigingen" onClick={() => setOpen(false)}>
-              De vijftien
-            </Link>
-          </li>
-          <li>
-            <Link href="/bestuur-worden" onClick={() => setOpen(false)}>
-              Bestuur worden
-            </Link>
-          </li>
-          <li>
-            <Link href="/#contact" onClick={() => setOpen(false)}>
-              Contact
-            </Link>
-          </li>
+          {[
+            ["/wat-we-doen", "Wat we doen"],
+            ["/geschiedenis", "Geschiedenis"],
+            ["/bestuur", "Bestuur"],
+            ["/#verenigingen", "De vijftien"],
+            ["/bestuur-worden", "Bestuur worden"],
+            ["/#contact", "Contact"],
+          ].map(([href, label]) => (
+            <li key={href}>
+              <Link href={href} onClick={() => setOpen(false)}>
+                {label}
+              </Link>
+            </li>
+          ))}
           <li>
             <Link className="knop" href="/inloggen" onClick={() => setOpen(false)}>
               Inloggen

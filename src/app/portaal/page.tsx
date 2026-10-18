@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendarDays, Download, FileText, Megaphone, Receipt } from "lucide-react";
 
+import { DeelKnop } from "@/components/deelknop";
 import { vereisPortaal } from "@/lib/auth/server";
 import { formatteerDatum } from "@/lib/datum";
 import {
@@ -79,7 +80,10 @@ function Vergaderingen({
                 <p className="text-sm text-muted-foreground">Nog niet beschikbaar</p>
               ) : (
                 [...agenda, ...notulen].map((bestand) => (
-                  <Bestandsknop key={bestand.id} bestand={bestand} />
+                  <span key={bestand.id} className="inline-flex items-center gap-2">
+                    <Bestandsknop bestand={bestand} />
+                    <DeelKnop bestandId={bestand.id} />
+                  </span>
                 ))
               )}
             </div>

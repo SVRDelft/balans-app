@@ -89,6 +89,14 @@ verenigingen ze in het portaal.
 De agenda zet je er vóór de vergadering bij (*Bestand toevoegen › Agenda*), de
 notulen erna. Zonder stukken staat er netjes "Nog niet beschikbaar".
 
+Moet iemand zonder login een agenda of notulen zien (een spreker, de
+universiteit)? Klik bij het stuk op **Deel** en stuur de link door. Hij werkt
+zonder inloggen maar komt niet in Google. Per ongeluk te breed gedeeld? Bij
+*Beheer › Portaal* zet **Link intrekken** hem meteen uit.
+
+Zet bij de wissel het vertrekkende bestuur in `content/oud-besturen.json`, dan
+staat het op de pagina *Bestuur* van de site (zie `BEWERKEN.md`).
+
 ---
 
 ## 4. Toegang die overgaat

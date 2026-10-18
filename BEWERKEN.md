@@ -15,7 +15,10 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/jaar.json` | de tijdlijn "Een jaar SVR"; bij het gala staat ook de datum van dit jaar |
 | `content/evenementen.json` | wat de SVR organiseert, met de bestandsnaam van de foto |
 | `content/tradities.json` | de "wist je dat"-blokjes |
-| `content/geschiedenis.json` | de mijlpalen op de tijdlijn |
+| `content/geschiedenis.json` | de mijlpalen op de tijdlijn (pagina Geschiedenis) |
+| `content/geschiedenis.md` | het verhaal bovenaan de pagina Geschiedenis |
+| `content/bereikt.json` | "Wat we bereikt hebben" op de pagina Geschiedenis |
+| `content/oud-besturen.json` | de oud-besturen op de pagina Bestuur, zie hieronder |
 | `content/samenwerking.json` | waar de SVR namens de verenigingen aanschuift |
 | `content/vragen.json` | de veelgestelde vragen |
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |
@@ -74,6 +77,20 @@ dasmotief, en bij een vereniging de eerste letters van de naam.
 
 Heb je nog geen foto? Laat `"foto"` dan weg. Er verschijnen dan initialen in het
 dasmotief, en dat ziet er netjes uit.
+
+## Een oud-bestuur toevoegen
+
+Bij de wissel zet je het vertrekkende bestuur in `content/oud-besturen.json`.
+Oudere besturen kun je er ook in zetten; de volgorde maakt niet uit, de site
+sorteert op nummer. Zolang de lijst leeg is (`[]`), staat er op de pagina een
+oproep om aan te vullen.
+
+```json
+[
+  { "nummer": 62, "jaar": "2026-2027", "leden": ["Itai Givony (voorzitter)", "Teun van den Corput (secretaris en penningmeester)"] },
+  { "nummer": 61, "jaar": "2025-2026", "leden": ["Voornaam Achternaam (voorzitter)"] }
+]
+```
 
 ## Hoe komt het online?
 

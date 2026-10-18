@@ -96,6 +96,14 @@ Bij *Beheer › Portaal* plaatst het bestuur mededelingen, voert het de
 vergaderingen in en uploadt het agenda's, notulen en losse documenten. Alles wat
 daar staat is zichtbaar voor **alle** aangesloten verenigingen met een account.
 
+Agenda's en notulen kunnen gedeeld worden met iemand die niet kan inloggen: de
+knop **Deel** (in het portaal en bij *Beheer › Portaal*) kopieert een link
+`/delen/<sleutel>`. Die werkt zonder inloggen, maar alleen met de volledige,
+niet te raden sleutel. Zoekmachines krijgen `noindex` mee en de links staan in
+geen sitemap, dus ze komen niet in Google. Losse documenten zijn niet te delen.
+Bij *Beheer › Portaal* zet **Link intrekken** een gedeelde link meteen uit; een
+volgende klik op Deel maakt een nieuwe.
+
 De vergaderingen van 2026-2027 staan in het seed-script
 (`src/lib/portaal/vergaderingen.ts`); een volgend bestuur voert het nieuwe
 rooster in via het scherm.

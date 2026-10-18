@@ -1156,3 +1156,67 @@
     font-size: 34px;
   }
 }
+
+/* Losse pagina's: de kop bovenaan */
+.paginakop {
+  padding-top: clamp(2.5rem, 6vw, 4rem);
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+}
+.paginakop h1 {
+  color: var(--wit);
+  margin-bottom: 0.5rem;
+}
+.paginakop .lead {
+  max-width: 40rem;
+}
+.paginakop .lead p {
+  font-size: 1.15rem;
+  color: var(--grijs-licht);
+}
+
+/* Wegwijzer op de voorpagina: hele kaart is de link */
+.ontdekkaart {
+  display: block;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  background: var(--wit);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.ontdekkaart:hover,
+.ontdekkaart:focus-visible {
+  border-color: var(--cyaan);
+  transform: translateY(-2px);
+}
+.ontdekkaart h3 {
+  margin-top: 0;
+}
+
+/* Oud-besturen */
+.oudbesturen dt span {
+  margin-left: 0.6rem;
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  font-size: 0.9rem;
+  color: var(--grijs);
+}
+
+/* De SVR zelf op de tijdlijn van de vijftien */
+.mijlpalen li.svr::before {
+  background: var(--geel);
+  width: 0.8rem;
+  height: 0.8rem;
+  left: -2.05rem;
+}
+
+/* Op een smalle telefoon past "studieverenigingen" niet in één regel van de
+   grote kop: dan afbreken in plaats van de pagina breder te maken. */
+.hero-tekst,
+.hero-tafel {
+  min-width: 0;
+}
+.publiek h1 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}

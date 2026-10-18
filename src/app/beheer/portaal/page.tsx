@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Paginakop } from "@/components/paginakop";
+import { DeelKnop } from "@/components/deelknop";
 import { BevestigKnop } from "@/components/bevestigknop";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ import {
 } from "./formulieren";
 import {
   verwijderMededeling,
+  trekDeellinkIn,
   verwijderPortaalbestand,
   verwijderVergadering,
 } from "./acties";
@@ -167,6 +169,18 @@ export default async function PortaalBeheerPagina() {
                           <a className="text-primary underline" href={`/api/portaal/bestand/${bestand.id}`}>
                             {bestand.titel}
                           </a>
+                          <DeelKnop bestandId={bestand.id} />
+                          {bestand.deelsleutel ? (
+                            <BevestigKnop
+                              actie={trekDeellinkIn}
+                              velden={{ id: bestand.id }}
+                              vraag={`De deellink van "${bestand.titel}" intrekken? Wie de link heeft, kan er dan niet meer bij.`}
+                              size="sm"
+                              variant="ghost"
+                            >
+                              Link intrekken
+                            </BevestigKnop>
+                          ) : null}
                           <BevestigKnop
                             actie={verwijderPortaalbestand}
                             velden={{ id: bestand.id }}

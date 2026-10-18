@@ -252,3 +252,37 @@ export async function verwijderPortaalbestand(
   });
 }
 
+
+/**
+ * Een deellink intrekken: de oude link werkt meteen niet meer. Wie daarna weer
+ * op "Deel" klikt, krijgt een nieuwe.
+ */
+export async function trekDeellinkIn(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    const id = leesTekst(formulier, "id");
+    if (!id) return { fout: "Onbekend bestand." };
+    const bestand = await db.portaalbestand.findUnique({ where: { id } });
+    if (!bestand) return { fout: "Dit bestand bestaat niet meer." };
+    if (!bestand.deelsleutel) return { melding: "Dit stuk was niet gedeeld." };
+
+    await db.portaalbestand.update({
+      where: { id },
+      data: { deelsleutel: null, gedeeldOp: null },
+    });
+    await logAudit({
+      gebruiker: sessie.naam,
+      entiteit: "Portaalbestand",
+      entiteitId: id,
+      actie: "deellink ingetrokken",
+      samenvatting: `Deellink van "${bestand.titel}" ingetrokken`,
+    });
+
+    vernieuw();
+    return { melding: "De link werkt niet meer." };
+  });
+}

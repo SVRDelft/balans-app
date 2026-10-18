@@ -822,6 +822,12 @@ model Portaalbestand {
   geuploadOp   DateTime @default(now())
   geuploadDoor String
 
+  /// Geheime sleutel voor een deellink (/delen/<sleutel>): wie hem heeft, kan
+  /// de agenda of notulen openen zonder in te loggen. Leeg: niet gedeeld.
+  /// Intrekken = leegmaken; een nieuwe link krijgt een nieuwe sleutel.
+  deelsleutel String? @unique
+  gedeeldOp   DateTime?
+
   @@index([vergaderingId])
   @@index([soort, geuploadOp])
 }
