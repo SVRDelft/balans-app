@@ -1,11 +1,11 @@
 [
   { "naam": "Leeghwater", "kort": "Leeghwater", "slug": "leeghwater", "faculteit": "ME", "opgericht": 1867, "website": "https://www.leeghwater.nl" },
   { "naam": "MV", "kort": "MV", "slug": "mv", "faculteit": "CiTG", "opgericht": 1892, "website": "https://mv.tudelft.nl" },
+  { "naam": "TG", "kort": "TG", "slug": "tg", "faculteit": "TNW", "opgericht": 1890, "website": "https://www.technologischgezelschap.nl" },
   { "naam": "PS", "kort": "PS", "slug": "ps", "faculteit": "CiTG", "opgericht": 1894, "website": "https://practischestudie.nl" },
   { "naam": "Stylos", "kort": "Stylos", "slug": "stylos", "faculteit": "BK", "opgericht": 1894, "website": "https://www.stylos.nl" },
-  { "naam": "ETV", "kort": "ETV", "slug": "etv", "faculteit": "EWI", "opgericht": 1906, "website": "https://etv.tudelft.nl" },
   { "naam": "Froude", "kort": "Froude", "slug": "froude", "faculteit": "ME", "opgericht": 1903, "website": "https://froude.nl" },
-  { "naam": "TG", "kort": "TG", "slug": "tg", "faculteit": "TNW", "opgericht": 1890, "website": "https://www.technologischgezelschap.nl" },
+  { "naam": "ETV", "kort": "ETV", "slug": "etv", "faculteit": "EWI", "opgericht": 1906, "website": "https://etv.tudelft.nl" },
   { "naam": "VvTP", "kort": "VvTP", "slug": "vvtp", "faculteit": "TNW", "opgericht": 1932, "website": "https://vvtp.nl" },
   { "naam": "VSV 'Leonardo da Vinci'", "kort": "VSV", "slug": "vsv", "faculteit": "LR", "opgericht": 1945, "website": "https://vsv.tudelft.nl" },
   { "naam": "Christiaan Huygens", "kort": "CH", "slug": "christiaan-huygens", "faculteit": "EWI", "opgericht": 1957, "website": "https://ch.tudelft.nl" },

@@ -1,6 +1,6 @@
 {
   "node": {
-    "002c35287dd9ad4aeacd40c30e30b9122c2fef8b94": {
+    "007297dc3d408ea2dca8ad06e4ccce9502a9b33b77": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6058fbc85bb7711824b2199a0cd3e31813487e7855": {
+    "60809a7772b930073b5bbef758791ca7a853da9fe0": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6072dfea7a1dd671f62b3f6fdf3b3cb74c0844ac4f": {
+    "60f2e4828095876a1f7367a0410581e8a058882d7b": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -33,7 +33,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "409e277df33b81a67bf7e5f01375b7e41b28f49750": {
+    "406ced277a600051dac662e97eb9ed87d883428d26": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "001394561d4e34022015cd7f50df6b99d3a22d07d7": {
+    "001b2862019d09a904fcc77badad92614b435f9ef4": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -55,7 +55,7 @@
       "exportedName": "koppelAlleVoorstellen",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "600e669e5dc66895f0647cd7e873db401ddc86c8c8": {
+    "604da2fe874380962feecaac26e4965e134b7d381d": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -63,21 +63,10 @@
           "codeHash": null
         }
       },
-      "exportedName": "stelToegangWachtwoordIn",
+      "exportedName": "voegInformantToe",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "601251c211b24a7d41c693574b06ce056f37982d9c": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderInformant",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "6020b8866a712451865e02001cfa01f522f4a5a1ec": {
+    "605ad566b570d3e550f38f8b1bb2f5a3aa57a3d1f9": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -88,7 +77,29 @@
       "exportedName": "koppelToegangRelatie",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "6091282cfc345b37968826f9ab037a0daf26f2d514": {
+    "60abbcf700d8b83f50e59fb04864fbd3bfc77fcb2d": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "stelToegangWachtwoordIn",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60b3489d5e66e8d4dbed9d6fe09b0fb5c9608e2f03": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderInformant",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60f3c63c0a09c692bc98ae72dbfc72d6d4596b07cf": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -97,17 +108,6 @@
         }
       },
       "exportedName": "zetToegangAanUit",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "609f5229770c9efb841fa40778d326532fdb0fc92c": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "voegInformantToe",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     }
   },
