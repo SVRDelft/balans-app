@@ -7,7 +7,11 @@ name: Bouwen voor de TU-server
 
 on:
   push:
-    branches: [main, tu-server]
+    # Alleen tu-server: dat is wat op svr.tudelft.nl draait. Een push naar main
+    # (bijvoorbeeld een tekst die iemand op github.com aanpast) zou anders een
+    # oudere versie op `deploy` zetten, en daarmee bij de volgende "Pull
+    # updates" de TU-site terugzetten. Vercel bouwt main zelf.
+    branches: [tu-server]
   workflow_dispatch:
 
 concurrency:

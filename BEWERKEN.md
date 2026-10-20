@@ -6,6 +6,11 @@ een account op GitHub dat bij de repository mag.
 Alle teksten van de publieke site staan in de map `content/`. Je past ze aan op
 github.com; daarna zet het bestuur de site opnieuw live.
 
+> **Eerst de goede branch kiezen.** De site op svr.tudelft.nl wordt gebouwd
+> vanuit de branch **`tu-server`**, niet vanuit `main`. Klik op github.com
+> linksboven op de knop met `main` en kies `tu-server` voordat je iets opent.
+> Wat je op `main` aanpast, komt niet op de site.
+
 ## Wat staat waar
 
 | Bestand | Wat erin staat |
@@ -100,10 +105,73 @@ beleidsplannen. Van 59 en 61 staan alleen voornamen: vul ze gerust aan.
   900 pixels breed en kleiner dan 200 kB.
 - `beleid`: het beleidsplan in `public/beleid/`. Laat weg als er geen is.
 
+## De wissel: een nieuw bestuur op de site
+
+Doe dit in één keer, op de branch **`tu-server`** (zie boven).
+
+1. **De foto's uploaden.** Open de map `public/img`, klik op **Add file ›
+   Upload files** en sleep de portretten erin, met namen als
+   `bestuur-voornaam.jpg` (vierkant, 400 × 400, max 300 kB). De groepsfoto heet
+   `bestuur-samen.jpg`. Zet onderaan **Commit changes**.
+2. **Het oude bestuur bij de oud-besturen zetten.** Open
+   `content/oud-besturen.json`, klik op het potloodje en zet bovenaan, direct na
+   de eerste `[`, een nieuw blok. Let op de komma na de `}`:
+
+   ```json
+   [
+     {
+       "nummer": 62,
+       "jaar": "2026-2027",
+       "leden": [
+         "Itai Givony (voorzitter)",
+         "Teun van den Corput (secretaris en penningmeester)"
+       ],
+       "foto": "besturen/62.jpg",
+       "beleid": "/beleid/beleid-62.pdf"
+     },
+     {
+       "nummer": 61,
+   ```
+
+   Upload de groepsfoto van het oude bestuur als `public/img/besturen/62.jpg` en
+   het beleidsplan als `public/beleid/beleid-62.pdf`. Heb je die niet, laat de
+   regels `"foto"` en `"beleid"` dan weg (en de komma ervoor).
+3. **Het nieuwe bestuur invullen.** Open `content/bestuur.json` en pas het
+   nummer, de startdatum en de leden aan:
+
+   ```json
+   {
+     "nummer": 63,
+     "startdatum": "2027-08-24",
+     "leden": [
+       { "naam": "Voornaam Achternaam", "functie": "Voorzitter", "foto": "bestuur-voornaam.jpg" },
+       { "naam": "Voornaam Achternaam", "functie": "Secretaris", "foto": "bestuur-voornaam2.jpg" },
+       { "naam": "Voornaam Achternaam", "functie": "Penningmeester", "foto": "bestuur-voornaam3.jpg" }
+     ],
+     "samenFoto": "bestuur-samen.jpg",
+     "samenBijschrift": "Een zin onder de groepsfoto",
+     "stofMaanden": 9
+   }
+   ```
+
+4. **Het beleid.** Vervang de tekst in `content/beleid.md` door een korte
+   samenvatting van jullie eigen beleidsplan: een `#`-titel, een inleiding en
+   per beleidspunt een `##`-kop met een paar zinnen.
+5. **Online zetten.** In Plesk: **Git › Pull updates** en dan **Node.js ›
+   Restart App** (zie `DEPLOY.md`). Kijk daarna op /bestuur of alles klopt.
+
+**Gaat er iets mis?** Een JSON-bestand is streng: één vergeten komma of
+aanhalingsteken en de site bouwt niet. De bouw op GitHub (tabblad **Actions**)
+wordt dan rood en de oude site blijft gewoon staan. Plak het bestand in
+[jsonlint.com](https://jsonlint.com) om te zien welke regel fout is, of zet de
+vorige versie terug (zie onderaan).
+
 ## Hoe komt het online?
 
-De site wordt gebouwd vanuit deze bestanden. Na een wijziging moet iemand de
-nieuwe versie publiceren; dat staat stap voor stap in `DEPLOY.md`. Tot die tijd
+De site wordt gebouwd vanuit deze bestanden, op de branch `tu-server`. Na een
+wijziging bouwt GitHub de nieuwe versie (tabblad **Actions**, een paar minuten);
+daarna moet iemand hem in Plesk ophalen met **Git › Pull updates** en **Node.js ›
+Restart App**. Dat staat stap voor stap in `DEPLOY.md`. Tot die tijd
 verandert er nog niets aan wat bezoekers zien.
 
 ## Iets kapot gemaakt?
