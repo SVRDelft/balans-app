@@ -10,7 +10,9 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  HandCoins,
   LayoutDashboard,
+  PiggyBank,
   Receipt,
   Package,
   Scale,
@@ -19,6 +21,9 @@ import {
   Target,
   Users,
   Menu,
+  KeyRound,
+  LockKeyhole,
+  Megaphone,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -33,42 +38,47 @@ const GROEPEN: { titel: string; items: NavItem[] }[] = [
   {
     titel: "Overzicht",
     items: [
-      { href: "/", label: "Dashboard", icoon: LayoutDashboard },
-      { href: "/exploitatie", label: "Exploitatie", icoon: Table2 },
-      { href: "/balans", label: "Balans", icoon: Scale },
+      { href: "/beheer", label: "Dashboard", icoon: LayoutDashboard },
+      { href: "/beheer/exploitatie", label: "Exploitatie", icoon: Table2 },
+      { href: "/beheer/balans", label: "Balans", icoon: Scale },
+      { href: "/beheer/debiteuren", label: "Debiteuren", icoon: HandCoins },
     ],
   },
   {
     titel: "Administratie",
     items: [
-      { href: "/facturen", label: "Facturen", icoon: FileText },
-      { href: "/uitgaven", label: "Uitgaven", icoon: Receipt },
-      { href: "/evenementen", label: "Evenementen", icoon: CalendarDays },
-      { href: "/bank", label: "Banksaldo", icoon: Banknote },
-      { href: "/voorraad", label: "Spullen & voorraad", icoon: Package },
+      { href: "/beheer/facturen", label: "Facturen", icoon: FileText },
+      { href: "/beheer/uitgaven", label: "Uitgaven", icoon: Receipt },
+      { href: "/beheer/evenementen", label: "Evenementen", icoon: CalendarDays },
+      { href: "/beheer/bank", label: "Banksaldo", icoon: Banknote },
+      { href: "/beheer/sparen", label: "Spaarrekening", icoon: PiggyBank },
+      { href: "/beheer/voorraad", label: "Spullen & voorraad", icoon: Package },
     ],
   },
   {
     titel: "Gegevens",
     items: [
-      { href: "/verenigingen", label: "Per vereniging", icoon: Building2 },
-      { href: "/relaties", label: "Relaties", icoon: Users },
-      { href: "/begroting", label: "Begroting", icoon: Target },
+      { href: "/beheer/verenigingen", label: "Per vereniging", icoon: Building2 },
+      { href: "/beheer/relaties", label: "Relaties", icoon: Users },
+      { href: "/beheer/begroting", label: "Begroting", icoon: Target },
     ],
   },
   {
     titel: "Beheer",
     items: [
-      { href: "/overdracht", label: "Overdracht", icoon: ArrowLeftRight },
-      { href: "/boekjaren", label: "Boekjaren", icoon: CalendarDays },
-      { href: "/auditlog", label: "Auditlog", icoon: ClipboardList },
-      { href: "/instellingen", label: "Instellingen", icoon: Settings },
+      { href: "/beheer/overdracht", label: "Overdracht", icoon: ArrowLeftRight },
+      { href: "/beheer/boekjaren", label: "Boekjaren", icoon: CalendarDays },
+      { href: "/beheer/portaal", label: "Portaal", icoon: Megaphone },
+      { href: "/beheer/portaaltoegang", label: "Portaaltoegang", icoon: LockKeyhole },
+      { href: "/beheer/accounts", label: "Accounts", icoon: KeyRound },
+      { href: "/beheer/auditlog", label: "Auditlog", icoon: ClipboardList },
+      { href: "/beheer/instellingen", label: "Instellingen", icoon: Settings },
     ],
   },
 ];
 
 function isActief(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
+  if (href === "/beheer") return pathname === "/beheer";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

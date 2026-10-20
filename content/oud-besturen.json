@@ -1,0 +1,200 @@
+[
+  {
+    "nummer": 61,
+    "jaar": "2025-2026",
+    "leden": [
+      "Corlien Douma (voorzitter)",
+      "Niels van den Dool (secretaris, later ook penningmeester)",
+      "Alexander Znamenskiy (penningmeester, eerste helft van het jaar)"
+    ],
+    "foto": "besturen/61.jpg"
+  },
+  {
+    "nummer": 60,
+    "jaar": "2024-2025",
+    "leden": [
+      "Rosa de Jong (voorzitter)",
+      "Tessa Roubos (secretaris)",
+      "Daan Kuivenhoven (penningmeester)"
+    ],
+    "foto": "besturen/60.jpg",
+    "beleid": "/beleid/beleid-60.pdf"
+  },
+  {
+    "nummer": 59,
+    "jaar": "2023-2024",
+    "leden": [
+      "Mischa de Gooijer (voorzitter)",
+      "Eva van der Weegen (secretaris)",
+      "Noah Tap (penningmeester)"
+    ],
+    "foto": "besturen/59.jpg",
+    "beleid": "/beleid/beleid-59.pdf"
+  },
+  {
+    "nummer": 58,
+    "jaar": "2022-2023",
+    "leden": [
+      "Lisa Scholtens (voorzitter)",
+      "Robert van Dijk (secretaris)",
+      "Laurens-Jan Cammeraat (penningmeester)"
+    ],
+    "foto": "besturen/58.jpg",
+    "beleid": "/beleid/beleid-58.pdf"
+  },
+  {
+    "nummer": 57,
+    "jaar": "2021-2022",
+    "leden": [
+      "Katja Zegwaard (voorzitter)",
+      "Mirko van Donkelaar (secretaris)",
+      "Siirilotta Moonen (penningmeester)"
+    ],
+    "foto": "besturen/57.jpg",
+    "beleid": "/beleid/beleid-57.pdf"
+  },
+  {
+    "nummer": 56,
+    "jaar": "2020-2021",
+    "leden": [
+      "Davide Pasqualini (voorzitter)",
+      "Nadine Tiessen (secretaris)",
+      "Stijn Hersbach (penningmeester)"
+    ],
+    "foto": "besturen/56.jpg",
+    "beleid": "/beleid/beleid-56.pdf"
+  },
+  {
+    "nummer": 55,
+    "jaar": "2019-2020",
+    "leden": [
+      "Tim de Vlieger (voorzitter)",
+      "Benjamin Slotboom (secretaris)",
+      "Joost van der Weerd (penningmeester)"
+    ],
+    "foto": "besturen/55.jpg",
+    "beleid": "/beleid/beleid-55.pdf"
+  },
+  {
+    "nummer": 54,
+    "jaar": "2018-2019",
+    "leden": [
+      "Tom Weinans (voorzitter)",
+      "Joost Oortwijn (secretaris)",
+      "Judith Kavelaars (penningmeester)"
+    ],
+    "foto": "besturen/54.jpg",
+    "beleid": "/beleid/beleid-54.pdf"
+  },
+  {
+    "nummer": 53,
+    "jaar": "2017-2018",
+    "leden": [
+      "Sebastian Maks (voorzitter)",
+      "Bas Rooijakkers (secretaris)",
+      "Menno van Manen (penningmeester)"
+    ],
+    "foto": "besturen/53.jpg",
+    "beleid": "/beleid/beleid-53.pdf"
+  },
+  {
+    "nummer": 52,
+    "jaar": "2016-2017",
+    "leden": [
+      "Josephine Vos (voorzitter)",
+      "Luuk Hofhuis (secretaris)",
+      "Willemijn van Varik (penningmeester)"
+    ],
+    "foto": "besturen/52.jpg"
+  },
+  {
+    "nummer": 51,
+    "jaar": "2015-2016",
+    "leden": [
+      "Bart Gijsberts (voorzitter)",
+      "Lisa Büller (secretaris)",
+      "Davy Boom (penningmeester)"
+    ],
+    "foto": "besturen/51.jpg"
+  },
+  {
+    "nummer": 50,
+    "jaar": "2014-2015",
+    "leden": [
+      "Floor Seuren (voorzitter)",
+      "Jildau Bras (secretaris)",
+      "Robin Gevers (penningmeester)"
+    ],
+    "foto": "besturen/50.jpg"
+  },
+  {
+    "nummer": 49,
+    "jaar": "2013-2014",
+    "leden": [
+      "Laurens Tijsseling (voorzitter)",
+      "Irma Stegmann (secretaris)",
+      "Céline Swennenhuis (penningmeester)"
+    ],
+    "foto": "besturen/49.jpg"
+  },
+  {
+    "nummer": 48,
+    "jaar": "2012-2013",
+    "leden": [
+      "Irena Doets (voorzitter)",
+      "Pieter Wijne (secretaris)",
+      "Maaike Dielwart (penningmeester)"
+    ],
+    "foto": "besturen/48.jpg"
+  },
+  {
+    "nummer": 47,
+    "jaar": "2011-2012",
+    "leden": [
+      "Lukas Kuijken (voorzitter)",
+      "Jesper Schoen (secretaris)",
+      "Virpi Heybroek (penningmeester)"
+    ],
+    "foto": "besturen/47.jpg"
+  },
+  {
+    "nummer": 46,
+    "jaar": "2010-2011",
+    "leden": [
+      "Ilse Stolk (voorzitter)",
+      "Michael Cerrone (secretaris)",
+      "Renee van de Watering (penningmeester)"
+    ],
+    "foto": "besturen/46.jpg"
+  },
+  {
+    "nummer": 45,
+    "jaar": "2009-2010",
+    "leden": [
+      "Niels Janszen (voorzitter)",
+      "Rene Kleizen (secretaris)",
+      "Myriam Koopmans (penningmeester)"
+    ],
+    "foto": "besturen/45.jpg"
+  },
+  {
+    "nummer": 44,
+    "jaar": "2008-2009",
+    "leden": [
+      "Joey van den Heuvel (voorzitter)",
+      "Simone Campman (secretaris)",
+      "Michael Deelen (penningmeester)"
+    ],
+    "foto": "besturen/44.jpg"
+  },
+  {
+    "nummer": 43,
+    "jaar": "2007-2008",
+    "leden": [
+      "Menno van der Kamp (voorzitter)",
+      "Céline Gaffel (secretaris)",
+      "Antoine Berkhout (penningmeester)"
+    ],
+    "foto": "besturen/43.jpg"
+  }
+]

@@ -272,3 +272,149 @@ SQLite kent geen enums. De toegestane waarden staan als constanten in
 
 Vitest 5 vraagt om `@types/node` 22 of nieuwer en liep vast op de npm-versie die
 bij Node 20 hoort. Vitest 4 doet hetzelfde werk.
+
+### MariaDB in plaats van Postgres, met de app op de TU-server
+
+De app verhuist van Vercel met Neon Postgres naar de webhosting van de TU Delft,
+waar alleen MariaDB 10.11 draait. Dat dwong een paar keuzes af:
+
+- Prisma gebruikt de driver adapter `@prisma/adapter-mariadb`: pure JavaScript,
+  zodat er niets gecompileerd hoeft te worden op een server waarvan we het
+  besturingssysteem niet kennen.
+- Alle vrije tekst heeft `@db.Text` in het schema. Zonder dat maakt MySQL er een
+  `VARCHAR(191)` van en worden lange omschrijvingen afgekapt.
+- `mode: "insensitive"` is uit de zoekfilters gehaald. Dat bestaat alleen in
+  Postgres; MariaDB vergelijkt met `utf8mb4_unicode_ci` al zonder op hoofdletters
+  te letten.
+- Zolang de overstap niet rond is, draait de bestaande app gewoon door op Vercel
+  met Postgres. Het werk voor de TU-server staat op de branch `tu-server`; de
+  branch `main` blijft de versie die live staat.
+
+### Logo controleren zonder sharp
+
+`sharp` is een gecompileerde bibliotheek en kan niet mee naar de TU-server. Het
+controleren van een geüpload logo gebeurt nu in `src/lib/afbeelding.ts`: dat
+leest alleen de kop van het bestand (PNG-signatuur en IHDR, of de JPEG-markeringen)
+en haalt daar het echte type en de afmetingen uit. Een bestand dat zich voordoet
+als afbeelding valt daarmee nog steeds af, en animaties (APNG) en bestanden met
+meerdere beelden worden geweigerd.
+
+Wat vervalt: de pixels worden niet meer gedecodeerd, dus een bestand met een
+geldige kop maar een beschadigde inhoud komt er nu doorheen. Het wordt bewaard
+zoals het is en alleen getoond, nooit uitgevoerd, dus het ergste geval is een
+logo dat scheef in de PDF staat. Verkleinen gebeurt niet meer; upload een logo
+van een redelijk formaat (maximaal 2 MB en 16 megapixels).
+
+### Accounts met een eigen wachtwoord, geen inloglink per e-mail
+
+De opdracht vroeg om persoonlijke accounts met een magic link per e-mail via
+SMTP. Dat is op verzoek van het bestuur vervallen: er komt geen `noreply@`-adres
+en geen mailserver. In plaats daarvan maakt het bestuur accounts aan en krijgt
+iedereen een wachtwoord dat de app verzint en één keer toont. Bij de eerste keer
+inloggen moet dat vervangen worden door een eigen wachtwoord.
+
+Wat dat kost: een wachtwoord moet mondeling of via een eigen kanaal worden
+doorgegeven, en wie het kwijt is moet het bestuur vragen. Wat het oplevert: geen
+mailserver, geen afhankelijkheid van een mailbox die bij een bestuurswissel mee
+moet, en inloggen werkt ook als de mail eruit ligt.
+
+Wachtwoorden worden gehasht met **scrypt** uit Node zelf (`node:crypto`), niet
+met bcrypt: dat laatste is een gecompileerde bibliotheek en kan niet mee naar de
+server van de TU Delft. De instellingen staan in de hash zelf, zodat ze later
+zwaarder gezet kunnen worden zonder dat bestaande wachtwoorden ongeldig worden.
+
+Mislukte pogingen worden geteld in de database (tabel `Inlogpoging`), per
+e-mailadres én per IP-adres: tien pogingen binnen een kwartier en het is een
+kwartier dicht. In het geheugen zou die teller niets waard zijn, want Passenger
+draait meerdere processen naast elkaar.
+
+### De rol komt uit de database, niet uit het cookie
+
+In het sessiecookie staat wie je bent en welke rol je had bij het inloggen, maar
+bij elk verzoek wordt het account opnieuw opgezocht. Een account dat is uitgezet
+of een rol die is veranderd geldt daardoor meteen, ook als het cookie nog dagen
+blijft staan. Dat kost één query per verzoek; dat is het waard.
+
+De controle zelf staat op één plek (`src/lib/auth/server.ts`) en wordt afgedwongen
+door een test die élke pagina, server action en API-route van `/beheer` langsloopt
+(`src/lib/auth/toegang.test.ts`). Die test vond bij het schrijven meteen zes
+schermen die alleen op de proxy leunden.
+
+### Het portaal is bijna helemaal voor alle verenigingen tegelijk
+
+Mededelingen, vergaderingen en documenten in het portaal zijn voor iedereen met
+een account zichtbaar; er zit niets in dat maar voor één vereniging bedoeld is.
+Dat staat ook als waarschuwing boven het beheerscherm.
+
+Eén onderdeel is wél per vereniging: **jullie facturen**. Een vereniging ziet daar
+haar eigen facturen met het openstaande bedrag, en kan de PDF downloaden. Dat
+scheelt het bestuur het heen-en-weer mailen van "wat staat er nog open?".
+
+Zo'n account hangt aan precies één relatie, en dat hoeft geen studievereniging te
+zijn: ORAS en Lijst Bèta krijgen ook facturen van de SVR en kunnen er dus net zo
+goed een krijgen.
+
+De regel daarbij: filteren op `relatieId` uit de **sessie** en nooit op een id uit
+de URL. Dat gebeurt op twee plekken, en nergens anders:
+
+- `haalEigenRekening(relatieId)` in `src/lib/portaal/gegevens.ts`, waar de
+  aanroeper de relatie uit de sessie meegeeft;
+- de route `/api/facturen/[id]/pdf`, die eerst de relatie van de factuur opzoekt en
+  pas daarna het document maakt. Het bestuur mag elke factuur; een vereniging
+  alleen haar eigen, en nooit een concept — dat is nog niet verstuurd. Er staan
+  tests naast die route die dat afdwingen.
+
+### Bestanden op schijf, niet in de database
+
+Bonnetjes bij uitgaven staan als bytes in de database (dat was er al). De
+bestanden van het portaal staan op schijf in `storage/`, omdat agenda's en
+notulen groter zijn en met tientallen tegelijk komen. Gevolg: een back-up van
+alleen de database is niet genoeg — `storage/` moet mee. Dat staat in DEPLOY.md
+en in de README.
+
+Alles loopt via één module (`src/lib/portaal/opslag.ts`). Wie later naar Vercel
+moet, vervangt alleen die module door opslag bij een dienst als Vercel Blob.
+
+### De homepage: wat gecontroleerd is en wat nog open staat
+
+De websites van de vijftien verenigingen in `content/verenigingen.json` zijn
+stuk voor stuk opgevraagd; alle vijftien gaven antwoord. Verandert er een adres,
+pas het dan in dat bestand aan. Laat je `website` leeg, dan blijft de vereniging
+gewoon in de lijst staan, maar zonder link.
+
+Over de inhoud van de homepage is niets verzonnen: de teksten over het Algemeen
+Bestuur, het dagelijks bestuur, de informanten, de vier overleggen, de tradities
+en de geschiedenis komen uit de opdracht van het bestuur. Bestuursnummers zijn
+bewust **niet** omgerekend naar jaartallen; bij het 41e en 45e bestuur staat
+daarom geen jaar.
+
+Wat nog ingevuld moet worden staat als `[IN TE VULLEN: …]` in `content/`. Zulke
+notities zijn lokaal zichtbaar, maar worden op de echte site weggelaten
+(`src/lib/placeholders.ts`). Op dit moment staat er niets meer open.
+
+De tafel in de opening en het filter bij de vijftien zijn gemaakt met CSS en
+SVG. Het filter heeft JavaScript nodig; staat dat uit, dan staan alle vijftien
+verenigingen er gewoon. De tafel werkt volledig zonder JavaScript.
+
+### De lettertypen laadden de verkeerde helft
+
+Young Serif en Instrument Sans stonden wel op de server, maar alleen de
+**latin-ext**-subset: het stuk met de zeldzame tekens, zonder de gewone letters.
+De browser viel daardoor terug op Arial, en alleen letters als de "A" van "Aan
+tafel" kwamen uit het echte lettertype. Nu staan beide subsets in `public/fonts`
+en declareert `publiek.css` ze zelf met de bijbehorende `unicode-range`, in
+plaats van via `next/font/local`. Zo is in één bestand te zien wat er geladen
+wordt.
+
+### Het Landelijk Bestuursgala is niet meer landelijk
+
+Volgens de inwerkstukken van DB 61 was het LBG ooit echt landelijk en is het dat
+nu niet meer; het is het gala voor de Delftse besturen, op een locatie buiten de
+stad. De datum (31 mei 2027) staat in `content/jaar.json` en moet elk jaar
+worden bijgewerkt.
+
+### Dé DDB wordt niet door de SVR georganiseerd
+
+De SVR plant de borrels in; per editie organiseren een paar verenigingen er één.
+Daarom heet de sectie nu "Waar je ons tegenkomt" en niet meer "Wat we
+organiseren": die kop klopt ook voor de Dodenherdenking en Dé DDB.

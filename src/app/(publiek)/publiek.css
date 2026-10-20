@@ -1,0 +1,1287 @@
+/* De lettertypen staan op onze eigen server, niet bij Google. Elk lettertype
+   komt in twee stukken: "latin" met de gewone letters en "latin-ext" met de
+   zeldzamere. De unicode-range zegt de browser welk stuk hij nodig heeft.
+   (Eerder laadde alleen latin-ext, waardoor alles terugviel op Arial.) */
+
+@font-face {
+  font-family: "Young Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/young-serif-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Young Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/young-serif-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* De publieke site. Eén bestand, geen Tailwind en geen shadcn: dit deel staat
+   los van de administratie achter het slot.
+
+   Het motief komt van de SVR-das: diagonale gele strepen op donkerblauw.
+   Dat motief komt bewust maar op een paar plekken terug — de band onder de
+   opening, de stippen in de tijdlijn, de vlakken waar een foto of logo
+   ontbreekt, en de kleine merkjes bij de tradities. */
+
+.publiek {
+  /* De huiskleuren van de SVR, en van de das: donkerblauw en geel. */
+  --navy: #001f46;
+  --navy-licht: #0a3268;
+  --geel: #f7bb00;
+  --geel-licht: #ffcb2e;
+  /* Voor lijnen en vlakjes die op wit moeten opvallen; geel zelf is daar te licht. */
+  --geel-donker: #b98800;
+  --grond: #f4f7fb;
+  --wit: #ffffff;
+  --rand: #dbe3f0;
+  --rand-donker: #2b3c74;
+  --grijs: #4a5673;
+  --grijs-licht: #b9c4de;
+
+  background: var(--grond);
+  color: var(--navy);
+  font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.publiek *,
+.publiek *::before,
+.publiek *::after {
+  box-sizing: border-box;
+}
+
+.publiek h1,
+.publiek h2,
+.publiek h3 {
+  font-family: "Young Serif", Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.publiek h1 {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  letter-spacing: -0.015em;
+}
+.publiek h2 {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  margin-bottom: 0.75rem;
+}
+.publiek h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.publiek p {
+  margin: 0 0 1rem;
+  max-width: 38rem; /* ongeveer 70 tekens */
+}
+.publiek a {
+  color: var(--navy-licht);
+}
+/* Links in lopende tekst krijgen een streep: kleur alleen is niet genoeg. */
+/* Links in lopende tekst krijgen een streep; kleur alleen is niet genoeg.
+   Links die zelf een blok zijn (het menu, de kaartjes) niet. */
+.publiek p a,
+.publiek dd a,
+.publiek address a,
+.publiek figcaption a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.publiek a:hover {
+  color: var(--navy);
+}
+.publiek :focus-visible {
+  outline: 3px solid var(--geel);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.binnen {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* ----- het dasmotief ----------------------------------------------------- */
+
+.strepen {
+  background-color: var(--navy);
+  background-image: repeating-linear-gradient(
+    115deg,
+    var(--geel) 0 10px,
+    transparent 10px 30px,
+    var(--geel) 30px 33px,
+    transparent 33px 68px
+  );
+}
+
+/* ----- kop --------------------------------------------------------------- */
+
+.kop {
+  background: var(--wit);
+  border-bottom: 1px solid var(--rand);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.kop .binnen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.25rem;
+}
+.merk {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--navy);
+}
+.merk img {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: contain;
+}
+.merk .teken {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+  border-radius: 0.4rem;
+  display: grid;
+  place-items: center;
+  color: var(--wit);
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 0.95rem;
+}
+.merk strong {
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+  display: block;
+  line-height: 1.1;
+}
+.merk span {
+  font-size: 0.78rem;
+  color: var(--grijs);
+}
+
+.menuknop {
+  display: none;
+  font: inherit;
+  font-size: 0.95rem;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--wit);
+  border: 1.5px solid var(--rand);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem 1.2rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.menu a {
+  color: var(--navy);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 0.35rem 0;
+}
+.menu a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}
+
+.knop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--geel);
+  color: var(--navy) !important;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.97rem;
+  border: 1.5px solid var(--geel);
+}
+.knop:hover {
+  background: var(--geel-licht);
+  border-color: var(--geel-licht);
+  color: var(--navy) !important;
+}
+.knop.licht {
+  background: transparent;
+  color: var(--navy) !important;
+  border-color: var(--navy);
+  font-weight: 500;
+}
+.knop.licht:hover {
+  background: var(--wit);
+  color: var(--navy) !important;
+}
+.vlak.donker .knop.licht {
+  color: var(--wit) !important;
+  border-color: var(--grijs-licht);
+}
+.vlak.donker .knop.licht:hover {
+  background: var(--navy-licht);
+  color: var(--wit) !important;
+}
+
+/* ----- 1. opening -------------------------------------------------------- */
+
+.hero {
+  background: var(--wit);
+}
+.hero .binnen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+.hero-tekst .lead p {
+  font-size: 1.2rem;
+  color: var(--grijs);
+  margin-top: 1.25rem;
+}
+.acties {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.tafel-uitleg {
+  margin: 0.25rem auto 0;
+  max-width: 22rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--grijs);
+}
+
+/* de tafel */
+.tafel {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  display: block;
+  overflow: visible;
+}
+.tafel .blad {
+  fill: var(--grond);
+  stroke: var(--navy);
+  stroke-width: 1.5;
+}
+.tafel .blad-naam {
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 40px;
+  fill: var(--navy);
+}
+.tafel .blad-onder {
+  font-size: 13px;
+  fill: var(--grijs);
+}
+.tafel .raakvlak {
+  fill: transparent;
+}
+.tafel .rug {
+  fill: var(--navy);
+  transition: fill 0.15s ease;
+}
+.tafel .stoel-naam {
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 17px;
+  fill: var(--navy);
+}
+.tafel .stoel-faculteit {
+  font-size: 13px;
+  fill: var(--grijs);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.tafel .plek {
+  cursor: pointer;
+  outline-offset: 4px;
+}
+.tafel .plek:hover .rug,
+.tafel .plek:focus-visible .rug {
+  fill: var(--geel);
+}
+.tafel .plek:hover .stoel-naam,
+.tafel .plek:focus-visible .stoel-naam {
+  fill: var(--geel-donker);
+}
+.tafel .plek:hover .stoel-faculteit,
+.tafel .plek:focus-visible .stoel-faculteit {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .tafel .plek {
+    opacity: 0;
+    animation: aanschuiven 0.45s ease-out forwards;
+    animation-delay: var(--wacht);
+  }
+  @keyframes aanschuiven {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+      transform-origin: 250px 250px;
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* ----- de band met namen ------------------------------------------------- */
+
+.band {
+  overflow: hidden;
+  padding: 0.9rem 0;
+  background: var(--navy);
+  /* Het dasmotief zit in de randen; de namen blijven daardoor goed leesbaar. */
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-image: repeating-linear-gradient(
+      115deg,
+      var(--geel) 0 10px,
+      var(--navy) 10px 30px,
+      var(--geel) 30px 33px,
+      var(--navy) 33px 68px
+    )
+    10;
+}
+.bandloop {
+  display: flex;
+  width: max-content;
+  gap: 0;
+}
+.bandloop > span {
+  display: flex;
+  gap: 2.5rem;
+  padding-right: 2.5rem;
+  white-space: nowrap;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--wit);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bandloop {
+    animation: schuiven 60s linear infinite;
+  }
+  @keyframes schuiven {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ----- secties ----------------------------------------------------------- */
+
+.vlak {
+  padding: 4rem 0;
+  border-top: 1px solid var(--rand);
+}
+.vlak.wit {
+  background: var(--wit);
+}
+.vlak.donker {
+  background: var(--navy);
+  color: var(--wit);
+  border-top-color: var(--rand-donker);
+}
+.vlak.donker h2,
+.vlak.donker h3,
+.vlak.donker strong,
+.vlak.donker dt {
+  color: var(--wit);
+}
+.vlak.donker p,
+.vlak.donker dd {
+  color: var(--grijs-licht);
+}
+.vlak.donker a {
+  color: var(--wit);
+}
+.vlak > .binnen > p {
+  color: var(--grijs);
+}
+.vlak.donker > .binnen > p {
+  color: var(--grijs-licht);
+}
+
+/* 2. vier feiten */
+.feiten {
+  padding: 3rem 0;
+}
+.feitenzin {
+  max-width: 54rem;
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  line-height: 1.5;
+  color: var(--navy) !important;
+}
+.feitenzin strong {
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.35em;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+/* 3. pijlers */
+.pijlers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+.pijlers h3 {
+  border-top: 3px solid var(--geel);
+  padding-top: 0.75rem;
+}
+.pijlers p {
+  color: var(--grijs);
+  margin-bottom: 0;
+}
+
+/* 4. schema */
+.schema {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+  margin-top: 2rem;
+}
+.schematekening {
+  width: 100%;
+}
+.schematekening .doos {
+  fill: none;
+  stroke: var(--grijs-licht);
+  stroke-width: 1.5;
+}
+.schematekening .doos.ab {
+  fill: rgba(0, 166, 214, 0.14);
+  stroke: var(--geel);
+}
+.schematekening .doos-naam {
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 16px;
+  fill: var(--wit);
+}
+.schematekening .doos-uitleg {
+  font-size: 12px;
+  fill: var(--grijs-licht);
+}
+.schematekening .lijn {
+  stroke: var(--grijs-licht);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+.schema-tekst > div + div {
+  margin-top: 1.75rem;
+}
+
+/* 5. overleggen */
+.overleggen {
+  margin-top: 2rem;
+  border-top: 1px solid var(--rand);
+}
+.overleggen article {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: baseline;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--rand);
+}
+.overleggen h3 {
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  color: var(--navy-licht);
+  margin: 0;
+}
+.overleggen .wie {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+.overleggen .details {
+  margin: 0;
+  color: var(--grijs);
+  font-size: 0.97rem;
+}
+
+.terzijde {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--grijs);
+}
+
+/* 6. tijdlijn van het jaar: op een breed scherm alles in beeld, in twee rijen;
+   op een telefoon één rij die je opzij schuift. */
+.tijdlijn {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.25rem 1.5rem;
+}
+.tijdlijn li {
+  position: relative;
+  padding-top: 1.75rem;
+  border-top: 2px solid var(--rand);
+}
+.tijdlijn .stip {
+  position: absolute;
+  top: -0.55rem;
+  left: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 2px solid var(--wit);
+}
+.tijdlijn .wanneer {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--navy-licht);
+}
+.tijdlijn .wat {
+  margin: 0.15rem 0 0.35rem;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 1.2rem;
+}
+.tijdlijn .datum {
+  margin: -0.2rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--navy);
+}
+.tijdlijn .uitleg {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--grijs);
+}
+.schuifhint {
+  display: none;
+}
+
+/* 7. evenementen */
+.evenementen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+.evenementen article {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-radius: 0.6rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.evenementen article.groot {
+  grid-column: span 3;
+  flex-direction: row;
+  align-items: stretch;
+}
+.evenementen article.groot .foto {
+  width: 42%;
+  aspect-ratio: auto;
+}
+.evenementen article.groot .inhoud {
+  padding: 2rem 2.25rem;
+  align-self: center;
+}
+.evenementen article.groot h3 {
+  font-size: 1.7rem;
+}
+.evenementen .foto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+/* Zonder foto een rustig vlak met één dasstreep in de hoek. */
+.evenementen .foto.leeg {
+  background: var(--grond);
+  position: relative;
+  overflow: hidden;
+}
+.evenementen .foto.leeg::after {
+  content: "";
+  position: absolute;
+  right: -1.5rem;
+  bottom: -1.5rem;
+  width: 7rem;
+  height: 1.1rem;
+  background: var(--geel);
+  transform: rotate(-25deg);
+}
+.evenementen article.groot .foto.leeg::after {
+  width: 11rem;
+  height: 1.4rem;
+}
+.evenementen .inhoud {
+  padding: 1.1rem 1.25rem 1.4rem;
+}
+.evenementen p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--grijs);
+}
+
+/* 8. samenwerking */
+.namens {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rand-donker);
+}
+.namens h3 {
+  font-size: 1.35rem;
+}
+.samenwerking {
+  margin: 1.5rem 0 0;
+  display: grid;
+  gap: 1.5rem;
+  max-width: 48rem;
+}
+.samenwerking dt {
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 1.2rem;
+  border-left: 3px solid var(--geel);
+  padding-left: 0.85rem;
+}
+.samenwerking dd {
+  margin: 0.35rem 0 0 0.85rem;
+  padding-left: 0.6rem;
+  max-width: 38rem;
+}
+
+/* 9. de vijftien */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.5rem 0 1.75rem;
+}
+.filters button {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--navy);
+  background: transparent;
+  color: var(--navy);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.filters button[aria-pressed="true"] {
+  background: var(--navy);
+  color: var(--wit);
+}
+.verenigingen {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.85rem;
+}
+.verenigingen a,
+.verenigingen .geenlink {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--rand);
+  border-radius: 0.5rem;
+  background: var(--grond);
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+.verenigingen a:hover,
+.verenigingen a:focus-visible {
+  border-color: var(--geel);
+  background: var(--wit);
+  transform: translateY(-1px);
+}
+.verenigingen a {
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.verenigingen .logo {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  border-radius: 0.4rem;
+  object-fit: contain;
+  background: var(--wit);
+}
+/* Zonder logo één dasstreep, geen initialen: die lazen als een fout. */
+.verenigingen .streepje {
+  width: 0.35rem;
+  height: 2.25rem;
+  flex: none;
+  border-radius: 999px;
+  background: linear-gradient(var(--geel) 0 55%, var(--navy) 55% 100%);
+}
+.verenigingen .naarbuiten {
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: auto;
+  flex: none;
+  fill: none;
+  stroke: var(--grijs);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.verenigingen a:hover .naarbuiten {
+  stroke: var(--geel-donker);
+}
+.verenigingen .wie strong {
+  display: block;
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+.verenigingen .wie span {
+  font-size: 0.82rem;
+  color: var(--grijs);
+}
+
+/* 10. tradities */
+.tradities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.tradities .merkje {
+  display: block;
+  width: 2.5rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.9rem;
+}
+.tradities p {
+  color: var(--grijs);
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+/* 11. geschiedenis */
+.geschiedenisblok {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2rem;
+  align-items: center;
+}
+.geschiedenisblok .groot-getal {
+  justify-self: end;
+  font-size: clamp(4rem, 11vw, 9rem);
+}
+.mijlpalen {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0 0 0 1.5rem;
+  border-left: 2px solid var(--rand-donker);
+  max-width: 44rem;
+  counter-reset: mijlpaal;
+}
+.mijlpalen li {
+  position: relative;
+  padding-bottom: 1.75rem;
+}
+.mijlpalen li::before {
+  content: "";
+  position: absolute;
+  left: -1.95rem;
+  top: 0.45rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--geel);
+}
+.mijlpalen .wanneer {
+  margin: 0;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--wit);
+}
+.mijlpalen .wat {
+  margin: 0.2rem 0 0;
+}
+
+/* 12. bestuur */
+.groot-getal {
+  font-family: "Young Serif", Georgia, serif;
+  line-height: 0.82;
+  font-size: clamp(7rem, 17vw, 15rem);
+  color: transparent;
+  -webkit-text-stroke: 3px var(--navy);
+  display: block;
+  letter-spacing: -0.02em;
+}
+.vlak.donker .groot-getal,
+.groot-getal.omtrek {
+  -webkit-text-stroke-color: var(--geel);
+}
+
+.bestuurblok {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: 3rem;
+  align-items: center;
+}
+.samenfoto {
+  margin: 0;
+}
+.samenfoto img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0.75rem;
+  border: 1px solid var(--rand);
+}
+.samenfoto figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--grijs);
+}
+.personen {
+  list-style: none;
+  padding: 0;
+  margin: 3rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 2rem;
+  max-width: 48rem;
+}
+.personen li {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.personen img,
+.personen .geenfoto {
+  width: 8rem;
+  height: 8rem;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.personen .geenfoto {
+  display: grid;
+  place-items: center;
+  color: var(--wit);
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 2rem;
+}
+.personen strong {
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.45rem;
+  display: block;
+  line-height: 1.15;
+}
+.personen span span {
+  font-family: "Young Serif", Georgia, serif;
+  color: var(--grijs);
+  font-size: 1rem;
+}
+.uitnodiging {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rand);
+  font-size: 1.05rem;
+}
+
+/* 13. vragen */
+.vragen {
+  margin-top: 1.5rem;
+  max-width: 48rem;
+  border-top: 1px solid var(--rand);
+}
+.vragen details {
+  border-bottom: 1px solid var(--rand);
+}
+.vragen summary {
+  cursor: pointer;
+  padding: 1rem 0;
+  font-size: 1.05rem;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+.vragen summary::-webkit-details-marker {
+  display: none;
+}
+.vragen summary::after {
+  content: "+";
+  font-size: 1.3rem;
+  color: var(--navy-licht);
+  line-height: 1;
+}
+.vragen details[open] summary::after {
+  content: "–";
+}
+.vragen details p {
+  margin: 0 0 1.1rem;
+  color: var(--grijs);
+}
+
+/* 14. contact */
+.contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.contact address {
+  font-style: normal;
+  line-height: 1.9;
+}
+
+/* ----- tekstpagina's ----------------------------------------------------- */
+
+.tekst {
+  max-width: 44rem;
+}
+.tekst ul {
+  max-width: 40rem;
+  padding-left: 1.2rem;
+}
+.tekst li {
+  margin-bottom: 0.4rem;
+}
+.tekst h2 {
+  margin-top: 2.5rem;
+}
+.tekst h3 {
+  margin-top: 1.75rem;
+}
+
+/* ----- voet -------------------------------------------------------------- */
+
+.voet {
+  margin-top: auto;
+  background: var(--navy);
+  color: var(--wit);
+  padding: 2.25rem 0;
+  font-size: 0.92rem;
+  border-top: 3px solid var(--geel);
+}
+.voet .binnen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  justify-content: space-between;
+}
+.voet a {
+  color: var(--wit);
+}
+.voet ul {
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+/* ----- smallere schermen ------------------------------------------------- */
+
+@media (max-width: 64rem) {
+  .hero .binnen {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .schema,
+  .bestuurblok,
+  .geschiedenisblok {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .geschiedenisblok .groot-getal {
+    justify-self: start;
+  }
+  .evenementen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .evenementen article.groot {
+    grid-column: span 2;
+    flex-direction: column;
+  }
+  .evenementen article.groot .foto {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+  }
+  .samenfoto {
+    max-width: 22rem;
+  }
+}
+
+@media (max-width: 48rem) {
+  .menuknop {
+    display: inline-flex;
+  }
+  .menu {
+    display: none;
+    width: 100%;
+    border-top: 1px solid var(--rand);
+    padding: 0.5rem 0 1rem;
+  }
+  .menu[data-open="ja"] {
+    display: block;
+  }
+  .menu ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .menu li {
+    border-bottom: 1px solid var(--rand);
+  }
+  .menu li:last-child {
+    border-bottom: 0;
+    padding-top: 0.75rem;
+  }
+  .menu a {
+    display: block;
+    padding: 0.8rem 0;
+  }
+  .kop .binnen {
+    flex-wrap: wrap;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .vlak {
+    padding: 2.75rem 0;
+  }
+  /* Op een telefoon één rij die je opzij schuift, met een zichtbare hint. */
+  .tijdlijn {
+    grid-auto-flow: column;
+    grid-auto-columns: 14rem;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.75rem;
+  }
+  .tijdlijn li {
+    scroll-snap-align: start;
+  }
+  .schuifhint {
+    display: block;
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--grijs);
+  }
+  .evenementen {
+    grid-template-columns: 1fr;
+  }
+  .evenementen article.groot {
+    grid-column: span 1;
+  }
+  .overleggen article {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .personen img,
+  .personen .geenfoto {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+@media (max-width: 30rem) {
+  .tafel .stoel-naam {
+    font-size: 16px;
+  }
+  .tafel .stoel-faculteit {
+    font-size: 14px;
+  }
+  .tafel .blad-naam {
+    font-size: 34px;
+  }
+}
+
+/* Losse pagina's: de kop bovenaan */
+.paginakop {
+  padding-top: clamp(2.5rem, 6vw, 4rem);
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+}
+.paginakop h1 {
+  color: var(--wit);
+  margin-bottom: 0.5rem;
+}
+.paginakop .lead {
+  max-width: 40rem;
+}
+.paginakop .lead p {
+  font-size: 1.15rem;
+  color: var(--grijs-licht);
+}
+
+/* Wegwijzer op de voorpagina: hele kaart is de link */
+.ontdekkaart {
+  display: block;
+  padding: 1.25rem 1.25rem 1.1rem;
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  background: var(--wit);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.ontdekkaart:hover,
+.ontdekkaart:focus-visible {
+  border-color: var(--geel);
+  transform: translateY(-2px);
+}
+.ontdekkaart h3 {
+  margin-top: 0;
+}
+
+/* Oud-besturen: een kaart per bestuur, met de groepsfoto */
+.oudbesturen {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.5rem;
+}
+.oudbesturen > li {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.oudbesturen img,
+.oudbesturen .geenfoto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 30%;
+  background: var(--grond);
+}
+.oudbesturen .geenfoto {
+  display: grid;
+  place-items: center;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 2.5rem;
+  color: var(--wit);
+}
+.oudbesturen > li > div {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 3px solid var(--geel);
+}
+.oudbesturen .kop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 0.4rem;
+}
+.oudbesturen .kop strong {
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+}
+.oudbesturen .kop span,
+.oudbesturen .namen {
+  font-size: 0.9rem;
+  color: var(--grijs);
+}
+.oudbesturen .namen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.oudbesturen .beleid {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}
+
+/* Volledige naam van een vereniging, onder de korte */
+.verenigingen .wie .officieel {
+  display: block;
+  font-style: italic;
+}
+
+/* De SVR zelf op de tijdlijn van de vijftien */
+.mijlpalen li.svr::before {
+  background: var(--geel);
+  width: 0.8rem;
+  height: 0.8rem;
+  left: -2.05rem;
+}
+
+/* Op een smalle telefoon past "studieverenigingen" niet in één regel van de
+   grote kop: dan afbreken in plaats van de pagina breder te maken. */
+.hero-tekst,
+.hero-tafel {
+  min-width: 0;
+}
+.publiek h1 {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}

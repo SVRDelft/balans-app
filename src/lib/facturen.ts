@@ -17,10 +17,18 @@ export async function vergrendelFactuur(
   factuurId: string,
   boekjaarId: string,
 ) {
-  await tx.$queryRaw`SELECT id FROM "Factuur" WHERE id = (
-    SELECT COALESCE("crediteertFactuurId", id) FROM "Factuur"
-    WHERE id = ${factuurId} AND "boekjaarId" = ${boekjaarId}
-  ) FOR UPDATE`;
+  // Eerst opzoeken welke factuur het origineel is, daarna die rij vergrendelen.
+  const [rij] = await tx.$queryRawUnsafe<{ id: string }[]>(
+    "SELECT COALESCE(crediteertFactuurId, id) AS id FROM `Factuur` WHERE id = ? AND boekjaarId = ?",
+    factuurId,
+    boekjaarId,
+  );
+  if (rij) {
+    await tx.$queryRawUnsafe(
+      "SELECT id FROM `Factuur` WHERE id = ? FOR UPDATE",
+      rij.id,
+    );
+  }
 }
 
 /**

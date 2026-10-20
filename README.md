@@ -10,28 +10,45 @@ betalingen en het banksaldo voer je handmatig in.
 
 ---
 
+## Wat er in deze app zit
+
+| Pad | Voor wie | Wat |
+|---|---|---|
+| `/`, `/bestuur-worden`, `/privacy` | iedereen | de publieke site van de SVR |
+| `/portaal` | ingelogde studieverenigingen | eigen facturen met PDF, mededelingen, vergaderingen met agenda en notulen, en documenten |
+| `/beheer` | ingelogd SVR-bestuur | de financiële administratie |
+
+De teksten van de publieke pagina's staan in `content/`; hoe je die aanpast
+staat in [BEWERKEN.md](BEWERKEN.md). De publieke pagina's zijn statisch en raken
+de database niet, zodat ze blijven staan als de database er even uit ligt.
+
+---
+
 ## Starten
 
-Gebruik [Node.js 22 of 24](https://nodejs.org) en een Postgres-database.
-De app kan via Vercel met Neon worden verbonden; zie [MIGRATIE.md](MIGRATIE.md).
+Gebruik [Node.js 20.9 of hoger](https://nodejs.org) (de webserver van de TU
+Delft draait 20.20) en een MariaDB-database.
 
 ```bash
 npm install
 ```
 
-```bash
-npx vercel link
-npx vercel env pull .env.local
-```
-
-Zet in Vercel een eigen `APP_WACHTWOORD` en `AUTH_SECRET` en haal de variabelen
-opnieuw op. Zonder Vercel kun je `.env.example` naar `.env.local` kopiëren en
-je eigen Postgres-adres invullen. Een
-willekeurige sleutel genereer je zo:
+Kopieer `.env.example` naar `.env` en vul je eigen waarden in. Een willekeurige
+sleutel genereer je zo:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
+
+Start de database. Dat is een MariaDB 10.11 in Docker, dezelfde versie als op de
+server van de TU Delft:
+
+```bash
+npm run db:start
+```
+
+Draait Docker niet, installeer dan MariaDB 10.11 of hoger zelf en zet het adres
+van die database in `DATABASE_URL`. Verder verandert er niets.
 
 Database aanmaken en vullen met de startgegevens:
 
@@ -45,13 +62,74 @@ Starten:
 npm run dev
 ```
 
-De app draait nu op <http://localhost:3000>. Log in met je eigen naam en het
-wachtwoord uit `APP_WACHTWOORD`. Die naam komt bij elke wijziging in het auditlog te staan,
-zodat achteraf te zien is wie wat gedaan heeft.
+Maak het eerste bestuursaccount aan; zonder account kan niemand inloggen:
 
-Na het testen kun je onderaan de pagina *Auditlog* het log wissen met hetzelfde
+```bash
+npm run account:eerste -- bestuur-svr@tudelft.nl "Je naam"
+```
+
+Het wachtwoord verschijnt één keer in de terminal. De app draait op
+<http://localhost:3000> en vraagt bij de eerste keer inloggen meteen om een
+eigen wachtwoord. Je naam komt bij elke wijziging in het auditlog te staan,
+zodat achteraf te zien is wie wat gedaan heeft. Verdere accounts maak je aan bij
+*Beheer › Accounts*.
+
+Na het testen kun je onderaan de pagina *Auditlog* het log wissen met je eigen
 wachtwoord. Er blijft dan één regel staan met wie het log wanneer gewist heeft.
-Boekingen wissen doe je apart bij *Boekjaren*, ook met het wachtwoord.
+Boekingen wissen doe je apart bij *Boekjaren*, ook met je wachtwoord.
+
+### Accounts en rollen
+
+| Rol | Mag bij | Hoe |
+|---|---|---|
+| **SVR-bestuur** | de administratie (`/beheer`) en het portaal | per persoon een account |
+| **Vereniging** | alleen het portaal, en alleen de eigen relatie | per vereniging één account op het functionele adres, bijvoorbeeld `thesaurier@curius.nl`. Ook ORAS en Lijst Bèta kunnen er een krijgen; zij ontvangen immers ook facturen |
+| **Als vereniging** (portaal) | alleen het portaal, plus de openstaande facturen van de relatie die het bestuur eraan koppelt | geen account maar een keuze uit de lijst en één gedeeld wachtwoord per vereniging of informant, in te stellen bij *Beheer › Portaaltoegang*. Blijft een jaar ingelogd |
+
+Niemand kan zichzelf aanmelden. Accounts worden niet verwijderd maar uitgezet,
+zodat het auditlog blijft kloppen. Vergeet iemand zijn wachtwoord, dan geeft het
+bestuur bij *Accounts* een nieuw wachtwoord uit; dat wordt één keer getoond.
+
+### Portaal
+
+Bij *Beheer › Portaal* plaatst het bestuur mededelingen, voert het de
+vergaderingen in en uploadt het agenda's, notulen en losse documenten. Alles wat
+daar staat is zichtbaar voor **alle** aangesloten verenigingen met een account.
+
+Agenda's en notulen kunnen gedeeld worden met iemand die niet kan inloggen: de
+knop **Deel** (in het portaal en bij *Beheer › Portaal*) kopieert een link
+`/delen/<sleutel>`. Die werkt zonder inloggen, maar alleen met de volledige,
+niet te raden sleutel. Zoekmachines krijgen `noindex` mee en de links staan in
+geen sitemap, dus ze komen niet in Google. Losse documenten zijn niet te delen.
+Bij *Beheer › Portaal* zet **Link intrekken** een gedeelde link meteen uit; een
+volgende klik op Deel maakt een nieuwe.
+
+De vergaderingen van 2026-2027 staan in het seed-script
+(`src/lib/portaal/vergaderingen.ts`); een volgend bestuur voert het nieuwe
+rooster in via het scherm.
+
+Uploads mogen PDF, PNG, JPG of DOCX zijn, maximaal 20 MB. De app kijkt naar de
+inhoud van het bestand en niet naar de extensie. De bestanden staan in `storage/`
+— buiten de map die de webserver uitserveert — met een willekeurige naam; de
+oorspronkelijke naam staat in de database. Downloaden kan alleen via
+`/api/portaal/bestand/<id>`, en daar wordt eerst gecontroleerd of je ingelogd
+bent. **Neem `storage/` mee in de back-up**: die map staat niet in git.
+
+### Testen
+
+```bash
+npm run build     # eerst: hiermee maakt Next de typen voor de routes aan
+npm test          # alle tests, waaronder de toegangscontrole per scherm
+npm run typecheck
+npm run lint
+```
+
+Op een verse kopie van de repository faalt `npm run typecheck` tot je één keer
+hebt gebouwd: `PageProps` en `RouteContext` komen uit bestanden die de build
+genereert. GitHub Actions doet daarom hetzelfde: eerst bouwen, dan controleren.
+
+`npm run test:e2e` (de browsertest met Playwright) is **nog niet omgezet** naar
+MariaDB en de nieuwe accounts; die staat tijdelijk stil.
 
 ---
 
@@ -96,6 +174,14 @@ Het inlogwachtwoord staat in `APP_WACHTWOORD` in `.env.local`.
 
 ## Hoe de app werkt
 
+### Snel ergens komen
+
+**Ctrl+K** (op een Mac Cmd+K) opent het zoekvenster, vanaf elke pagina van de
+administratie. Daarin typ je een factuurnummer, de naam van een vereniging, een
+uitgave, een evenement of de naam van een pagina; Enter brengt je erheen. Het
+zoekt over **alle boekjaren**: een factuur van vorig jaar wisselt onderweg zelf
+van boekjaar, zodat je niet op een leeg scherm belandt.
+
 ### Boekjaren
 
 Er is altijd precies één **actief** boekjaar. Alleen daarin kun je schrijven;
@@ -104,6 +190,16 @@ oudere jaren zijn wel te bekijken. Bovenin wissel je van boekjaar. Relaties
 bestaan. Het eerste boekjaar wordt automatisch actief. Bij het aanmaken van een
 volgend jaar kun je de begrotingsposten en bedragen kopiëren. Activeer dat jaar
 wanneer je erin wilt gaan werken en neem de voorraad over via *Spullen & voorraad*.
+
+**Een oud jaar alsnog invoeren.** Begin je net met de app, dan staat het vorige
+bestuursjaar nog nergens in. Maak dat jaar aan en zet het bij *Boekjaren* op
+**Opbouwen**: zolang die schakelaar aanstaat mag je in dat afgesloten jaar boeken,
+precies zoals in het actieve jaar. Lees daarna het MT940-afschrift van dat jaar in
+en gebruik *Alles in één keer boeken*: van elke bijschrijving maakt de app een
+factuur die al op betaald staat, van elke afschrijving een betaalde uitgave.
+Facturen die nooit betaald zijn staan niet op het afschrift; die voer je er met de
+hand bij. Zet de schakelaar daarna weer uit. Elke keer dat je hem omzet komt in
+het auditlog te staan.
 
 ### Begroting
 
@@ -129,6 +225,24 @@ hergebruikt**, ook niet als je een concept verwijdert. Een gat in de reeks is
 verklaarbaar; een hergebruikt nummer niet.
 
 Deelbetalingen kunnen: de status volgt automatisch uit de som van de betalingen.
+
+Bij een openstaande factuur maakt de app de tekst voor een herinnering; versturen
+doe je zelf uit je eigen mail. Met één knop teken je aan dát je hem hebt verstuurd,
+en dan houdt de app bij hoe vaak en wanneer dat gebeurde. Zo zie je in de lijst
+welke facturen nog **niet** herinnerd zijn, en staat op het dashboard hoeveel te
+late facturen daar nog op wachten.
+
+Staat er een hele ronde facturen in de lijst — bijvoorbeeld alle LBG-facturen —
+dan haal je met **PDF's als zip downloaden** alle PDF's in één keer op, met de
+naam van de vereniging in de bestandsnaam. De knop volgt de filters die boven de
+lijst staan.
+
+Een betaling hoort bij het boekjaar waarin het **geld** binnenkwam, en dat is niet
+altijd het jaar van de factuur. Betaalt een vereniging in oktober de factuur van
+mei, dan kies je bij de betaling het nieuwe jaar: de vordering blijft in het oude
+jaar staan en het geld telt in het nieuwe jaar mee. Beide balansen blijven zo
+kloppen. Daarom mag je een betaling ook vastleggen op een factuur uit een
+afgesloten boekjaar — als enige handeling in zo'n jaar.
 
 Een creditfactuur telt mee zodra je deze op *verstuurd* zet. De app verrekent
 de credit met het origineel en laat een eventuele terugbetaling apart zien.
@@ -199,10 +313,72 @@ Voer het banksaldo regelmatig in vanuit je bankapp. De app zet dat af tegen het
 saldo dat uit de administratie volgt. **Dat verschil is het beste signaal dat er
 iets vergeten is.**
 
+### De spaarrekening
+
+Naast de betaalrekening heeft de SVR een spaarrekening. Geld dat je daarheen
+overmaakt is **geen uitgave**: het blijft van de SVR en staat alleen ergens
+anders. Op de balans staat het daarom als apart bezit, en in de exploitatie zie je
+er niets van terug.
+
+Onder *Spaarrekening* leg je de mutaties vast:
+
+- **Overboeking** tussen de eigen rekeningen. Die staat ook op je afschrift, dus
+  meestal boek je hem bij de bankimport: kies daar *Naar de eigen spaarrekening*.
+- **Rente** en **bankkosten**. Die komen rechtstreeks op de spaarrekening binnen
+  en staan dus nooit op het afschrift van de betaalrekening. Daarom kies je er een
+  begrotingspost bij: rente is een opbrengst, kosten zijn kosten.
+- **Correctie**, voor het geval het saldo om een andere reden afwijkt.
+
+Het beginsaldo van de spaarrekening zet je per boekjaar bij *Boekjaren*, naast het
+beginsaldo van de bank. Net als bij de betaalrekening kun je het werkelijke saldo
+uit je bankapp invoeren; het verschil met de administratie hoort nul te zijn en
+staat ook op de balans.
+
+### Debiteuren en de rekening-courant
+
+Onder *Debiteuren* staat alles wat de SVR nog moet krijgen. Dat zijn twee dingen
+die los van elkaar staan:
+
+- **Openstaande facturen**, met de ouderdom gerekend vanaf de factuurdatum.
+  Facturen uit eerdere boekjaren staan er apart bij, want dat geld komt in dit jaar
+  binnen.
+- **De rekening-courant**: geld dat buiten facturen om heen en weer gaat met één
+  persoon of vereniging. De aanleiding is de praktijk — er wordt iets privés met de
+  SVR-pas betaald, of iemand schiet iets voor. Zonder administratie daarvan
+  verdwijnt zoiets in het bankverschil en weet een jaar later niemand meer wie wat
+  moet betalen.
+
+Een post op de rekening-courant heeft een richting in woorden en geen minteken dat
+je moet onthouden: *moet de SVR nog betalen* of *de SVR moet nog betalen*. Een
+saldo loopt door over boekjaren heen, tot het verrekend is. Dit geldt voor
+iedereen die je wilt bijhouden, niet alleen voor het bestuur zelf.
+
+Het vinkje **dit bedrag ging via de SVR-rekening** bepaalt wat er met de cijfers
+gebeurt:
+
+- **Aan** (het normale geval): het bedrag staat op het afschrift en gaat van het
+  banksaldo af, met een vordering op die persoon ertegenover. Het raakt de
+  begroting niet, want het is geen uitgave van de SVR.
+- **Uit**: er is geen bankmutatie, dus het is een correctie — bijvoorbeeld een
+  bedrag dat de SVR alsnog voor eigen rekening neemt. Dan hoort er een
+  begrotingspost bij en komt het als kosten of opbrengst in de exploitatie.
+
+Bij een bankimport zet je zo'n bedrag met één keuze op de rekening-courant van de
+juiste persoon; een terugbetaling boek je op dezelfde manier en haalt het saldo
+weer omlaag.
+
 ### Bankafschriften inlezen
 
 Onder *Banksaldo › Bankafschriften* lees je een MT940-bestand in dat je bij ABN
-AMRO downloadt. De app stelt koppelingen voor tussen de mutaties en je openstaande
+AMRO downloadt onder **Bij- en afschrijvingen**, met *Bestandsformaat: MT940* en
+een periode die binnen het boekjaar valt. Vink je daar zowel de bestuurrekening
+als de spaarrekening aan, dan zet ABN ze in één bestand; de app herkent dat en
+houdt de twee uit elkaar. De regels van de spaarrekening krijgen hun eigen blok,
+want daar hoort nooit een factuur of uitgave bij: een overboeking tussen de eigen
+rekeningen boek je op de regel van de betaalrekening en vink je bij de
+spaarrekening alleen af, en rente of bankkosten boek je daar met een
+begrotingspost erbij. Het eindsaldo van beide rekeningen wordt in één keer
+overgenomen. De app stelt koppelingen voor tussen de mutaties en je openstaande
 facturen en uitgaven; je bevestigt die zelf voordat er iets geboekt wordt.
 
 De app herkent een betaling op, van zeker naar minder zeker:
@@ -216,13 +392,25 @@ De app herkent een betaling op, van zeker naar minder zeker:
 - **Alleen bedrag**: er is precies één open factuur of uitgave met dit bedrag.
   Dit staat niet aangevinkt; vink het zelf aan als het klopt.
 
+Openstaande facturen uit **eerdere boekjaren** staan gewoon tussen de keuzes: komt
+het geld van vorig jaar nu binnen, dan koppel je dat hier en wordt de betaling in
+dit jaar geboekt.
+
 Zekere voorstellen en naam-plus-bedrag staan alvast aangevinkt; met één knop
 koppel je ze allemaal. Wat niet herkend is koppel je per regel, of boek je als
-nieuwe uitgave of als *inkomst zonder factuur* (dan maakt de app een betaalde
-factuur aan, zodat de ontvangst in de administratie staat). Na een koppeling
+nieuwe uitgave, als *inkomst zonder factuur* (dan maakt de app een betaalde
+factuur aan, zodat de ontvangst in de administratie staat) of op de
+**rekening-courant** van een persoon. Met *Alles in één keer boeken* doe je dat
+voor een hele stapel regels tegelijk; dat is bedoeld voor het opbouwen van een oud
+boekjaar. Na een koppeling
 onthoudt de app het rekeningnummer van de relatie, zodat die de volgende keer
 zeker herkend wordt. Draai je de koppeling terug, dan vergeet hij dat nummer weer.
 Het banksaldo overnemen is een aparte knop en boekt niets.
+
+Loopt de download over een jaargrens heen, dan zegt de app welke periode in het
+bestand staat en welke bij dit boekjaar hoort. Download in dat geval per boekjaar
+een apart bestand; voor een jaar dat je achteraf opbouwt, zet je dat boekjaar
+eerst op *Opbouwen* (zie Boekjaren).
 
 Dit is een **handmatige import van een bestand dat jij downloadt**, geen
 koppeling met de bank: de app praat nooit zelf met ABN AMRO en heeft geen
@@ -283,8 +471,9 @@ die testdatabase. Gebruik hiervoor ontwikkelvariabelen, geen productievariabelen
 Testresultaten, sessiegegevens en exports blijven buiten Git.
 
 - **Next.js 16** (App Router) met **TypeScript** en **React 19**
-- **Prisma 7** met **Postgres** via de `@prisma/adapter-pg` driver adapter;
-  hosting op Vercel met Neon — zie [MIGRATIE.md](MIGRATIE.md)
+- **Prisma 7** met **MariaDB** via de `@prisma/adapter-mariadb` driver adapter:
+  pure JavaScript, zodat de app ook draait op de webserver van de TU Delft —
+  zie [MIGRATIE.md](MIGRATIE.md)
 - **Tailwind CSS 4** met componenten in de conventie van **shadcn/ui**
 - **@react-pdf/renderer** voor de PDF's (geen headless Chromium, werkt op Vercel)
 - **ExcelJS** voor de Excel-export
@@ -314,5 +503,8 @@ ze te testen zijn. Draai `npm test` na elke wijziging daaraan.
 
 ## Verder lezen
 
-- [MIGRATIE.md](MIGRATIE.md) — Vercel en Postgres instellen en publiceren
+- [BEWERKEN.md](BEWERKEN.md) — teksten en foto's van de website aanpassen
+- [DEPLOY.md](DEPLOY.md) — de app op de webserver van de TU Delft zetten
+- [OVERDRACHT.md](OVERDRACHT.md) — overdracht aan het volgende bestuur
+- [MIGRATIE.md](MIGRATIE.md) — de database en het publiceren van de app
 - [AANNAMES.md](AANNAMES.md) — de aannames die tijdens het bouwen zijn gedaan

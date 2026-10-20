@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>StudieVerenigingenRaad Delft</title>
+<meta name="description" content="De StudieVerenigingenRaad (SVR) is het overleg van de vijftien studieverenigingen van de TU Delft.">
+<style>
+:root{
+  --porselein:#F7F9FC; --glazuur:#E3EAF6; --delfts:#1F3F95; --delfts-2:#3A5BB8;
+  --inkt:#14203A; --grijs:#56627C; --oker:#D9A021;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --max:68rem;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--porselein);color:var(--inkt);font:1.0625rem/1.6 var(--sans)}
+a{color:var(--delfts)}
+a:focus-visible,button:focus-visible{outline:3px solid var(--oker);outline-offset:3px;border-radius:2px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0}
+h2{font-size:clamp(1.75rem,3.2vw,2.4rem);margin-bottom:1rem}
+p{max-width:38rem;margin:0 0 1rem}
+
+/* header */
+header{border-bottom:1px solid var(--glazuur);background:#fff}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:4.25rem;flex-wrap:wrap}
+.merk{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--delfts);text-decoration:none;letter-spacing:.02em}
+nav ul{list-style:none;display:flex;flex-wrap:wrap;gap:.25rem 1.5rem;margin:0;padding:.5rem 0}
+nav a{color:var(--inkt);text-decoration:none;font-size:.97rem}
+nav a:hover{color:var(--delfts);text-decoration:underline;text-underline-offset:.3em}
+
+/* hero */
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:2rem;align-items:center;padding-top:3.5rem;padding-bottom:3.5rem}
+.hero h1{font-size:clamp(2.4rem,5.4vw,4.1rem);color:var(--delfts);margin-bottom:1.25rem;letter-spacing:-.01em}
+.hero .lead{font-size:1.2rem;color:var(--inkt)}
+.volgende{margin-top:1.75rem;padding:1rem 1.25rem;background:#fff;border-left:4px solid var(--oker);max-width:30rem}
+.volgende strong{display:block;font-family:var(--serif);font-size:1.25rem}
+.volgende span{color:var(--grijs);font-size:.95rem}
+.ring{width:100%;max-width:30rem;justify-self:center}
+.ring .tafel{fill:var(--glazuur);stroke:var(--delfts);stroke-width:1.5}
+.ring .seat{fill:#fff;stroke:var(--delfts);stroke-width:2}
+.ring .sv{font:500 14px var(--sans);fill:var(--inkt)}
+.ring .midden{font:700 44px var(--serif);fill:var(--delfts)}
+.ring .onder{font:13px var(--sans);fill:var(--grijs)}
+@media (prefers-reduced-motion:no-preference){
+  .ring .seat,.ring .sv{opacity:0;animation:zit .5s ease-out forwards;animation-delay:var(--d)}
+  @keyframes zit{to{opacity:1}}
+}
+
+/* secties */
+section{padding:4rem 0;border-top:1px solid var(--glazuur)}
+section.tint{background:#fff}
+.reeksen{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:2rem 2.5rem;margin-top:2rem}
+.reeks h3{font-size:1.35rem;color:var(--delfts);margin-bottom:.35rem}
+.reeks p{color:var(--grijs);margin:0;font-size:.98rem}
+.reeks .wie{color:var(--inkt);font-weight:600}
+
+/* agenda */
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.5rem 0 2rem;padding:0;list-style:none}
+.filters button{font:inherit;font-size:.92rem;padding:.4rem .95rem;border:1.5px solid var(--delfts);background:#fff;color:var(--delfts);border-radius:999px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--delfts);color:#fff}
+.agenda{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1.5rem 3rem}
+.month h3{font-size:1.15rem;margin-bottom:.5rem;text-transform:lowercase}
+.month ol{list-style:none;margin:0;padding:0}
+.mt{display:grid;grid-template-columns:5.25rem 4.75rem 1fr;align-items:baseline;gap:.5rem;padding:.55rem 0;border-bottom:1px solid var(--glazuur)}
+.mt time{white-space:nowrap}
+.mt .day{font-family:var(--serif);font-size:1.3rem;font-weight:600}
+.mt .wd{color:var(--grijs);font-size:.85rem}
+.series{font-size:.8rem;font-weight:600;padding:.12rem .5rem;border-radius:3px;justify-self:start;background:var(--glazuur);color:var(--delfts)}
+.s-svr{background:var(--delfts);color:#fff}
+.s-sveuro{background:#fff;box-shadow:inset 0 0 0 1.5px var(--delfts)}
+.s-svjwr{background:#fff;box-shadow:inset 0 0 0 1.5px var(--delfts-2);color:var(--delfts-2)}
+.host{color:var(--inkt)}
+.mt.past{opacity:.45}
+.mt.next{background:linear-gradient(90deg,rgba(217,160,33,.14),transparent);box-shadow:inset 3px 0 0 var(--oker);padding-left:.5rem}
+.month[hidden],.mt[hidden]{display:none}
+
+/* verenigingen */
+.svs{list-style:none;padding:0;margin:2rem 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.75rem}
+.svs li{padding:.9rem 1rem;background:var(--porselein);border:1px solid var(--glazuur);font-family:var(--serif);font-size:1.15rem}
+
+/* bestuur + contact */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:3rem}
+.personen{list-style:none;padding:0;margin:1.5rem 0 0}
+.personen li{padding:1rem 0;border-bottom:1px solid var(--glazuur)}
+.personen strong{display:block;font-family:var(--serif);font-size:1.3rem;font-weight:600}
+.personen span{color:var(--grijs)}
+address{font-style:normal;margin-top:1.5rem;line-height:1.8}
+address a{font-size:1.15rem}
+
+footer{background:var(--delfts);color:#fff;padding:2rem 0;font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+footer a{color:#fff}
+
+@media (max-width:52rem){
+  .hero .wrap{grid-template-columns:1fr;padding-top:2.5rem}
+  .ring{max-width:22rem}
+  .duo{grid-template-columns:1fr;gap:2rem}
+  section{padding:3rem 0}
+}
+@media (max-width:26rem){
+  .mt{grid-template-columns:4.5rem 4.5rem 1fr}
+  .mt .wd{font-size:.78rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="merk" href="#top">SVR</a>
+    <nav aria-label="Hoofdmenu">
+      <ul>
+        <li><a href="#vergaderingen">Vergaderingen</a></li>
+        <li><a href="#agenda">Agenda</a></li>
+        <li><a href="#verenigingen">Verenigingen</a></li>
+        <li><a href="#bestuur">Bestuur</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <h1>StudieVerenigingen<wbr>Raad Delft</h1>
+        <p class="lead">Vijftien studieverenigingen van de TU Delft, één tafel. In de SVR stemmen de verenigingen onderling af, delen ze kennis en spreken ze samen met de universiteit.</p>
+        <div class="volgende" id="volgende">
+          <span>Volgende vergadering</span>
+          <strong>di 29 september, SVR-O</strong>
+          <span>14:00 bij Leeghwater</span>
+        </div>
+      </div>
+      <svg class="ring" viewBox="0 0 480 440" role="img" aria-labelledby="ringtitel">
+        <title id="ringtitel">De vijftien aangesloten studieverenigingen rond de SVR-tafel</title>
+        <circle class="tafel" cx="240" cy="220" r="118"/>
+        <text class="midden" x="240" y="226" text-anchor="middle">SVR</text>
+        <text class="onder" x="240" y="250" text-anchor="middle">bestuur 62</text>
+        <circle class="seat" cx="240.0" cy="102.0" r="7" style="--d:0.15s"/>
+<circle class="seat" cx="288.0" cy="112.2" r="7" style="--d:0.21s"/>
+<circle class="seat" cx="327.7" cy="141.0" r="7" style="--d:0.27s"/>
+<circle class="seat" cx="352.2" cy="183.5" r="7" style="--d:0.33s"/>
+<circle class="seat" cx="357.4" cy="232.3" r="7" style="--d:0.39s"/>
+<circle class="seat" cx="342.2" cy="279.0" r="7" style="--d:0.45s"/>
+<circle class="seat" cx="309.4" cy="315.5" r="7" style="--d:0.51s"/>
+<circle class="seat" cx="264.5" cy="335.4" r="7" style="--d:0.57s"/>
+<circle class="seat" cx="215.5" cy="335.4" r="7" style="--d:0.63s"/>
+<circle class="seat" cx="170.6" cy="315.5" r="7" style="--d:0.69s"/>
+<circle class="seat" cx="137.8" cy="279.0" r="7" style="--d:0.75s"/>
+<circle class="seat" cx="122.6" cy="232.3" r="7" style="--d:0.81s"/>
+<circle class="seat" cx="127.8" cy="183.5" r="7" style="--d:0.87s"/>
+<circle class="seat" cx="152.3" cy="141.0" r="7" style="--d:0.93s"/>
+<circle class="seat" cx="192.0" cy="112.2" r="7" style="--d:0.99s"/>
+<text class="sv" x="240.0" y="75.0" text-anchor="middle" style="--d:0.15s">CH</text>
+<text class="sv" x="299.4" y="91.6" text-anchor="start" style="--d:0.21s">Curius</text>
+<text class="sv" x="348.5" y="127.3" text-anchor="start" style="--d:0.27s">ETV</text>
+<text class="sv" x="378.9" y="179.9" text-anchor="start" style="--d:0.33s">Froude</text>
+<text class="sv" x="385.2" y="240.3" text-anchor="start" style="--d:0.39s">Hooke</text>
+<text class="sv" x="366.4" y="298.0" text-anchor="start" style="--d:0.45s">i.d</text>
+<text class="sv" x="325.8" y="343.1" text-anchor="start" style="--d:0.51s">Leeghwater</text>
+<text class="sv" x="270.4" y="375.8" text-anchor="middle" style="--d:0.57s">LIFE</text>
+<text class="sv" x="209.6" y="375.8" text-anchor="middle" style="--d:0.63s">MV</text>
+<text class="sv" x="154.2" y="343.1" text-anchor="end" style="--d:0.69s">PS</text>
+<text class="sv" x="113.6" y="298.0" text-anchor="end" style="--d:0.75s">Stylos</text>
+<text class="sv" x="94.8" y="240.3" text-anchor="end" style="--d:0.81s">TG</text>
+<text class="sv" x="101.1" y="179.9" text-anchor="end" style="--d:0.87s">Variscopic</text>
+<text class="sv" x="131.5" y="127.3" text-anchor="end" style="--d:0.93s">VSV</text>
+<text class="sv" x="180.6" y="91.6" text-anchor="end" style="--d:0.99s">VvTP</text>
+      </svg>
+    </div>
+  </div>
+
+  <section id="vergaderingen" class="tint">
+    <div class="wrap">
+      <h2>Vier vergaderingen</h2>
+      <p>Elke vereniging schuift aan bij vier soorten overleg. De vergaderingen rouleren: telkens is een andere vereniging gastheer.</p>
+      <div class="reeksen">
+        <div class="reeks">
+          <h3>SVR</h3>
+          <p><span class="wie">Voorzitters.</span> De hoofdvergadering, tien keer per jaar op dinsdag om 14:00.</p>
+        </div>
+        <div class="reeks">
+          <h3>SVR-O</h3>
+          <p><span class="wie">Onderwijs.</span> Overleg over onderwijszaken, vier keer per jaar. Voorgezeten door de secretaris.</p>
+        </div>
+        <div class="reeks">
+          <h3>SVeuRo</h3>
+          <p><span class="wie">Penningmeesters.</span> Financiën, begroting en de jaarlijkse bijdrage, vier keer per jaar. Voorgezeten door de penningmeester.</p>
+        </div>
+        <div class="reeks">
+          <h3>SVjwR</h3>
+          <p>Drie keer per jaar op dinsdag om 16:00.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="agenda">
+    <div class="wrap">
+      <h2>Agenda 2026–2027</h2>
+      <p>Alle vergaderingen van dit bestuursjaar, met de vereniging die ontvangt.</p>
+      <ul class="filters" aria-label="Filter op vergadering">
+        <li><button type="button" data-filter="alle" aria-pressed="true">Alle</button></li>
+        <li><button type="button" data-filter="SVR" aria-pressed="false">SVR</button></li>
+        <li><button type="button" data-filter="SVR-O" aria-pressed="false">SVR-O</button></li>
+        <li><button type="button" data-filter="SVeuRo" aria-pressed="false">SVeuRo</button></li>
+        <li><button type="button" data-filter="SVjwR" aria-pressed="false">SVjwR</button></li>
+      </ul>
+      <ol class="agenda">
+        <li class="month"><h3>september 2026</h3><ol>
+<li class="mt" data-date="2026-09-22" data-series="SVR"><time datetime="2026-09-22T14:00"><span class="day">22</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij Stylos</span></li>
+<li class="mt" data-date="2026-09-29" data-series="SVR-O"><time datetime="2026-09-29T14:00"><span class="day">29</span> <span class="wd">di 14:00</span></time><span class="series s-svro">SVR-O</span><span class="host">bij Leeghwater</span></li>
+</ol></li>
+<li class="month"><h3>oktober 2026</h3><ol>
+<li class="mt" data-date="2026-10-06" data-series="SVeuRo"><time datetime="2026-10-06T14:00"><span class="day">6</span> <span class="wd">di 14:00</span></time><span class="series s-sveuro">SVeuRo</span><span class="host">bij Variscopic</span></li>
+<li class="mt" data-date="2026-10-13" data-series="SVR"><time datetime="2026-10-13T14:00"><span class="day">13</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij Froude</span></li>
+</ol></li>
+<li class="month"><h3>november 2026</h3><ol>
+<li class="mt" data-date="2026-11-10" data-series="SVR"><time datetime="2026-11-10T14:00"><span class="day">10</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij VvTP</span></li>
+</ol></li>
+<li class="month"><h3>december 2026</h3><ol>
+<li class="mt" data-date="2026-12-01" data-series="SVeuRo"><time datetime="2026-12-01T14:00"><span class="day">1</span> <span class="wd">di 14:00</span></time><span class="series s-sveuro">SVeuRo</span><span class="host">bij MV</span></li>
+<li class="mt" data-date="2026-12-08" data-series="SVR"><time datetime="2026-12-08T14:00"><span class="day">8</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij ETV</span></li>
+<li class="mt" data-date="2026-12-15" data-series="SVR-O"><time datetime="2026-12-15T14:00"><span class="day">15</span> <span class="wd">di 14:00</span></time><span class="series s-svro">SVR-O</span><span class="host">bij PS</span></li>
+</ol></li>
+<li class="month"><h3>januari 2027</h3><ol>
+<li class="mt" data-date="2027-01-12" data-series="SVR"><time datetime="2027-01-12T14:00"><span class="day">12</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij CH</span></li>
+</ol></li>
+<li class="month"><h3>februari 2027</h3><ol>
+<li class="mt" data-date="2027-02-16" data-series="SVR"><time datetime="2027-02-16T14:00"><span class="day">16</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij Curius</span></li>
+<li class="mt" data-date="2027-02-23" data-series="SVR-O"><time datetime="2027-02-23T14:00"><span class="day">23</span> <span class="wd">di 14:00</span></time><span class="series s-svro">SVR-O</span><span class="host">bij i.d</span></li>
+</ol></li>
+<li class="month"><h3>maart 2027</h3><ol>
+<li class="mt" data-date="2027-03-02" data-series="SVjwR"><time datetime="2027-03-02T16:00"><span class="day">2</span> <span class="wd">di 16:00</span></time><span class="series s-svjwr">SVjwR</span><span class="host">bij Stylos</span></li>
+<li class="mt" data-date="2027-03-09" data-series="SVeuRo"><time datetime="2027-03-09T14:00"><span class="day">9</span> <span class="wd">di 14:00</span></time><span class="series s-sveuro">SVeuRo</span><span class="host">bij Hooke</span></li>
+<li class="mt" data-date="2027-03-16" data-series="SVR"><time datetime="2027-03-16T14:00"><span class="day">16</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij Leeghwater</span></li>
+<li class="mt" data-date="2027-03-23" data-series="SVjwR"><time datetime="2027-03-23T16:00"><span class="day">23</span> <span class="wd">di 16:00</span></time><span class="series s-svjwr">SVjwR</span><span class="host">bij VSV</span></li>
+</ol></li>
+<li class="month"><h3>april 2027</h3><ol>
+<li class="mt" data-date="2027-04-20" data-series="SVR"><time datetime="2027-04-20T14:00"><span class="day">20</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij LIFE</span></li>
+</ol></li>
+<li class="month"><h3>mei 2027</h3><ol>
+<li class="mt" data-date="2027-05-11" data-series="SVR-O"><time datetime="2027-05-11T14:00"><span class="day">11</span> <span class="wd">di 14:00</span></time><span class="series s-svro">SVR-O</span><span class="host">bij ETV</span></li>
+<li class="mt" data-date="2027-05-18" data-series="SVR"><time datetime="2027-05-18T14:00"><span class="day">18</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij VSV</span></li>
+<li class="mt" data-date="2027-05-25" data-series="SVeuRo"><time datetime="2027-05-25T14:00"><span class="day">25</span> <span class="wd">di 14:00</span></time><span class="series s-sveuro">SVeuRo</span><span class="host">bij PS</span></li>
+</ol></li>
+<li class="month"><h3>juni 2027</h3><ol>
+<li class="mt" data-date="2027-06-01" data-series="SVjwR"><time datetime="2027-06-01T16:00"><span class="day">1</span> <span class="wd">di 16:00</span></time><span class="series s-svjwr">SVjwR</span><span class="host">bij VvTP</span></li>
+<li class="mt" data-date="2027-06-08" data-series="SVR"><time datetime="2027-06-08T14:00"><span class="day">8</span> <span class="wd">di 14:00</span></time><span class="series s-svr">SVR</span><span class="host">bij TG</span></li>
+</ol></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="verenigingen" class="tint">
+    <div class="wrap">
+      <h2>De verenigingen</h2>
+      <p>Deze vijftien studieverenigingen zijn aangesloten bij de SVR.</p>
+      <ul class="svs">
+        <li>CH</li>
+<li>Curius</li>
+<li>ETV</li>
+<li>Froude</li>
+<li>Hooke</li>
+<li>i.d</li>
+<li>Leeghwater</li>
+<li>LIFE</li>
+<li>MV</li>
+<li>PS</li>
+<li>Stylos</li>
+<li>TG</li>
+<li>Variscopic</li>
+<li>VSV</li>
+<li>VvTP</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="bestuur">
+    <div class="wrap duo">
+      <div>
+        <h2>Bestuur 62</h2>
+        <p>Het 62e dagelijks bestuur, sinds 25 augustus 2026.</p>
+        <ul class="personen">
+          <li><strong>Itai Givony</strong><span>Voorzitter</span></li>
+          <li><strong>Teun van den Corput</strong><span>Secretaris &amp; penningmeester</span></li>
+        </ul>
+      </div>
+      <div id="contact">
+        <h2>Contact</h2>
+        <p>Vragen over de SVR, een vergadering of samenwerking? Mail het bestuur.</p>
+        <address>
+          <a href="mailto:bestuur-svr@tudelft.nl">bestuur-svr@tudelft.nl</a><br>
+          Van der Burghweg 1<br>
+          Delft
+        </address>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Stichting Studieraad Delft, KvK 41145076</span>
+    <a href="mailto:bestuur-svr@tudelft.nl">bestuur-svr@tudelft.nl</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var items=[].slice.call(document.querySelectorAll('.mt'));
+  var today=new Date(); today.setHours(0,0,0,0);
+  var MF=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  var next=null;
+  items.forEach(function(li){
+    var d=new Date(li.dataset.date+'T00:00:00');
+    if(d<today){li.classList.add('past');}
+    else if(!next){next=li;li.classList.add('next');}
+  });
+  var box=document.getElementById('volgende');
+  if(next){
+    var d=new Date(next.dataset.date+'T00:00:00');
+    var wd=next.querySelector('.wd').textContent.split(' ');
+    box.querySelector('strong').textContent=wd[0]+' '+d.getDate()+' '+MF[d.getMonth()]+', '+next.dataset.series;
+    box.querySelectorAll('span')[1].textContent=wd[1]+' '+next.querySelector('.host').textContent;
+  } else { box.hidden=true; }
+
+  var buttons=[].slice.call(document.querySelectorAll('.filters button'));
+  buttons.forEach(function(b){
+    b.addEventListener('click',function(){
+      var f=b.dataset.filter;
+      buttons.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+      items.forEach(function(li){li.hidden=!(f==='alle'||li.dataset.series===f);});
+      document.querySelectorAll('.month').forEach(function(m){
+        m.hidden=!m.querySelector('.mt:not([hidden])');
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
