@@ -77,6 +77,20 @@ export default function PubliekeLayout({
             <li>
               <a href={`mailto:${svr.email}`}>{svr.email}</a>
             </li>
+            {svr.linkedin ? (
+              <li>
+                <a href={svr.linkedin} target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+              </li>
+            ) : null}
+            {svr.facebook ? (
+              <li>
+                <a href={svr.facebook} target="_blank" rel="noopener noreferrer">
+                  Facebook
+                </a>
+              </li>
+            ) : null}
             <li>
               <Link href="/privacy">Privacy</Link>
             </li>

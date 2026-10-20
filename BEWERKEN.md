@@ -24,8 +24,8 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |
 | `content/privacy.md` | de privacypagina |
 | `content/bestuur.json` | wie er in het bestuur zitten, het bestuursnummer, de startdatum en het aantal StOF-maanden |
-| `content/verenigingen.json` | de vijftien verenigingen: naam, faculteit en de link naar hun site |
-| `content/svr.json` | e-mailadres, adres, KvK-nummer en oprichtingsdatum |
+| `content/verenigingen.json` | de vijftien verenigingen: naam, officiële naam, studie, faculteit, oprichtingsjaar en de link naar hun site |
+| `content/svr.json` | e-mailadres, adres, KvK-nummer, oprichtingsdatum en de links naar LinkedIn en Facebook (onderaan elke pagina) |
 | `public/img/` | het logo en de portretten, zie `public/img/LEESMIJ.md` |
 
 ## Een tekst aanpassen
@@ -80,17 +80,24 @@ dasmotief, en dat ziet er netjes uit.
 
 ## Een oud-bestuur toevoegen
 
-Bij de wissel zet je het vertrekkende bestuur in `content/oud-besturen.json`.
-Oudere besturen kun je er ook in zetten; de volgorde maakt niet uit, de site
-sorteert op nummer. Zolang de lijst leeg is (`[]`), staat er op de pagina een
-oproep om aan te vullen.
+Bij de wissel zet je het vertrekkende bestuur bovenaan in
+`content/oud-besturen.json`; de site sorteert zelf op nummer. De lijst loopt nu
+van bestuur 43 (2007-2008) tot en met 61, overgenomen van de oude website en de
+beleidsplannen. Van 59 en 61 staan alleen voornamen: vul ze gerust aan.
 
 ```json
-[
-  { "nummer": 62, "jaar": "2026-2027", "leden": ["Itai Givony (voorzitter)", "Teun van den Corput (secretaris en penningmeester)"] },
-  { "nummer": 61, "jaar": "2025-2026", "leden": ["Voornaam Achternaam (voorzitter)"] }
-]
+{
+  "nummer": 62,
+  "jaar": "2026-2027",
+  "leden": ["Itai Givony (voorzitter)", "Teun van den Corput (secretaris en penningmeester)"],
+  "foto": "besturen/62.jpg",
+  "beleid": "/beleid/beleid-62.pdf"
+},
 ```
+
+- `foto`: de groepsfoto in `public/img/besturen/`, liggend of staand, ongeveer
+  900 pixels breed en kleiner dan 200 kB.
+- `beleid`: het beleidsplan in `public/beleid/`. Laat weg als er geen is.
 
 ## Hoe komt het online?
 

@@ -46,6 +46,10 @@ export interface Vereniging {
   website?: string;
   /** Wordt tijdens de build gevuld als public/img/sv/<slug>.png bestaat. */
   logo?: string;
+  /** De volledige, officiële naam, bijvoorbeeld "W.I.S.V. 'Christiaan Huygens'". */
+  officieel?: string;
+  /** De studie van de vereniging. */
+  studie?: string;
 }
 
 export interface Overleg {
@@ -103,6 +107,8 @@ export interface Svr {
   email: string;
   adres: string;
   plaats: string;
+  linkedin?: string;
+  facebook?: string;
 }
 
 function leesJson<T>(naam: string): T {
@@ -155,9 +161,23 @@ export interface OudBestuur {
   jaar: string;
   /** Naam en functie, bijvoorbeeld "Jan Jansen (voorzitter)". */
   leden: string[];
+  /** Groepsfoto in public/img, bijvoorbeeld "besturen/61.jpg". */
+  foto?: string;
+  /** Link naar het beleidsplan, bijvoorbeeld "/beleid/beleid-60.pdf". */
+  beleid?: string;
 }
 export const leesOudBesturen = (): OudBestuur[] =>
-  leesJson<OudBestuur[]>("oud-besturen.json").sort((a, b) => b.nummer - a.nummer);
+  leesJson<OudBestuur[]>("oud-besturen.json")
+    .map((bestuur) => ({
+      ...bestuur,
+      // Net als bij het huidige bestuur: alleen een foto als het bestand er is.
+      foto: bestuur.foto && existsSync(afbeeldingspad(bestuur.foto)) ? bestuur.foto : undefined,
+      beleid:
+        bestuur.beleid && existsSync(path.join(process.cwd(), "public", bestuur.beleid))
+          ? bestuur.beleid
+          : undefined,
+    }))
+    .sort((a, b) => b.nummer - a.nummer);
 
 export const leesJaar = () => leesJson<{ momenten: Jaarmoment[] }>("jaar.json");
 

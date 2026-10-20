@@ -47,17 +47,19 @@
 /* De publieke site. Eén bestand, geen Tailwind en geen shadcn: dit deel staat
    los van de administratie achter het slot.
 
-   Het motief komt van de SVR-das: diagonale strepen in navy met cyaan en wit.
+   Het motief komt van de SVR-das: diagonale gele strepen op donkerblauw.
    Dat motief komt bewust maar op een paar plekken terug — de band onder de
    opening, de stippen in de tijdlijn, de vlakken waar een foto of logo
    ontbreekt, en de kleine merkjes bij de tradities. */
 
 .publiek {
-  --navy: #0f1a45;
-  --navy-licht: #1b2c6b;
-  --cyaan: #00a6d6;
-  --cyaan-donker: #00647f;
-  --geel: #ffc845;
+  /* De huiskleuren van de SVR, en van de das: donkerblauw en geel. */
+  --navy: #001f46;
+  --navy-licht: #0a3268;
+  --geel: #f7bb00;
+  --geel-licht: #ffcb2e;
+  /* Voor lijnen en vlakjes die op wit moeten opvallen; geel zelf is daar te licht. */
+  --geel-donker: #b98800;
   --grond: #f4f7fb;
   --wit: #ffffff;
   --rand: #dbe3f0;
@@ -109,7 +111,7 @@
   max-width: 38rem; /* ongeveer 70 tekens */
 }
 .publiek a {
-  color: var(--cyaan-donker);
+  color: var(--navy-licht);
 }
 /* Links in lopende tekst krijgen een streep: kleur alleen is niet genoeg. */
 /* Links in lopende tekst krijgen een streep; kleur alleen is niet genoeg.
@@ -143,10 +145,10 @@
   background-color: var(--navy);
   background-image: repeating-linear-gradient(
     115deg,
-    var(--cyaan) 0 10px,
-    transparent 10px 26px,
-    var(--wit) 26px 30px,
-    transparent 30px 68px
+    var(--geel) 0 10px,
+    transparent 10px 30px,
+    var(--geel) 30px 33px,
+    transparent 33px 68px
   );
 }
 
@@ -239,22 +241,25 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--navy);
-  color: var(--wit) !important;
+  background: var(--geel);
+  color: var(--navy) !important;
+  font-weight: 600;
   text-decoration: none;
   border-radius: 0.5rem;
   padding: 0.6rem 1.15rem;
   font-size: 0.97rem;
-  border: 1.5px solid var(--navy);
+  border: 1.5px solid var(--geel);
 }
 .knop:hover {
-  background: var(--navy-licht);
-  border-color: var(--navy-licht);
-  color: var(--wit) !important;
+  background: var(--geel-licht);
+  border-color: var(--geel-licht);
+  color: var(--navy) !important;
 }
 .knop.licht {
   background: transparent;
   color: var(--navy) !important;
+  border-color: var(--navy);
+  font-weight: 500;
 }
 .knop.licht:hover {
   background: var(--wit);
@@ -347,11 +352,11 @@
 }
 .tafel .plek:hover .rug,
 .tafel .plek:focus-visible .rug {
-  fill: var(--cyaan);
+  fill: var(--geel);
 }
 .tafel .plek:hover .stoel-naam,
 .tafel .plek:focus-visible .stoel-naam {
-  fill: var(--cyaan-donker);
+  fill: var(--geel-donker);
 }
 .tafel .plek:hover .stoel-faculteit,
 .tafel .plek:focus-visible .stoel-faculteit {
@@ -388,10 +393,10 @@
   border-bottom: 10px solid transparent;
   border-image: repeating-linear-gradient(
       115deg,
-      var(--cyaan) 0 10px,
-      var(--navy) 10px 26px,
-      var(--wit) 26px 30px,
-      var(--navy) 30px 68px
+      var(--geel) 0 10px,
+      var(--navy) 10px 30px,
+      var(--geel) 30px 33px,
+      var(--navy) 33px 68px
     )
     10;
 }
@@ -480,7 +485,7 @@
   margin-top: 2rem;
 }
 .pijlers h3 {
-  border-top: 3px solid var(--cyaan);
+  border-top: 3px solid var(--geel);
   padding-top: 0.75rem;
 }
 .pijlers p {
@@ -506,7 +511,7 @@
 }
 .schematekening .doos.ab {
   fill: rgba(0, 166, 214, 0.14);
-  stroke: var(--cyaan);
+  stroke: var(--geel);
 }
 .schematekening .doos-naam {
   font-family: "Young Serif", Georgia, serif;
@@ -541,7 +546,7 @@
 }
 .overleggen h3 {
   font-size: clamp(1.5rem, 2.6vw, 2rem);
-  color: var(--cyaan-donker);
+  color: var(--navy-licht);
   margin: 0;
 }
 .overleggen .wie {
@@ -589,7 +594,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--cyaan-donker);
+  color: var(--navy-licht);
 }
 .tijdlijn .wat {
   margin: 0.15rem 0 0.35rem;
@@ -660,7 +665,7 @@
   bottom: -1.5rem;
   width: 7rem;
   height: 1.1rem;
-  background: var(--cyaan);
+  background: var(--geel);
   transform: rotate(-25deg);
 }
 .evenementen article.groot .foto.leeg::after {
@@ -694,7 +699,7 @@
 .samenwerking dt {
   font-family: "Young Serif", Georgia, serif;
   font-size: 1.2rem;
-  border-left: 3px solid var(--cyaan);
+  border-left: 3px solid var(--geel);
   padding-left: 0.85rem;
 }
 .samenwerking dd {
@@ -747,7 +752,7 @@
 }
 .verenigingen a:hover,
 .verenigingen a:focus-visible {
-  border-color: var(--cyaan);
+  border-color: var(--geel);
   background: var(--wit);
   transform: translateY(-1px);
 }
@@ -768,7 +773,7 @@
   height: 2.25rem;
   flex: none;
   border-radius: 999px;
-  background: linear-gradient(var(--cyaan) 0 55%, var(--navy) 55% 100%);
+  background: linear-gradient(var(--geel) 0 55%, var(--navy) 55% 100%);
 }
 .verenigingen .naarbuiten {
   width: 0.95rem;
@@ -782,7 +787,7 @@
   stroke-linejoin: round;
 }
 .verenigingen a:hover .naarbuiten {
-  stroke: var(--cyaan-donker);
+  stroke: var(--geel-donker);
 }
 .verenigingen .wie strong {
   display: block;
@@ -847,7 +852,7 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 50%;
-  background: var(--cyaan);
+  background: var(--geel);
 }
 .mijlpalen .wanneer {
   margin: 0;
@@ -871,7 +876,7 @@
 }
 .vlak.donker .groot-getal,
 .groot-getal.omtrek {
-  -webkit-text-stroke-color: var(--cyaan);
+  -webkit-text-stroke-color: var(--geel);
 }
 
 .bestuurblok {
@@ -969,7 +974,7 @@
 .vragen summary::after {
   content: "+";
   font-size: 1.3rem;
-  color: var(--cyaan-donker);
+  color: var(--navy-licht);
   line-height: 1;
 }
 .vragen details[open] summary::after {
@@ -1019,7 +1024,7 @@
   color: var(--wit);
   padding: 2.25rem 0;
   font-size: 0.92rem;
-  border-top: 3px solid var(--cyaan);
+  border-top: 3px solid var(--geel);
 }
 .voet .binnen {
   display: flex;
@@ -1187,19 +1192,79 @@
 }
 .ontdekkaart:hover,
 .ontdekkaart:focus-visible {
-  border-color: var(--cyaan);
+  border-color: var(--geel);
   transform: translateY(-2px);
 }
 .ontdekkaart h3 {
   margin-top: 0;
 }
 
-/* Oud-besturen */
-.oudbesturen dt span {
-  margin-left: 0.6rem;
-  font-family: "Instrument Sans", system-ui, sans-serif;
+/* Oud-besturen: een kaart per bestuur, met de groepsfoto */
+.oudbesturen {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.5rem;
+}
+.oudbesturen > li {
+  background: var(--wit);
+  border: 1px solid var(--rand);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.oudbesturen img,
+.oudbesturen .geenfoto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center 30%;
+  background: var(--grond);
+}
+.oudbesturen .geenfoto {
+  display: grid;
+  place-items: center;
+  font-family: "Young Serif", Georgia, serif;
+  font-size: 2.5rem;
+  color: var(--wit);
+}
+.oudbesturen > li > div {
+  padding: 0.9rem 1rem 1rem;
+  border-top: 3px solid var(--geel);
+}
+.oudbesturen .kop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 0.4rem;
+}
+.oudbesturen .kop strong {
+  font-family: "Young Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+}
+.oudbesturen .kop span,
+.oudbesturen .namen {
   font-size: 0.9rem;
   color: var(--grijs);
+}
+.oudbesturen .namen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.oudbesturen .beleid {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+}
+
+/* Volledige naam van een vereniging, onder de korte */
+.verenigingen .wie .officieel {
+  display: block;
+  font-style: italic;
 }
 
 /* De SVR zelf op de tijdlijn van de vijftien */

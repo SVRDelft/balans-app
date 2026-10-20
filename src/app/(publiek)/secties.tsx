@@ -480,30 +480,46 @@ export function OudBesturen() {
     <section className="vlak" id="oud-besturen">
       <div className="binnen">
         <h2>Oud-besturen</h2>
-        {besturen.length === 0 ? (
-          <p>
-            Deze lijst wordt aangevuld. Zat jij in een eerder bestuur van de SVR?{" "}
-            <a href={`mailto:${svr.email}`}>Laat het ons weten</a>.
-          </p>
-        ) : (
-          <>
-            <p>
-              Elk jaar een nieuw dagelijks bestuur, sinds 1963. Ontbreekt er
-              iemand? <a href={`mailto:${svr.email}`}>Laat het ons weten</a>.
-            </p>
-            <dl className="samenwerking oudbesturen">
-              {besturen.map((bestuur) => (
-                <div key={bestuur.nummer}>
-                  <dt>
-                    Bestuur {bestuur.nummer}
+        <p>
+          Elk jaar een nieuw dagelijks bestuur, sinds 1963. Ontbreekt er iemand,
+          of klopt een naam niet? <a href={`mailto:${svr.email}`}>Laat het ons weten</a>.
+        </p>
+        {besturen.length > 0 ? (
+          <ul className="oudbesturen">
+            {besturen.map((bestuur) => (
+              <li key={bestuur.nummer}>
+                {bestuur.foto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/img/${bestuur.foto}`}
+                    alt={`Het ${bestuur.nummer}e bestuur`}
+                    loading="lazy"
+                  />
+                ) : (
+                  <span className="geenfoto strepen" aria-hidden>
+                    {bestuur.nummer}
+                  </span>
+                )}
+                <div>
+                  <p className="kop">
+                    <strong>Bestuur {bestuur.nummer}</strong>
                     <span>{bestuur.jaar}</span>
-                  </dt>
-                  <dd>{bestuur.leden.join(" · ")}</dd>
+                  </p>
+                  <ul className="namen">
+                    {bestuur.leden.map((lid) => (
+                      <li key={lid}>{lid}</li>
+                    ))}
+                  </ul>
+                  {bestuur.beleid ? (
+                    <a className="beleid" href={bestuur.beleid} target="_blank" rel="noopener">
+                      Beleidsplan (pdf)
+                    </a>
+                  ) : null}
                 </div>
-              ))}
-            </dl>
-          </>
-        )}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
     </section>
   );

@@ -57,8 +57,11 @@ export function Verenigingenlijst({ verenigingen }: { verenigingen: Vereniging[]
               )}
               <span className="wie">
                 <strong>{vereniging.naam}</strong>
+                {vereniging.officieel && vereniging.officieel !== vereniging.naam ? (
+                  <span className="officieel">{vereniging.officieel}</span>
+                ) : null}
                 <span>
-                  {vereniging.faculteit}
+                  {vereniging.studie ?? vereniging.faculteit}
                   {vereniging.opgericht ? ` · sinds ${vereniging.opgericht}` : ""}
                 </span>
               </span>

@@ -5,7 +5,7 @@ import type { Vereniging } from "@/lib/content";
  *
  * Alles zit in SVG en CSS, zonder JavaScript. Elke stoel is een link naar de
  * website van die vereniging en dus met het toetsenbord te bereiken; bij hover
- * of focus kleurt hij cyaan en verschijnt de faculteit. Verenigingen zonder
+ * of focus kleurt hij geel en verschijnt de faculteit. Verenigingen zonder
  * bekende website worden een groep met een toegankelijke naam, zodat ze wel
  * oplichten maar nergens heen wijzen.
  */
