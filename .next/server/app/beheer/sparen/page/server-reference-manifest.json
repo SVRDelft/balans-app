@@ -1,6 +1,6 @@
 {
   "node": {
-    "00491ac080981093d873cdae3c9c6cba707bf39bdd": {
+    "00dcb02488ffaf131e9ae9e05a55beda092d2da64f": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60106d77dc32089b86c81d4468cc328c99a87eefc6": {
+    "6021f722bea076212032f4c9c884021dfece7a05da": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6087266878a35b3f21220c73b8b9b3570b27d08fe2": {
+    "6034247fdb5ae6e57041eadc60280ef2937bcfe9cb": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4023b9aa909a9814594f5be03d30d2a19b3a939d8b": {
+    "40b1cc0ac1a5064461b1affed5b6ce4530973ec199": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60ba678aa70e1b660ef305bfa96eee9c3d03362f1c": {
+    "6048b52bb4aa1e69289ba69a02a356cee311ecb2eb": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -55,7 +55,7 @@
       "exportedName": "bewaarBanksaldo",
       "filename": "src/app/beheer/bank/acties.ts"
     },
-    "604ad5134e629b2a6827b08fe178b34c2f93bb8cdb": {
+    "60d43992d8029c7bfdb89f0ea2d6d7ea2263b4de9c": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -66,18 +66,7 @@
       "exportedName": "verwijderBanksaldo",
       "filename": "src/app/beheer/bank/acties.ts"
     },
-    "601111d0a00ef3231e555724cc1c22e154ceff5205": {
-      "workers": {
-        "app/beheer/sparen/page": {
-          "moduleId": 58667,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "bewaarSpaarmutatie",
-      "filename": "src/app/beheer/sparen/acties.ts"
-    },
-    "607fe6fef34728f8117e022219b17c3a6363dd42ed": {
+    "608dbc6c93e7f0d89a0256393cc7390e95a1d4dc2c": {
       "workers": {
         "app/beheer/sparen/page": {
           "moduleId": 58667,
@@ -86,6 +75,17 @@
         }
       },
       "exportedName": "verwijderSpaarmutatie",
+      "filename": "src/app/beheer/sparen/acties.ts"
+    },
+    "60c763e1410e023a35338a1291d00f06bb3c04292b": {
+      "workers": {
+        "app/beheer/sparen/page": {
+          "moduleId": 58667,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarSpaarmutatie",
       "filename": "src/app/beheer/sparen/acties.ts"
     }
   },

@@ -1,6 +1,6 @@
 {
   "node": {
-    "4084e499d161af5339e7141cbdeaee7c058260319c": {
+    "403bdb89f0becaa7bd1f30f4e1f17e32e02ba20f80": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 42382,
@@ -11,7 +11,7 @@
       "exportedName": "haalDeellink",
       "filename": "src/app/portaal/acties.ts"
     },
-    "00491ac080981093d873cdae3c9c6cba707bf39bdd": {
+    "00dcb02488ffaf131e9ae9e05a55beda092d2da64f": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 42382,
@@ -22,7 +22,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60106d77dc32089b86c81d4468cc328c99a87eefc6": {
+    "6021f722bea076212032f4c9c884021dfece7a05da": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 42382,
@@ -33,7 +33,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6087266878a35b3f21220c73b8b9b3570b27d08fe2": {
+    "6034247fdb5ae6e57041eadc60280ef2937bcfe9cb": {
       "workers": {
         "app/portaal/page": {
           "moduleId": 42382,
