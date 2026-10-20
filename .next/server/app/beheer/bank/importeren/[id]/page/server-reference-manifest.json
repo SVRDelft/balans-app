@@ -1,6 +1,6 @@
 {
   "node": {
-    "009758fc64de323434a89426d3f7c106fc4112b3c3": {
+    "00491ac080981093d873cdae3c9c6cba707bf39bdd": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604f2fccf967a926ef3c633e406fc32c5f9dc38ced": {
+    "60106d77dc32089b86c81d4468cc328c99a87eefc6": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60bdcfbcc20f35d1fe4791792714af5123e8057196": {
+    "6087266878a35b3f21220c73b8b9b3570b27d08fe2": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40903126951afd8ef8873c1ae62c40584d9a45d136": {
+    "4023b9aa909a9814594f5be03d30d2a19b3a939d8b": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -44,7 +44,18 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6000a1da4f9c000171ec20a2f745cc6ddb8e15574a": {
+    "605aab495a75262cd42d271346be842dd7f66cda33": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "boekBankregelsSnel",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "606e27d1f9a911f0071d0fbcac3ac34cdee92e0680": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -55,29 +66,7 @@
       "exportedName": "verwerkBankmutatie",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     },
-    "6049e46b2ce558a502a34c2debd76c76263f1c35cd": {
-      "workers": {
-        "app/beheer/bank/importeren/[id]/page": {
-          "moduleId": 10111,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "bevestigBankimport",
-      "filename": "src/app/beheer/bank/importeren/acties.ts"
-    },
-    "60648af107ca979b0bf40dbc025e72a6cd83166cab": {
-      "workers": {
-        "app/beheer/bank/importeren/[id]/page": {
-          "moduleId": 10111,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "importeerBankbestand",
-      "filename": "src/app/beheer/bank/importeren/acties.ts"
-    },
-    "6092150fb79734193d10c79db3e24fc37ba7ca96a5": {
+    "60a3e9c943864f22955e1796de13b0ea105e56ea55": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -88,7 +77,18 @@
       "exportedName": "ontkoppelBankmutatie",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     },
-    "60ec817e96154a8a446e50c10ca852cdf0d95bb9bf": {
+    "60bdd1b80fad7546e240f1a0a04bfa44b9e9bf5e02": {
+      "workers": {
+        "app/beheer/bank/importeren/[id]/page": {
+          "moduleId": 10111,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "importeerBankbestand",
+      "filename": "src/app/beheer/bank/importeren/acties.ts"
+    },
+    "60d2eac129b9193c95ebf24a98a0d2f0d1a3948e10": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -99,7 +99,7 @@
       "exportedName": "koppelSelectie",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     },
-    "60f43c212640a88d89f544b26f5490b3931ee596d1": {
+    "60fd37006efdb5a3f71516d6062d91b178d68652b3": {
       "workers": {
         "app/beheer/bank/importeren/[id]/page": {
           "moduleId": 10111,
@@ -107,7 +107,7 @@
           "codeHash": null
         }
       },
-      "exportedName": "boekBankregelsSnel",
+      "exportedName": "bevestigBankimport",
       "filename": "src/app/beheer/bank/importeren/acties.ts"
     }
   },

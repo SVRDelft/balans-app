@@ -3,9 +3,9 @@
     "nummer": 61,
     "jaar": "2025-2026",
     "leden": [
-      "Alex",
-      "Corlien",
-      "Niels"
+      "Corlien Douma (voorzitter)",
+      "Niels van den Dool (secretaris, later ook penningmeester)",
+      "Alexander Znamenskiy (penningmeester, eerste helft van het jaar)"
     ],
     "foto": "besturen/61.jpg"
   },
@@ -24,11 +24,12 @@
     "nummer": 59,
     "jaar": "2023-2024",
     "leden": [
-      "Eva",
-      "Mischa",
-      "Noah"
+      "Mischa de Gooijer (voorzitter)",
+      "Eva van der Weegen (secretaris)",
+      "Noah Tap (penningmeester)"
     ],
-    "foto": "besturen/59.jpg"
+    "foto": "besturen/59.jpg",
+    "beleid": "/beleid/beleid-59.pdf"
   },
   {
     "nummer": 58,
@@ -140,9 +141,9 @@
     "nummer": 48,
     "jaar": "2012-2013",
     "leden": [
-      "Irena Doets",
-      "Pieter Wijne",
-      "Maaike Dielwart"
+      "Irena Doets (voorzitter)",
+      "Pieter Wijne (secretaris)",
+      "Maaike Dielwart (penningmeester)"
     ],
     "foto": "besturen/48.jpg"
   },
@@ -150,9 +151,9 @@
     "nummer": 47,
     "jaar": "2011-2012",
     "leden": [
-      "Lukas Kuijken",
-      "Jesper Schoen",
-      "Virpi Heybroek"
+      "Lukas Kuijken (voorzitter)",
+      "Jesper Schoen (secretaris)",
+      "Virpi Heybroek (penningmeester)"
     ],
     "foto": "besturen/47.jpg"
   },
@@ -160,9 +161,9 @@
     "nummer": 46,
     "jaar": "2010-2011",
     "leden": [
-      "Ilse Stolk",
-      "Michael Cerrone",
-      "Renee van de Watering"
+      "Ilse Stolk (voorzitter)",
+      "Michael Cerrone (secretaris)",
+      "Renee van de Watering (penningmeester)"
     ],
     "foto": "besturen/46.jpg"
   },
@@ -170,9 +171,9 @@
     "nummer": 45,
     "jaar": "2009-2010",
     "leden": [
-      "Niels Janszen",
-      "Rene Kleizen",
-      "Myriam Koopmans"
+      "Niels Janszen (voorzitter)",
+      "Rene Kleizen (secretaris)",
+      "Myriam Koopmans (penningmeester)"
     ],
     "foto": "besturen/45.jpg"
   },
@@ -180,9 +181,9 @@
     "nummer": 44,
     "jaar": "2008-2009",
     "leden": [
-      "Joey van den Heuvel",
-      "Simone Campman",
-      "Michael Deelen"
+      "Joey van den Heuvel (voorzitter)",
+      "Simone Campman (secretaris)",
+      "Michael Deelen (penningmeester)"
     ],
     "foto": "besturen/44.jpg"
   },
@@ -190,9 +191,9 @@
     "nummer": 43,
     "jaar": "2007-2008",
     "leden": [
-      "Menno van der Kamp",
-      "Céline Gaffel",
-      "Antoine Berkhout"
+      "Menno van der Kamp (voorzitter)",
+      "Céline Gaffel (secretaris)",
+      "Antoine Berkhout (penningmeester)"
     ],
     "foto": "besturen/43.jpg"
   }

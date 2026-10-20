@@ -1,6 +1,6 @@
 {
   "node": {
-    "009758fc64de323434a89426d3f7c106fc4112b3c3": {
+    "00491ac080981093d873cdae3c9c6cba707bf39bdd": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "604f2fccf967a926ef3c633e406fc32c5f9dc38ced": {
+    "60106d77dc32089b86c81d4468cc328c99a87eefc6": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60bdcfbcc20f35d1fe4791792714af5123e8057196": {
+    "6087266878a35b3f21220c73b8b9b3570b27d08fe2": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40903126951afd8ef8873c1ae62c40584d9a45d136": {
+    "4023b9aa909a9814594f5be03d30d2a19b3a939d8b": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "60f10f809b2bdf12c122a373ac53041fa97ce34a03": {
+    "608c8a50fa92c882ff691ebc4342842280ed08af76": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -55,7 +55,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60228440e79ff730f97d9db5ba86b9122d2e75849c": {
+    "60a519766b949f45981785461822b8c2ef004b7457": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -66,7 +66,7 @@
       "exportedName": "nieuwWachtwoord",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "6031e2d9edf14c099648a5fa1f746afb2f313d717e": {
+    "60ea7af9c1b3cc0d78894aa0fd4f23bfb2446f305e": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
