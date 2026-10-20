@@ -23,6 +23,8 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/geschiedenis.json` | de mijlpalen op de tijdlijn (pagina Geschiedenis) |
 | `content/geschiedenis.md` | het verhaal bovenaan de pagina Geschiedenis |
 | `content/bereikt.json` | "Wat we bereikt hebben" op de pagina Geschiedenis |
+| `content/stamboom.json` | de stamboom van de vijftien op de pagina Geschiedenis: uit welke vereniging of welk corps elke studievereniging voortkwam. Elke vereniging moet er precies één keer in staan |
+| `public/img/sv/<slug>.png` | het logo van een vereniging, voor de lijst van de vijftien en de stamboom; vierkant, doorzichtige achtergrond |
 | `content/oud-besturen.json` | de oud-besturen op de pagina Bestuur, zie hieronder |
 | `content/beleid.md` | "Ons beleid dit jaar" op de pagina Bestuur; elk nieuw bestuur schrijft hier een korte samenvatting van het eigen beleidsplan |
 | `content/samenwerking.json` | waar de SVR namens de verenigingen aanschuift |

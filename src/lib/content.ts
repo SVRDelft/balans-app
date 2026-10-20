@@ -149,6 +149,23 @@ export const leesVerenigingen = (): Vereniging[] =>
     .sort((a, b) => (a.opgericht ?? 9999) - (b.opgericht ?? 9999));
 
 export const leesOverleggen = () => leesJson<Overleg[]>("overleggen.json");
+
+/** Een vereniging in de stamboom, met waar ze uit voortkwam. */
+export interface Tak {
+  slug: string;
+  hoe: string;
+  takken?: Tak[];
+}
+export interface Stamboom {
+  inleiding: string;
+  families: {
+    titel: string;
+    /** Waar de familie uit voortkomt: een vereniging (slug) of iets anders (naam). */
+    wortel?: { slug?: string; naam?: string; jaar?: number; hoe?: string };
+    takken: Tak[];
+  }[];
+}
+export const leesStamboom = () => leesJson<Stamboom>("stamboom.json");
 export const leesTradities = () => leesJson<Traditie[]>("tradities.json");
 export const leesGeschiedenis = () => leesJson<Mijlpaal[]>("geschiedenis.json");
 export const leesSamenwerking = () => leesJson<Samenwerking[]>("samenwerking.json");
