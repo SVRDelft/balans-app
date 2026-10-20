@@ -1,6 +1,6 @@
 {
   "node": {
-    "002977f176d63348d0655d9beca2d67c148c7d7750": {
+    "0077fc2d46568a5b15d063d6802365bd938402f916": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "602654258d2c2fbb5194d960052c46fc39fbee3218": {
-      "workers": {
-        "app/beheer/voorraad/page": {
-          "moduleId": 30769,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60ca07fba7dfd7aa3e8b6f087d00a44a2a971ded87": {
+    "603b5004fa74ecb61a4e7142188162fcce37a14a1c": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -33,7 +22,18 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4093bbc19e0b2b75616bfabf242224091689c300f2": {
+    "60a8efa142b016798034593e4d4bfb793ba5615343": {
+      "workers": {
+        "app/beheer/voorraad/page": {
+          "moduleId": 30769,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "4043ef1d69aaf42cabd045aaa45c97f2c28b027bb3": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "600112228e33cccb86e0da42928ff549c2b4061288": {
+    "60a51bd2f6acd8d6f54943b894bef6983b82e7f534": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -55,7 +55,7 @@
       "exportedName": "bewaarVoorraad",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "004236f000c8d36fa8b7fc3003c3570280b22221e5": {
+    "000978742055ec7763d4adaa85cd8c2e0fc9a85920": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -66,7 +66,7 @@
       "exportedName": "neemVoorraadOver",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "60d60fa332d2581dc1c3997d29b9ab6e2ea5814983": {
+    "60296dcf597f25ea4a1e414a8badc9eaf314a16ac6": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,
@@ -77,7 +77,7 @@
       "exportedName": "verwijderVoorraad",
       "filename": "src/app/beheer/voorraad/acties.ts"
     },
-    "60db37fca52d7e611bc01d4a1b54dab691731a1ec7": {
+    "60bd48b377d75717223f083fe90be7402389b53688": {
       "workers": {
         "app/beheer/voorraad/page": {
           "moduleId": 30769,

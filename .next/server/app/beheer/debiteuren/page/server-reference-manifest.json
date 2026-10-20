@@ -1,6 +1,6 @@
 {
   "node": {
-    "002977f176d63348d0655d9beca2d67c148c7d7750": {
+    "0077fc2d46568a5b15d063d6802365bd938402f916": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "602654258d2c2fbb5194d960052c46fc39fbee3218": {
-      "workers": {
-        "app/beheer/debiteuren/page": {
-          "moduleId": 98473,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggenAlsVereniging",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "60ca07fba7dfd7aa3e8b6f087d00a44a2a971ded87": {
+    "603b5004fa74ecb61a4e7142188162fcce37a14a1c": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -33,7 +22,18 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4093bbc19e0b2b75616bfabf242224091689c300f2": {
+    "60a8efa142b016798034593e4d4bfb793ba5615343": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggenAlsVereniging",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "4043ef1d69aaf42cabd045aaa45c97f2c28b027bb3": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -44,18 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6006007fc70cf6e22f407b9da6e8866f8203aacae3": {
-      "workers": {
-        "app/beheer/debiteuren/page": {
-          "moduleId": 98473,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderRekeningpost",
-      "filename": "src/app/beheer/debiteuren/acties.ts"
-    },
-    "60c103a184cc1fab5cc3d0c87f9e716369bb728cc2": {
+    "604e39b10991da4880bef921ea61bbc4f4d0f6112a": {
       "workers": {
         "app/beheer/debiteuren/page": {
           "moduleId": 98473,
@@ -64,6 +53,17 @@
         }
       },
       "exportedName": "bewaarRekeningpost",
+      "filename": "src/app/beheer/debiteuren/acties.ts"
+    },
+    "6079fdb774f27fb1e7a6b08d2bf46928f3a585fc04": {
+      "workers": {
+        "app/beheer/debiteuren/page": {
+          "moduleId": 98473,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderRekeningpost",
       "filename": "src/app/beheer/debiteuren/acties.ts"
     }
   },
