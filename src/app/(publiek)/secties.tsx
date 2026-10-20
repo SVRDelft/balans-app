@@ -14,10 +14,7 @@ import {
   leesVerenigingen,
   leesVragen,
   leesBereikt,
-  leesStamboom,
   leesOudBesturen,
-  type Tak,
-  type Vereniging,
 } from "@/lib/content";
 
 import { Blokken } from "./blokken";
@@ -472,86 +469,6 @@ export function VijftienDoorDeJaren() {
             </li>
           ))}
         </ol>
-      </div>
-    </section>
-  );
-}
-
-function Logo({ vereniging }: { vereniging?: Vereniging }) {
-  return vereniging?.logo ? (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img className="stamlogo" src={`/img/sv/${vereniging.logo}`} alt="" width={48} height={48} loading="lazy" />
-  ) : (
-    <span className="stamlogo leeg strepen" aria-hidden />
-  );
-}
-
-function StamTak({ tak, verenigingen }: { tak: Tak; verenigingen: Map<string, Vereniging> }) {
-  const vereniging = verenigingen.get(tak.slug);
-  return (
-    <li>
-      <div className="stamkaart">
-        <Logo vereniging={vereniging} />
-        <div>
-          <p className="stamnaam">
-            <strong>{vereniging?.naam ?? tak.slug}</strong>
-            {vereniging?.opgericht ? <span>{vereniging.opgericht}</span> : null}
-          </p>
-          <p className="stamhoe">{tak.hoe}</p>
-        </div>
-      </div>
-      {tak.takken?.length ? (
-        <ul>
-          {tak.takken.map((kind) => (
-            <StamTak key={kind.slug} tak={kind} verenigingen={verenigingen} />
-          ))}
-        </ul>
-      ) : null}
-    </li>
-  );
-}
-
-/** Waar de vijftien vandaan komen: uit het Corps, uit Leeghwater, of zelf opgericht. */
-export function Stamboom() {
-  const stamboom = leesStamboom();
-  const verenigingen = new Map(leesVerenigingen().map((v) => [v.slug, v]));
-  return (
-    <section className="vlak wit" id="stamboom">
-      <div className="binnen">
-        <h2>De stamboom van de vijftien</h2>
-        <p>{stamboom.inleiding}</p>
-        <div className="stamboom">
-          {stamboom.families.map((familie) => {
-            const wortel = familie.wortel;
-            const wortelVereniging = wortel?.slug ? verenigingen.get(wortel.slug) : undefined;
-            return (
-              <div key={familie.titel} className="stamfamilie">
-                <h3>{familie.titel}</h3>
-                {wortel ? (
-                  <div className="stamkaart wortel">
-                    {wortelVereniging ? (
-                      <Logo vereniging={wortelVereniging} />
-                    ) : (
-                      <span className="stamlogo leeg strepen" aria-hidden />
-                    )}
-                    <div>
-                      <p className="stamnaam">
-                        <strong>{wortelVereniging?.naam ?? wortel.naam}</strong>
-                        <span>{wortelVereniging?.opgericht ?? wortel.jaar}</span>
-                      </p>
-                      {wortel.hoe ? <p className="stamhoe">{wortel.hoe}</p> : null}
-                    </div>
-                  </div>
-                ) : null}
-                <ul className={wortel ? "stamtakken" : "stamtakken los"}>
-                  {familie.takken.map((tak) => (
-                    <StamTak key={tak.slug} tak={tak} verenigingen={verenigingen} />
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </section>
   );

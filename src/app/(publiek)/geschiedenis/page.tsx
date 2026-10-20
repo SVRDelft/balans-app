@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Bereikt, Mijlpalen, PaginaKop, Stamboom, Verhaal, VijftienDoorDeJaren } from "../secties";
+import { Bereikt, Mijlpalen, PaginaKop, Verhaal, VijftienDoorDeJaren } from "../secties";
 
 export const dynamic = "force-static";
 
@@ -19,7 +19,6 @@ export default function GeschiedenisPagina() {
       <Verhaal />
       <Mijlpalen />
       <Bereikt />
-      <Stamboom />
       <VijftienDoorDeJaren />
     </>
   );

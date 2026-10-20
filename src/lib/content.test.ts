@@ -14,22 +14,3 @@ describe("de vijftien", () => {
     expect(leesVerenigingen().filter((vereniging) => !vereniging.opgericht)).toEqual([]);
   });
 });
-
-describe("de stamboom", () => {
-  it("bevat elke vereniging precies één keer, en niets anders", async () => {
-    const { leesStamboom } = await import("./content");
-    const gevonden: string[] = [];
-    const loop = (takken: { slug: string; takken?: unknown[] }[]) => {
-      for (const tak of takken) {
-        gevonden.push(tak.slug);
-        loop((tak.takken ?? []) as { slug: string; takken?: unknown[] }[]);
-      }
-    };
-    for (const familie of leesStamboom().families) {
-      if (familie.wortel?.slug) gevonden.push(familie.wortel.slug);
-      loop(familie.takken);
-    }
-    const slugs = leesVerenigingen().map((vereniging) => vereniging.slug);
-    expect([...gevonden].sort()).toEqual([...slugs].sort());
-  });
-});
