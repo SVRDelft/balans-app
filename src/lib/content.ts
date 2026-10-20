@@ -133,14 +133,20 @@ export function leesTekst(
 
 export const leesSvr = () => leesJson<Svr>("svr.json");
 
-/** De vijftien, met hun logo als dat bestand er is. */
+/**
+ * De vijftien, met hun logo als dat bestand er is. Altijd op volgorde van
+ * oprichting, de oudste eerst, wat de volgorde in het bestand ook is. Bij
+ * hetzelfde jaar blijft de volgorde uit het bestand staan.
+ */
 export const leesVerenigingen = (): Vereniging[] =>
-  leesJson<Vereniging[]>("verenigingen.json").map((vereniging) => ({
-    ...vereniging,
-    logo: existsSync(logopad(`${vereniging.slug}.png`))
-      ? `${vereniging.slug}.png`
-      : undefined,
-  }));
+  leesJson<Vereniging[]>("verenigingen.json")
+    .map((vereniging) => ({
+      ...vereniging,
+      logo: existsSync(logopad(`${vereniging.slug}.png`))
+        ? `${vereniging.slug}.png`
+        : undefined,
+    }))
+    .sort((a, b) => (a.opgericht ?? 9999) - (b.opgericht ?? 9999));
 
 export const leesOverleggen = () => leesJson<Overleg[]>("overleggen.json");
 export const leesTradities = () => leesJson<Traditie[]>("tradities.json");

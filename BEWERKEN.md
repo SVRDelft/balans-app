@@ -25,7 +25,7 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |
 | `content/privacy.md` | de privacypagina |
 | `content/bestuur.json` | wie er in het bestuur zitten, het bestuursnummer, de startdatum en het aantal StOF-maanden |
-| `content/verenigingen.json` | de vijftien verenigingen: naam, officiële naam, studie, faculteit, oprichtingsjaar en de link naar hun site |
+| `content/verenigingen.json` | de vijftien verenigingen: naam, officiële naam, studie, faculteit, oprichtingsjaar en de link naar hun site. De site zet ze zelf op volgorde van oprichting; pas je een jaar aan, dan schuift de vereniging vanzelf mee |
 | `content/svr.json` | e-mailadres, adres, KvK-nummer, oprichtingsdatum en de links naar LinkedIn en Facebook (onderaan elke pagina) |
 | `public/img/` | het logo en de portretten, zie `public/img/LEESMIJ.md` |
 
