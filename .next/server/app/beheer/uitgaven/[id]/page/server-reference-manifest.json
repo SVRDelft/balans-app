@@ -1,6 +1,6 @@
 {
   "node": {
-    "007297dc3d408ea2dca8ad06e4ccce9502a9b33b77": {
+    "0055cc1398156eba3ec41ffea140c3a0b9f6385434": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60809a7772b930073b5bbef758791ca7a853da9fe0": {
+    "60184e9aa939abff106cce3a8d1158b5b186695a80": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60f2e4828095876a1f7367a0410581e8a058882d7b": {
+    "602aa37618939a369781b93d337837a89e36dd4d99": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -33,7 +33,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "406ced277a600051dac662e97eb9ed87d883428d26": {
+    "4034eb110b4422ddcb0a69b612883605bf3bdc6379": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -44,18 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "603d6111fe69c469269a9ff16e4da6c4b35133ac31": {
-      "workers": {
-        "app/beheer/uitgaven/[id]/page": {
-          "moduleId": 83289,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "verwijderUitgave",
-      "filename": "src/app/beheer/uitgaven/acties.ts"
-    },
-    "604cc07071feca4631e309ba62dd51fa730a88b7f4": {
+    "600e656ad55ca6cc390b5f5617d473edc7832bf197": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -66,7 +55,7 @@
       "exportedName": "zetBedragDefinitief",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     },
-    "6059a245bcb872df057921392c1aed04386c0c95ef": {
+    "6021030d96f0238c2a4fada2beddd855f6563e47ab": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -77,7 +66,7 @@
       "exportedName": "bewaarUitgave",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     },
-    "60bbe478610bb8dff2aec25bd35018a6b191b015c5": {
+    "605bfe35b8230f11ac08427efcb7145fd85901429a": {
       "workers": {
         "app/beheer/uitgaven/[id]/page": {
           "moduleId": 83289,
@@ -86,6 +75,17 @@
         }
       },
       "exportedName": "zetBetaald",
+      "filename": "src/app/beheer/uitgaven/acties.ts"
+    },
+    "609c95614629aa89a7081388f643247b05d904fa03": {
+      "workers": {
+        "app/beheer/uitgaven/[id]/page": {
+          "moduleId": 83289,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "verwijderUitgave",
       "filename": "src/app/beheer/uitgaven/acties.ts"
     }
   },

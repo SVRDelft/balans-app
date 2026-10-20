@@ -1,6 +1,6 @@
 {
   "node": {
-    "007297dc3d408ea2dca8ad06e4ccce9502a9b33b77": {
+    "0055cc1398156eba3ec41ffea140c3a0b9f6385434": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60809a7772b930073b5bbef758791ca7a853da9fe0": {
+    "60184e9aa939abff106cce3a8d1158b5b186695a80": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -22,7 +22,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60f2e4828095876a1f7367a0410581e8a058882d7b": {
+    "602aa37618939a369781b93d337837a89e36dd4d99": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -33,7 +33,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "406ced277a600051dac662e97eb9ed87d883428d26": {
+    "4034eb110b4422ddcb0a69b612883605bf3bdc6379": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "001b2862019d09a904fcc77badad92614b435f9ef4": {
+    "006621e0b300fc66dc40ecd1799c1d103767c89d45": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -55,40 +55,7 @@
       "exportedName": "koppelAlleVoorstellen",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "604da2fe874380962feecaac26e4965e134b7d381d": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "voegInformantToe",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "605ad566b570d3e550f38f8b1bb2f5a3aa57a3d1f9": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "koppelToegangRelatie",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "60abbcf700d8b83f50e59fb04864fbd3bfc77fcb2d": {
-      "workers": {
-        "app/beheer/portaaltoegang/page": {
-          "moduleId": 95509,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "stelToegangWachtwoordIn",
-      "filename": "src/app/beheer/portaaltoegang/acties.ts"
-    },
-    "60b3489d5e66e8d4dbed9d6fe09b0fb5c9608e2f03": {
+    "60464959f3138b94609e267ede8cf58c49d7524c55": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,
@@ -99,7 +66,40 @@
       "exportedName": "verwijderInformant",
       "filename": "src/app/beheer/portaaltoegang/acties.ts"
     },
-    "60f3c63c0a09c692bc98ae72dbfc72d6d4596b07cf": {
+    "608c0a6043f49b76276cabcda5adb92fb195bc7add": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "stelToegangWachtwoordIn",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60aebfd5bc9e0abbc980ff062ab0b1080ba8ffa099": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "koppelToegangRelatie",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60ba42499e306ece769220a3cf0de074ff37a473cc": {
+      "workers": {
+        "app/beheer/portaaltoegang/page": {
+          "moduleId": 95509,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "voegInformantToe",
+      "filename": "src/app/beheer/portaaltoegang/acties.ts"
+    },
+    "60fded9d06b0370bea21ff3c99a961ad0f3077cce4": {
       "workers": {
         "app/beheer/portaaltoegang/page": {
           "moduleId": 95509,

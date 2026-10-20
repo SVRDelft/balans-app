@@ -8,6 +8,7 @@ de site zoekt precies deze bestanden en toont iets anders als ze er niet zijn.
 | `logo.svg` of `logo.png` | logo linksboven in de kop | SVG (het mooiste) of PNG met doorzichtige achtergrond | vierkant; een SVG schaalt vanzelf mee |
 | `bestuur-<naam>.jpg` | portret van een bestuurslid | JPG | vierkant, 400 × 400 pixels, max 300 kB |
 | `bestuur-samen.jpg` | foto van het hele bestuur op de voorpagina | JPG | staand, ongeveer 1000 pixels breed, max 300 kB |
+| `besturen/<nummer>.jpg` | groepsfoto van een oud-bestuur op de pagina Bestuur | JPG | ongeveer 900 pixels breed, max 200 kB; zie `content/oud-besturen.json` |
 
 De bestandsnaam van een portret zet je in `content/bestuur.json` bij `foto`; die
 van de groepsfoto bij `samenFoto`, met de tekst eronder bij `samenBijschrift`.
