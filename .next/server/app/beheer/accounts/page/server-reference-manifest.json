@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055cc1398156eba3ec41ffea140c3a0b9f6385434": {
+    "009758fc64de323434a89426d3f7c106fc4112b3c3": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60184e9aa939abff106cce3a8d1158b5b186695a80": {
-      "workers": {
-        "app/beheer/accounts/page": {
-          "moduleId": 99773,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggen",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "602aa37618939a369781b93d337837a89e36dd4d99": {
+    "604f2fccf967a926ef3c633e406fc32c5f9dc38ced": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -33,7 +22,18 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4034eb110b4422ddcb0a69b612883605bf3bdc6379": {
+    "60bdcfbcc20f35d1fe4791792714af5123e8057196": {
+      "workers": {
+        "app/beheer/accounts/page": {
+          "moduleId": 99773,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "40903126951afd8ef8873c1ae62c40584d9a45d136": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6056e4ac155b7d2703babca5a359f1f7da78948725": {
+    "60f10f809b2bdf12c122a373ac53041fa97ce34a03": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -55,7 +55,7 @@
       "exportedName": "maakAccount",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "6057f201d71672bf82b97c582ae270df922cbcdc97": {
+    "60228440e79ff730f97d9db5ba86b9122d2e75849c": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,
@@ -66,7 +66,7 @@
       "exportedName": "nieuwWachtwoord",
       "filename": "src/app/beheer/accounts/acties.ts"
     },
-    "60f38d7650c35032c6ba67adaf45311ee8f595838c": {
+    "6031e2d9edf14c099648a5fa1f746afb2f313d717e": {
       "workers": {
         "app/beheer/accounts/page": {
           "moduleId": 99773,

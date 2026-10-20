@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055cc1398156eba3ec41ffea140c3a0b9f6385434": {
+    "009758fc64de323434a89426d3f7c106fc4112b3c3": {
       "workers": {
         "app/beheer/relaties/nieuw/page": {
           "moduleId": 45355,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60184e9aa939abff106cce3a8d1158b5b186695a80": {
-      "workers": {
-        "app/beheer/relaties/nieuw/page": {
-          "moduleId": 45355,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggen",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "602aa37618939a369781b93d337837a89e36dd4d99": {
+    "604f2fccf967a926ef3c633e406fc32c5f9dc38ced": {
       "workers": {
         "app/beheer/relaties/nieuw/page": {
           "moduleId": 45355,
@@ -33,7 +22,18 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4034eb110b4422ddcb0a69b612883605bf3bdc6379": {
+    "60bdcfbcc20f35d1fe4791792714af5123e8057196": {
+      "workers": {
+        "app/beheer/relaties/nieuw/page": {
+          "moduleId": 45355,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "40903126951afd8ef8873c1ae62c40584d9a45d136": {
       "workers": {
         "app/beheer/relaties/nieuw/page": {
           "moduleId": 45355,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "603eea5d2ed57912d2a2bc417466f8ae44c1e83790": {
+    "60f94e3ebdfe78ae26e004996125535de2a0150b5a": {
       "workers": {
         "app/beheer/relaties/nieuw/page": {
           "moduleId": 45355,

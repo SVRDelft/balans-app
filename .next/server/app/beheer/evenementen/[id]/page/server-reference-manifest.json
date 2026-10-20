@@ -1,6 +1,6 @@
 {
   "node": {
-    "0055cc1398156eba3ec41ffea140c3a0b9f6385434": {
+    "009758fc64de323434a89426d3f7c106fc4112b3c3": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -11,18 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60184e9aa939abff106cce3a8d1158b5b186695a80": {
-      "workers": {
-        "app/beheer/evenementen/[id]/page": {
-          "moduleId": 42952,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "inloggen",
-      "filename": "src/app/inloggen/acties.ts"
-    },
-    "602aa37618939a369781b93d337837a89e36dd4d99": {
+    "604f2fccf967a926ef3c633e406fc32c5f9dc38ced": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -33,7 +22,18 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "4034eb110b4422ddcb0a69b612883605bf3bdc6379": {
+    "60bdcfbcc20f35d1fe4791792714af5123e8057196": {
+      "workers": {
+        "app/beheer/evenementen/[id]/page": {
+          "moduleId": 42952,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "inloggen",
+      "filename": "src/app/inloggen/acties.ts"
+    },
+    "40903126951afd8ef8873c1ae62c40584d9a45d136": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -44,7 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "608076ae7ee608b2b3270ab09c50bbb90e0dd64f7d": {
+    "60c9a0091fb2aa3ec78cfaac4778fc0ec3ed2fd70d": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -55,7 +55,7 @@
       "exportedName": "verwijderDeelnemer",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60409173e763d75b5ccb3740b50f64c0eea0408f88": {
+    "601a35dd36eba80a25106b92fc4e9d5be7b45be5ba": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -66,7 +66,7 @@
       "exportedName": "voegDeelnemerToe",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "608af87ca69e2ba524b7a817f6126e07e6f348c5d2": {
+    "60bc88ecd31e155880d2a6af407538edb1fd6124ad": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -77,7 +77,7 @@
       "exportedName": "wijzigDeelnemer",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60030bfda42e5e226c58b625aab9311bd0fcaaf40c": {
+    "6077d6e5b151e67b492d51588ba58d563d11c5f3e7": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -88,7 +88,7 @@
       "exportedName": "berekenOmslagActie",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "60116bb8eef0ba6aac6354a1df36001dd7a7038264": {
+    "6097bd45cda334bf6e6bb63278270098995ec8ddf9": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -99,7 +99,7 @@
       "exportedName": "boekTenLasteVanSvr",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "6004ebfee6c7600275a0757d650f6524e8582de01b": {
+    "6068a7e7a6f179f8905117f4c7604dd1fc45b5c33b": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -110,7 +110,7 @@
       "exportedName": "heropenEvenement",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "603cd08b19c06f0a084d86b091d547f7f9a49c27e7": {
+    "60cb7f08ca7db1d7c113a16733b926d58798534f5f": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,
@@ -121,7 +121,7 @@
       "exportedName": "sluitEvenement",
       "filename": "src/app/beheer/evenementen/acties.ts"
     },
-    "600e656ad55ca6cc390b5f5617d473edc7832bf197": {
+    "60eb4491b2756561a2d8825b3cea22cc06c5bf5c03": {
       "workers": {
         "app/beheer/evenementen/[id]/page": {
           "moduleId": 42952,

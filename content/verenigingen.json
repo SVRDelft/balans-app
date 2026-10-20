@@ -1,7 +1,7 @@
 [
   { "naam": "Leeghwater", "kort": "Leeghwater", "slug": "leeghwater", "faculteit": "ME", "opgericht": 1867, "website": "https://www.leeghwater.nl", "officieel": "Gezelschap Leeghwater", "studie": "Werktuigbouwkunde" },
-  { "naam": "MV", "kort": "MV", "slug": "mv", "faculteit": "CiTG", "opgericht": 1892, "website": "https://mv.tudelft.nl", "officieel": "Mijnbouwkundige Vereeniging", "studie": "Applied Earth Sciences" },
   { "naam": "TG", "kort": "TG", "slug": "tg", "faculteit": "TNW", "opgericht": 1890, "website": "https://www.technologischgezelschap.nl", "officieel": "Technologisch Gezelschap", "studie": "Molecular Science & Technology" },
+  { "naam": "MV", "kort": "MV", "slug": "mv", "faculteit": "CiTG", "opgericht": 1892, "website": "https://mv.tudelft.nl", "officieel": "Mijnbouwkundige Vereeniging", "studie": "Applied Earth Sciences" },
   { "naam": "PS", "kort": "PS", "slug": "ps", "faculteit": "CiTG", "opgericht": 1894, "website": "https://practischestudie.nl", "officieel": "Het Gezelschap \"Practische Studie\"", "studie": "Civiele Techniek" },
   { "naam": "Stylos", "kort": "Stylos", "slug": "stylos", "faculteit": "BK", "opgericht": 1894, "website": "https://www.stylos.nl", "officieel": "D.B.S.G. Stylos", "studie": "Bouwkunde" },
   { "naam": "Froude", "kort": "Froude", "slug": "froude", "faculteit": "ME", "opgericht": 1903, "website": "https://froude.nl", "officieel": "Scheepsbouwkundig Gezelschap \"William Froude\"", "studie": "Maritieme Techniek" },
