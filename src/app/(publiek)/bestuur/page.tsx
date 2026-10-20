@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { leesBestuur } from "@/lib/content";
 
-import { HuidigBestuur, OudBesturen, PaginaKop } from "../secties";
+import { Beleid, HuidigBestuur, OudBesturen, PaginaKop } from "../secties";
 
 export const dynamic = "force-static";
 
@@ -23,6 +23,7 @@ export default function BestuurPagina() {
         </p>
       </PaginaKop>
       <HuidigBestuur />
+      <Beleid />
       <OudBesturen />
     </>
   );

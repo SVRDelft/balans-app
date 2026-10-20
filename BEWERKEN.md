@@ -19,6 +19,7 @@ github.com; daarna zet het bestuur de site opnieuw live.
 | `content/geschiedenis.md` | het verhaal bovenaan de pagina Geschiedenis |
 | `content/bereikt.json` | "Wat we bereikt hebben" op de pagina Geschiedenis |
 | `content/oud-besturen.json` | de oud-besturen op de pagina Bestuur, zie hieronder |
+| `content/beleid.md` | "Ons beleid dit jaar" op de pagina Bestuur; elk nieuw bestuur schrijft hier een korte samenvatting van het eigen beleidsplan |
 | `content/samenwerking.json` | waar de SVR namens de verenigingen aanschuift |
 | `content/vragen.json` | de veelgestelde vragen |
 | `content/bestuur-worden.md` | de pagina voor studenten die bestuur willen worden |

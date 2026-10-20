@@ -365,7 +365,8 @@ export function Contact() {
           <div>
             <p>
               Vragen over de SVR, een vergadering of samenwerken? Mail het
-              bestuur; we lezen alles.
+              bestuur; je krijgt binnen twee werkdagen antwoord. Op dinsdag
+              zijn we op kantoor, en dan mag je gewoon binnenlopen.
             </p>
             <address>
               <a href={`mailto:${svr.email}`}>{svr.email}</a>
@@ -520,6 +521,27 @@ export function OudBesturen() {
             ))}
           </ul>
         ) : null}
+      </div>
+    </section>
+  );
+}
+
+/** Het beleid van het huidige bestuur, uit content/beleid.md. */
+export function Beleid() {
+  const tekst = leesTekst("beleid");
+  return (
+    <section className="vlak donker" id="beleid">
+      <div className="binnen">
+        <h2>{tekst.titel}</h2>
+        <Blokken blokken={tekst.blokken} />
+        <div className="pijlers beleidspunten">
+          {tekst.secties.map((sectie) => (
+            <div key={sectie.kop}>
+              <h3>{sectie.kop}</h3>
+              <Blokken blokken={sectie.blokken} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
