@@ -1,0 +1,63 @@
+{
+  "inleiding": "Veel studieverenigingen begonnen niet als zelfstandige club, maar als dispuut binnen een andere vereniging. Zo is te zien waar de vijftien vandaan komen.",
+  "families": [
+    {
+      "titel": "Uit het Delftsch Studenten Corps",
+      "wortel": { "naam": "Delftsch Studenten Corps", "jaar": 1848 },
+      "takken": [
+        {
+          "slug": "ps",
+          "hoe": "Begon op 12 november 1878 als dispuut van het Corps. Op 13 februari 1894 werd het het Civiel en Bouwkundig Gezelschap, voor civiel én bouwkunde.",
+          "takken": [
+            {
+              "slug": "stylos",
+              "hoe": "De bouwkunde-afdeling van Practische Studie. Op 22 januari 1947 werd de scheiding definitief en ging zij verder als Stylos.",
+              "takken": [
+                {
+                  "slug": "id",
+                  "hoe": "Eén à twee jaar een subvereniging van Stylos, daarna zelfstandig."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "vsv",
+          "hoe": "Opgericht op 18 juli 1945 in Phoenix, de sociëteit van het Corps. De studie Vliegtuigbouwkunde was vijf jaar eerder afgesplitst van Werktuigbouwkunde."
+        }
+      ]
+    },
+    {
+      "titel": "Uit Leeghwater",
+      "wortel": {
+        "slug": "leeghwater",
+        "hoe": "De oudste studievereniging van Nederland, opgericht op 16 december 1867 op aanraden van ingenieur Adriën Huet."
+      },
+      "takken": [
+        {
+          "slug": "etv",
+          "hoe": "Op 26 maart 1906 opgericht als dispuut van Leeghwater; Elektrotechniek was toen nog een richting binnen Werktuigbouwkunde. Zelfstandig sinds 1919.",
+          "takken": [
+            {
+              "slug": "vvtp",
+              "hoe": "Natuurkundestudenten waren eerst lid van de ETV. Omdat hun belangen niet aansloten, kregen ze op 2 december 1932 een eigen vereniging."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Zelf opgericht, met hun studie",
+      "takken": [
+        { "slug": "tg", "hoe": "Opgericht op 15 december 1890 door drie initiatiefnemers, aangemoedigd door professor Hoogewerff." },
+        { "slug": "mv", "hoe": "Op 1 oktober 1892 opgericht door vier mijnbouwstudenten, naar het voorbeeld van het Technologisch Gezelschap." },
+        { "slug": "froude", "hoe": "Op 17 november 1903 opgericht door drie studenten, toen Scheepsbouwkunde veertig studenten en één hoogleraar telde." },
+        { "slug": "christiaan-huygens", "hoe": "Op 6 maart 1957 opgericht, negen maanden na de start van de studie Wiskunde." },
+        { "slug": "curius", "hoe": "Opgericht met de nieuwe studie Technische Bestuurskunde." },
+        { "slug": "life", "hoe": "Opgericht tegelijk met de studie Life Science & Technology van Delft en Leiden." },
+        { "slug": "hooke", "hoe": "Opgericht op 20 november 2014 voor de studie Nanobiologie van Delft en Rotterdam." },
+        { "slug": "variscopic", "hoe": "Opgericht op 15 april 2014 voor de nieuwe studie Klinische Technologie." }
+      ]
+    }
+  ]
+}
