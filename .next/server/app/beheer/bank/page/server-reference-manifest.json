@@ -1,6 +1,6 @@
 {
   "node": {
-    "00dcb02488ffaf131e9ae9e05a55beda092d2da64f": {
+    "008f8fc0ab43df078ded963cf5d21608eb917034b7": {
       "workers": {
         "app/beheer/bank/page": {
           "moduleId": 11776,
@@ -11,7 +11,7 @@
       "exportedName": "uitloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6021f722bea076212032f4c9c884021dfece7a05da": {
+    "6056dd3b3c3dba9bf309377e8b6fe0985ee6e2b524": {
       "workers": {
         "app/beheer/bank/page": {
           "moduleId": 11776,
@@ -22,7 +22,7 @@
       "exportedName": "inloggenAlsVereniging",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "6034247fdb5ae6e57041eadc60280ef2937bcfe9cb": {
+    "60ae31cfa427103ef72af7d7f0d88263ea3642ccb9": {
       "workers": {
         "app/beheer/bank/page": {
           "moduleId": 11776,
@@ -33,7 +33,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "40b1cc0ac1a5064461b1affed5b6ce4530973ec199": {
+    "40ffc1777a186d5fb1f0fcbca1f18512d83c272992": {
       "workers": {
         "app/beheer/bank/page": {
           "moduleId": 11776,
@@ -44,18 +44,7 @@
       "exportedName": "kiesBoekjaar",
       "filename": "src/app/beheer/acties.ts"
     },
-    "6048b52bb4aa1e69289ba69a02a356cee311ecb2eb": {
-      "workers": {
-        "app/beheer/bank/page": {
-          "moduleId": 11776,
-          "async": false,
-          "codeHash": null
-        }
-      },
-      "exportedName": "bewaarBanksaldo",
-      "filename": "src/app/beheer/bank/acties.ts"
-    },
-    "60d43992d8029c7bfdb89f0ea2d6d7ea2263b4de9c": {
+    "60048a57960bf38cb7113505b427bef0171dd2b25e": {
       "workers": {
         "app/beheer/bank/page": {
           "moduleId": 11776,
@@ -64,6 +53,17 @@
         }
       },
       "exportedName": "verwijderBanksaldo",
+      "filename": "src/app/beheer/bank/acties.ts"
+    },
+    "603c562df716ed14636c1edb6d6eeccb6a3c136a14": {
+      "workers": {
+        "app/beheer/bank/page": {
+          "moduleId": 11776,
+          "async": false,
+          "codeHash": null
+        }
+      },
+      "exportedName": "bewaarBanksaldo",
       "filename": "src/app/beheer/bank/acties.ts"
     }
   },
