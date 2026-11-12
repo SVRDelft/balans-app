@@ -49,6 +49,10 @@ model Instellingen {
   /// Geheime sleutel voor de agenda-feed (/agenda/<sleutel>). Leeg: alleen
   /// bereikbaar met een portaalsessie. Een nieuwe sleutel trekt de oude in.
   agendaSleutel    String? @unique
+  /// Wanneer de volledige back-up (Overdracht › Alles downloaden) voor het
+  /// laatst is gedownload. Het dashboard meldt het na 30 dagen.
+  laatsteBackupOp  DateTime?
+  laatsteBackupDoor String?
   bijgewerktOp     DateTime @updatedAt
 }
 

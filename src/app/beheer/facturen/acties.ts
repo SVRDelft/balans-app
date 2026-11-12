@@ -592,6 +592,52 @@ export async function legHerinneringVast(
   });
 }
 
+/**
+ * Een hele ronde herinneringen in één keer aantekenen: elke gekozen factuur
+ * krijgt er een herinnering bij, gedateerd vandaag. De app verstuurt zelf
+ * niets; dit legt alleen vast dat jij het hebt gedaan.
+ */
+export async function legHerinneringenVast(
+  _vorigeStaat: ActieStaat,
+  formulier: FormData,
+): Promise<ActieStaat> {
+  const sessie = await vereisBestuur();
+
+  return voerUit(async () => {
+    await vereisBoekjaarContext();
+    const ids = [...new Set(formulier.getAll("id").map(String))].filter(Boolean);
+    if (ids.length === 0) return { fout: "Kies eerst een of meer facturen." };
+
+    const facturen = await db.factuur.findMany({
+      where: { id: { in: ids }, status: { not: "concept" } },
+      select: { id: true, nummer: true, boekjaarId: true, herinneringen: true },
+    });
+    if (facturen.length === 0) return { fout: "Geen van deze facturen kan herinnerd worden." };
+
+    const dag = vandaag();
+    for (const factuur of facturen) {
+      await db.factuur.update({
+        where: { id: factuur.id },
+        data: { herinneringen: { increment: 1 }, laatsteHerinneringOp: dag },
+      });
+      await logAudit({
+        gebruiker: sessie.naam,
+        entiteit: "Factuur",
+        entiteitId: factuur.id,
+        actie: "herinnering verstuurd",
+        samenvatting: `Herinnering ${factuur.herinneringen + 1} voor ${factuur.nummer} aangetekend`,
+        boekjaarId: factuur.boekjaarId,
+      });
+    }
+
+    revalidatePath("/beheer/facturen");
+    revalidatePath("/beheer");
+    return {
+      melding: `${facturen.length} ${facturen.length === 1 ? "herinnering" : "herinneringen"} aangetekend op ${dag.toISOString().slice(0, 10).split("-").reverse().join("-")}.`,
+    };
+  });
+}
+
 export async function verwijderBetaling(
   _vorigeStaat: ActieStaat,
   formulier: FormData,

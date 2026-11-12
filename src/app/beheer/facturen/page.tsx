@@ -31,7 +31,8 @@ import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 
 import { ConceptenVersturen } from "./concepten-versturen";
-import { ordenRelaties } from "@/lib/verenigingen";
+import { ordenRelaties, toonNaam } from "@/lib/verenigingen";
+import { Herinneringen, type TeLateFactuur } from "./herinneringen";
 
 export const metadata: Metadata = { title: "Facturen" };
 
@@ -110,6 +111,34 @@ export default async function FacturenPagina({
   const bundelbaar = facturen
     .filter((factuur) => factuur.status !== "concept")
     .slice(0, 60);
+
+  // Te late facturen voor de herinneringsronde (binnen de filters hierboven).
+  const teLaat: TeLateFactuur[] = gevonden
+    .filter(
+      (factuur) =>
+        factuur.status !== "concept" &&
+        dagenTeLaat(factuur.vervaldatum, peildatum, factuurOpenstaand(factuur)) > 0,
+    )
+    .slice(0, 60)
+    .map((factuur) => ({
+      id: factuur.id,
+      nummer: factuur.nummer,
+      relatieId: factuur.relatieId,
+      relatieNaam: toonNaam(factuur.relatie),
+      openstaandCenten: factuurOpenstaand(factuur),
+      vervaldatum: formatteerDatum(factuur.vervaldatum),
+      herinneringen: factuur.herinneringen,
+      laatsteHerinneringOp: factuur.laatsteHerinneringOp
+        ? formatteerDatum(factuur.laatsteHerinneringOp)
+        : null,
+    }));
+  const instellingen =
+    teLaat.length > 0
+      ? await db.instellingen.findUnique({
+          where: { id: "svr" },
+          select: { iban: true, organisatieNaam: true },
+        })
+      : null;
 
   return (
     <>
@@ -193,6 +222,14 @@ export default async function FacturenPagina({
           </Button>
         ) : null}
       </form>
+
+      {schrijfbaar && teLaat.length > 0 ? (
+        <Herinneringen
+          facturen={teLaat}
+          iban={instellingen?.iban ?? ""}
+          organisatie={instellingen?.organisatieNaam ?? "StudieVerenigingenRaad Delft"}
+        />
+      ) : null}
 
       {bundelbaar.length > 1 ? (
         <form

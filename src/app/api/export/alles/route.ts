@@ -114,6 +114,12 @@ export async function GET() {
     samenvatting: `Volledige back-up gedownload (${bestanden.length} bestanden, ${Math.round(zip.byteLength / 1024)} kB)`,
   });
 
+  // Voor het dashboard: een back-up ouder dan 30 dagen wordt gemeld.
+  await db.instellingen.updateMany({
+    where: { id: "svr" },
+    data: { laatsteBackupOp: nu, laatsteBackupDoor: sessie.naam },
+  });
+
   const datumnaam = nu.toISOString().slice(0, 10);
   return new Response(new Uint8Array(zip), {
     headers: {
