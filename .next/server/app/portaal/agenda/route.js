@@ -1,0 +1,10 @@
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/portaal/agenda/route.js")
+R.c("server/chunks/[externals]__015xw3d._.js")
+R.c("server/chunks/_15ssuaa._.js")
+R.c("server/chunks/[root-of-the-server]__1c-dd6s._.js")
+R.c("server/chunks/[root-of-the-server]__15bjnu5._.js")
+R.c("server/chunks/node_modules_next_dist_11w3z5e._.js")
+R.c("server/chunks/_0znylte._.js")
+R.c("server/chunks/_next-internal_server_app_portaal_agenda_route_actions_1jmhcj4.js")
+R.m(7642)
+module.exports=R.m(7642).exports

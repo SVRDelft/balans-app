@@ -23,6 +23,14 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/agenda/[sleutel]",
+      "regex": "^/agenda/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPsleutel": "nxtPsleutel"
+      },
+      "namedRegex": "^/agenda/(?<nxtPsleutel>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/api/bijlagen/[id]",
       "regex": "^/api/bijlagen/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -391,6 +399,12 @@
       "regex": "^/portaal(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/portaal(?:/)?$"
+    },
+    {
+      "page": "/portaal/agenda",
+      "regex": "^/portaal/agenda(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/portaal/agenda(?:/)?$"
     },
     {
       "page": "/privacy",

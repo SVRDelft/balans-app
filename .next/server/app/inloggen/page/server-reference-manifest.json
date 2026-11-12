@@ -1,6 +1,6 @@
 {
   "node": {
-    "603b5004fa74ecb61a4e7142188162fcce37a14a1c": {
+    "607d93794b48a8e8e7c95e23b36434be4eb7c9765b": {
       "workers": {
         "app/inloggen/page": {
           "moduleId": 7716,
@@ -11,7 +11,7 @@
       "exportedName": "inloggen",
       "filename": "src/app/inloggen/acties.ts"
     },
-    "60a8efa142b016798034593e4d4bfb793ba5615343": {
+    "60efdda8a49144d22998b23e545934f02dfec8b30b": {
       "workers": {
         "app/inloggen/page": {
           "moduleId": 7716,

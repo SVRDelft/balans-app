@@ -5,7 +5,7 @@ R.c("server/chunks/_0ifooyp._.js")
 R.c("server/chunks/[root-of-the-server]__15bjnu5._.js")
 R.c("server/chunks/node_modules_next_dist_11w3z5e._.js")
 R.c("server/chunks/_0znylte._.js")
-R.c("server/chunks/[root-of-the-server]__1piseb7._.js")
+R.c("server/chunks/[root-of-the-server]__1kejtnm._.js")
 R.c("server/chunks/_next-internal_server_app_api_facturen_bundel_route_actions_1i26s3e.js")
 R.m(96139)
 module.exports=R.m(96139).exports
