@@ -1,6 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "regions": ["fra1"],
-  "buildCommand": "node scripts/check-env.mjs && npm run db:deploy && npm run build"
+  "regions": [
+    "fra1"
+  ],
+  "buildCommand": "node scripts/check-env.mjs && npm run db:deploy && npm run build",
+  "git": {
+    "deploymentEnabled": {
+      "tu-server": false
+    }
+  }
 }

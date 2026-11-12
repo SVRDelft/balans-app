@@ -21,7 +21,7 @@ describe("ABN AMRO MT940", () => {
     expect(resultaat.afschriften).toHaveLength(1);
     expect(resultaat.afschriften[0]).toMatchObject({ beginSaldoCenten: 100000, eindSaldoCenten: 109250, beginDatum: "2026-09-14", eindDatum: "2026-09-15" });
     expect(resultaat.transacties[0]).toEqual({
-      boekdatum: "2026-09-15", valutadatum: "2026-09-15", bedragCenten: 10000,
+      rekening, boekdatum: "2026-09-15", valutadatum: "2026-09-15", bedragCenten: 10000,
       debetCredit: "C", omschrijving: "Factuur SVR-2026-001", tegenpartijNaam: "Vereniging Bèta",
       tegenpartijIban: tegenrekening, bankReferentie: null, klantReferentie: "REF-100",
       transactieCode: "N654", afschriftNummer: "00123", afschriftVolgnummer: 1, volgnummer: 1,
@@ -170,6 +170,76 @@ describe("meerdere afschriften en vervolgpagina's", () => {
   ] as const)("weigert %s", (_, input) => { expect(() => parseerMt940(input())).toThrow(Mt940Fout); });
 });
 
+describe("een ABN AMRO-download zoals hij binnenkomt", () => {
+  // ABN zet elk afschrift in een eigen bericht, met telkens dezelfde kop. En wie
+  // bij "Bij- en afschrijvingen" beide rekeningen aanvinkt, krijgt ze in één
+  // bestand: de betaalrekening en de spaarrekening achter elkaar.
+  const kop = (bericht: string) => `ABNANL2A\n940\nABNANL2A\n${bericht}\n-`;
+
+  it("leest losse berichten met een eigen kop achter elkaar", () => {
+    const bestand = [
+      kop(afschrift({ nummer: "00123/1" })),
+      kop(afschrift({ nummer: "00124/1", begin: "C260915EUR1092,5", eind: "C260916EUR1192,5", transacties: ":61:2609160916C100,N654NONREF\n:86:Contributie" })),
+    ].join("\n");
+
+    const resultaat = parseerMt940(bestand);
+    expect(resultaat.afschriften).toHaveLength(2);
+    expect(resultaat.transacties).toHaveLength(3);
+    expect(resultaat.rekeningen).toEqual([rekening]);
+  });
+
+  it("leest de betaalrekening en de spaarrekening uit één bestand", () => {
+    const spaarrekening = "NL44ABNA0123456789";
+    const bestand = [
+      kop(afschrift()),
+      kop(afschrift({
+        account: spaarrekening, nummer: "00201/1",
+        begin: "C260101EUR1717,42", eind: "C260102EUR1740,3",
+        transacties: ":61:2601010101C22,88N604NONREF\n:86:BASIS RENTE                      OVER DE PERIODE VAN\n31-12-2024 TOT 31-12-2025",
+      })),
+    ].join("\n");
+
+    const resultaat = parseerMt940(bestand);
+    expect(resultaat.rekeningen).toEqual([rekening, spaarrekening]);
+    expect(resultaat.rekening).toBe(rekening);
+    const spaar = resultaat.transacties.filter((t) => t.rekening === spaarrekening);
+    expect(spaar).toHaveLength(1);
+    expect(spaar[0].bedragCenten).toBe(2288);
+    expect(resultaat.afschriften.filter((a) => a.rekening === spaarrekening)).toHaveLength(1);
+  });
+
+  it("haalt tegenpartij en omschrijving uit de notatie met labels", () => {
+    const details = [
+      ":86:SEPA OVERBOEKING                 IBAN: NL20INGB0001234567",
+      "BIC: INGBNL2A                    NAAM: SCHEEPSBOUWKUNDIG GEZELSCH",
+      "AP WILLIAM FROUDE                OMSCHRIJVING: Factuur 603050",
+      "KENMERK: 251007INGBNL2A000040000 1000003",
+    ].join("\n");
+    const resultaat = parseerMt940(
+      afschrift({ eind: "C260915EUR1100,", transacties: `:61:2609150915C100,N654NONREF\n${details}` }),
+    );
+
+    expect(resultaat.transacties[0]).toMatchObject({
+      tegenpartijIban: "NL20INGB0001234567",
+      // De naam loopt door op de volgende regel en hoort weer aan elkaar te staan.
+      tegenpartijNaam: "SCHEEPSBOUWKUNDIG GEZELSCHAP WILLIAM FROUDE",
+      omschrijving: "Factuur 603050",
+      klantReferentie: "251007INGBNL2A000040000 1000003",
+    });
+  });
+
+  it("valt terug op de hele tekst als er geen labels in staan", () => {
+    const resultaat = parseerMt940(
+      afschrift({
+        eind: "C260915EUR1100,",
+        transacties: ":61:2609150915C100,N654NONREF\n:86:ABN AMRO BANK N.V.               UW MAANDTARIFERINGSNOTA IS\nBESCHIKBAAR",
+      }),
+    );
+    expect(resultaat.transacties[0].omschrijving).toContain("MAANDTARIFERINGSNOTA");
+    expect(resultaat.transacties[0].tegenpartijNaam).toBeNull();
+  });
+});
+
 describe("veilig afwijzen zonder gedeeltelijk resultaat", () => {
   it.each([
     ["leeg bestand", ""],
@@ -207,10 +277,15 @@ describe("veilig afwijzen zonder gedeeltelijk resultaat", () => {
     ["vreemde tekst na saldo", `${afschrift()}\nonbekende staart`],
     ["onleesbare tekens", `${afschrift()}\u0000`],
     ["kapotte UTF-8", afschrift().replace("Bèta", "B\uFFFDta")],
-    ["meerdere rekeningen", `${afschrift()}\n${afschrift({ account: tegenrekening })}`],
     ["niet-aansluitende saldi", `${afschrift()}\n${afschrift({ nummer: "00124/1" })}`],
   ])("weigert %s met een leesbare fout", (_, input) => {
     expect(() => parseerMt940(input)).toThrow(Mt940Fout);
+  });
+
+  it("weigert een bestand waarin de afschriften van één rekening niet aansluiten", () => {
+    expect(() =>
+      parseerMt940(`${afschrift()}\n${afschrift({ nummer: "00124/1", begin: "C260915EUR9999," })}`),
+    ).toThrow(Mt940Fout);
   });
 
   it("weigert een te groot bestand voordat het parserwerk begint", () => {

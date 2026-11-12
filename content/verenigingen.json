@@ -1,0 +1,17 @@
+[
+  { "naam": "Leeghwater", "kort": "Leeghwater", "slug": "leeghwater", "faculteit": "ME", "opgericht": 1867, "website": "https://www.leeghwater.nl", "officieel": "Gezelschap Leeghwater", "studie": "Werktuigbouwkunde" },
+  { "naam": "TG", "kort": "TG", "slug": "tg", "faculteit": "TNW", "opgericht": 1890, "website": "https://www.technologischgezelschap.nl", "officieel": "Technologisch Gezelschap", "studie": "Molecular Science & Technology" },
+  { "naam": "MV", "kort": "MV", "slug": "mv", "faculteit": "CiTG", "opgericht": 1892, "website": "https://mv.tudelft.nl", "officieel": "Mijnbouwkundige Vereeniging", "studie": "Applied Earth Sciences" },
+  { "naam": "PS", "kort": "PS", "slug": "ps", "faculteit": "CiTG", "opgericht": 1894, "website": "https://practischestudie.nl", "officieel": "Het Gezelschap \"Practische Studie\"", "studie": "Civiele Techniek" },
+  { "naam": "Stylos", "kort": "Stylos", "slug": "stylos", "faculteit": "BK", "opgericht": 1894, "website": "https://www.stylos.nl", "officieel": "D.B.S.G. Stylos", "studie": "Bouwkunde" },
+  { "naam": "Froude", "kort": "Froude", "slug": "froude", "faculteit": "ME", "opgericht": 1903, "website": "https://froude.nl", "officieel": "Scheepsbouwkundig Gezelschap \"William Froude\"", "studie": "Maritieme Techniek" },
+  { "naam": "ETV", "kort": "ETV", "slug": "etv", "faculteit": "EWI", "opgericht": 1906, "website": "https://etv.tudelft.nl", "officieel": "Electrotechnische Vereeniging", "studie": "Elektrotechniek" },
+  { "naam": "VvTP", "kort": "VvTP", "slug": "vvtp", "faculteit": "TNW", "opgericht": 1932, "website": "https://vvtp.nl", "officieel": "Vereniging voor Technische Physica", "studie": "Technische Natuurkunde" },
+  { "naam": "VSV 'Leonardo da Vinci'", "kort": "VSV", "slug": "vsv", "faculteit": "LR", "opgericht": 1945, "website": "https://vsv.tudelft.nl", "officieel": "V.S.V. 'Leonardo da Vinci'", "studie": "Lucht- en Ruimtevaarttechniek" },
+  { "naam": "Christiaan Huygens", "kort": "CH", "slug": "christiaan-huygens", "faculteit": "EWI", "opgericht": 1957, "website": "https://ch.tudelft.nl", "officieel": "W.I.S.V. 'Christiaan Huygens'", "studie": "Technische Wiskunde en Informatica" },
+  { "naam": "ID", "kort": "ID", "slug": "id", "faculteit": "IO", "opgericht": 1973, "website": "https://www.studieverenigingid.nl", "officieel": "S.V. ID", "studie": "Industrieel Ontwerpen" },
+  { "naam": "Curius", "kort": "Curius", "slug": "curius", "faculteit": "TBM", "opgericht": 1992, "website": "https://curius.nl", "officieel": "S.V.T.B. Curius", "studie": "Technische Bestuurskunde" },
+  { "naam": "LIFE", "kort": "LIFE", "slug": "life", "faculteit": "TNW", "opgericht": 1999, "website": "https://www.svlife.nl", "officieel": "S.V. LIFE", "studie": "Life Science & Technology" },
+  { "naam": "Hooke", "kort": "Hooke", "slug": "hooke", "faculteit": "TNW", "opgericht": 2014, "website": "https://svnbhooke.nl", "officieel": "S.V.N.B. Hooke", "studie": "Nanobiologie" },
+  { "naam": "Variscopic", "kort": "Variscopic", "slug": "variscopic", "faculteit": "ME", "opgericht": 2014, "website": "https://variscopic.nl", "officieel": "Variscopic", "studie": "Klinische Technologie" }
+]

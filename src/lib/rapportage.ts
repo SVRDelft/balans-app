@@ -13,6 +13,11 @@ import {
   maakOuderdomsanalyse,
   type Ouderdomsanalyse,
 } from "@/lib/finance/debiteuren";
+import {
+  maakRekeningcourant,
+  resultaatEffectCenten,
+  type Rekeningcourant,
+} from "@/lib/finance/rekeningcourant";
 import { berekenAfstemming, type Afstemming } from "@/lib/finance/omslag";
 import {
   factuurOpenstaand,
@@ -34,6 +39,9 @@ export interface OpenstaandeFactuurRegel {
   betaaldCenten: number;
   openstaandCenten: number;
   status: string;
+  /** Hoe vaak er al aan herinnerd is, en wanneer voor het laatst. */
+  herinneringen: number;
+  laatsteHerinneringOp: Date | null;
 }
 
 export interface OpenstaandeUitgaveRegel {
@@ -57,11 +65,33 @@ export interface BoekjaarCijfers {
   balans: Balans;
   ouderdom: Ouderdomsanalyse;
   openstaandeFacturen: OpenstaandeFactuurRegel[];
+  /**
+   * Facturen uit eerdere boekjaren waar nog geld van moet komen. Ze horen bij de
+   * exploitatie van dat oude jaar, maar het geld komt in dit jaar binnen.
+   */
+  eerdereOpenstaandeFacturen: (OpenstaandeFactuurRegel & {
+    boekjaarNaam: string;
+  })[];
+  rekeningcourant: Rekeningcourant;
   openstaandeUitgaven: OpenstaandeUitgaveRegel[];
   laatsteBanksaldo: { datum: Date; saldoCenten: number } | null;
+  laatsteSpaarsaldo: { datum: Date; saldoCenten: number } | null;
+  /** Alle mutaties op de spaarrekening in dit boekjaar, nieuwste eerst. */
+  spaarmutaties: {
+    id: string;
+    datum: Date;
+    omschrijving: string;
+    bedragCenten: number;
+    soort: string;
+    viaBetaalrekening: boolean;
+    begrotingspost: { code: string; naam: string } | null;
+    uitBankimport: boolean;
+  }[];
   evenementen: EvenementAfstemming[];
   uitgavenZonderPost: number;
   conceptFacturen: number;
+  /** Bankregels die zijn ingelezen maar nog niet gekoppeld of genegeerd. */
+  openBankregels: number;
   voorraadposten: (Voorraadpost & {
     begrotingspost: { code: string; naam: string } | null;
   })[];
@@ -109,7 +139,7 @@ export async function haalBoekjaarCijfers(
       orderBy: { datum: "asc" },
     }),
     db.banksaldo.findFirst({
-      where: { boekjaarId },
+      where: { boekjaarId, rekening: "betaal" },
       orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
     }),
     db.evenement.findMany({
@@ -128,6 +158,91 @@ export async function haalBoekjaarCijfers(
     }),
   ]);
 
+  // Geld stroomt niet netjes binnen de grenzen van een boekjaar. Een factuur van
+  // vorig jaar kan dit jaar betaald worden, en iemand kan een privébedrag van de
+  // SVR-rekening pas een jaar later terugbetalen. Daarom wordt hier gekeken naar
+  // alle boekjaren tot en met dit jaar.
+  const alleBoekjaren = await db.boekjaar.findMany({
+    select: { id: true, naam: true, startDatum: true },
+  });
+  const jaarStart = new Map(
+    alleBoekjaren.map((jaar) => [jaar.id, jaar.startDatum]),
+  );
+  const jaarNaam = new Map(alleBoekjaren.map((jaar) => [jaar.id, jaar.naam]));
+  const startVan = (id: string) => jaarStart.get(id) ?? boekjaar.startDatum;
+  /** Hoort dit boekjaar bij dit jaar of een jaar daarvoor? */
+  const totEnMetNu = (id: string) => startVan(id) <= boekjaar.startDatum;
+  const eerderJaar = (id: string) => startVan(id) < boekjaar.startDatum;
+
+  const [
+    eerdereFacturen,
+    ontvangen,
+    rekeningposten,
+    openBankregels,
+    spaarmutaties,
+    spaarsaldo,
+  ] = await Promise.all([
+    db.factuur.findMany({
+      where: { boekjaarId: { not: boekjaarId }, status: { not: "concept" } },
+      include: {
+        ...factuurStandRelaties,
+        betalingen: true,
+        relatie: { select: { id: true, naam: true } },
+      },
+      orderBy: { nummer: "asc" },
+    }),
+    db.betaling.aggregate({
+      where: { boekjaarId, factuur: { status: { not: "concept" } } },
+      _sum: { bedragCenten: true },
+    }),
+    db.rekeningpost.findMany({
+      include: {
+        relatie: { select: { id: true, naam: true, type: true } },
+        begrotingspost: { select: { id: true, soort: true } },
+      },
+      orderBy: { datum: "asc" },
+    }),
+    db.bankmutatie.count({ where: { boekjaarId, verwerking: "open" } }),
+    db.spaarmutatie.findMany({
+      where: { boekjaarId },
+      orderBy: [{ datum: "desc" }, { aangemaaktOp: "desc" }],
+      include: {
+        begrotingspost: { select: { id: true, code: true, naam: true, soort: true } },
+        bankmutatie: { select: { id: true } },
+      },
+    }),
+    db.banksaldo.findFirst({
+      where: { boekjaarId, rekening: "spaar" },
+      orderBy: [{ datum: "desc" }, { ingevoerdOp: "desc" }],
+    }),
+  ]);
+
+  // De stand van een factuur zoals die bij dit boekjaar hoort: een betaling die
+  // in een later jaar is geboekt, telt hier nog niet mee.
+  type MetBetalingen = {
+    betalingen: { bedragCenten: number; boekjaarId: string }[];
+  };
+  const tot = <T extends MetBetalingen>(factuur: T): T => ({
+    ...factuur,
+    betalingen: factuur.betalingen.filter((betaling) =>
+      totEnMetNu(betaling.boekjaarId),
+    ),
+  });
+  const stand = <
+    T extends MetBetalingen & {
+      creditfactuur?: MetBetalingen | null;
+      crediteertFactuur?: MetBetalingen | null;
+    },
+  >(
+    factuur: T,
+  ): T => ({
+    ...tot(factuur),
+    creditfactuur: factuur.creditfactuur ? tot(factuur.creditfactuur) : factuur.creditfactuur,
+    crediteertFactuur: factuur.crediteertFactuur
+      ? tot(factuur.crediteertFactuur)
+      : factuur.crediteertFactuur,
+  });
+
   // --- realisatie per begrotingspost -------------------------------------
   const inkomstenPerPost = new Map<string, number>();
   const uitgavenPerPost = new Map<string, number>();
@@ -135,7 +250,7 @@ export async function haalBoekjaarCijfers(
   for (const factuur of facturen) {
     if (factuur.status === "concept") continue;
     const bedragen = factuurRegelRealisaties(
-      factuur,
+      stand(factuur),
       factuur.regels.map((regel) => regel.bedragCenten),
     );
     for (const [index, regel] of factuur.regels.entries()) {
@@ -150,6 +265,39 @@ export async function haalBoekjaarCijfers(
       uitgave.begrotingspostId,
       huidig + uitgave.bedragCenten,
     );
+  }
+
+  // Een rekening-courantpost die niet via de bank liep, is een correctie: een
+  // bedrag dat de SVR voor eigen rekening neemt of alsnog als opbrengst boekt.
+  // Alleen die posten raken de exploitatie; geld dat alleen maar heen en weer
+  // gaat, is geen kostenpost.
+  const rekeningpostenDitJaar = rekeningposten.filter(
+    (post) => post.boekjaarId === boekjaarId,
+  );
+  for (const post of rekeningpostenDitJaar) {
+    const effect = resultaatEffectCenten(post);
+    if (effect === 0 || !post.begrotingspost) continue;
+    if (post.begrotingspost.soort === "inkomst") {
+      const huidig = inkomstenPerPost.get(post.begrotingspost.id) ?? 0;
+      inkomstenPerPost.set(post.begrotingspost.id, huidig + effect);
+    } else {
+      const huidig = uitgavenPerPost.get(post.begrotingspost.id) ?? 0;
+      uitgavenPerPost.set(post.begrotingspost.id, huidig - effect);
+    }
+  }
+
+  // Een overboeking naar de spaarrekening is alleen geld verplaatsen. Rente en
+  // bankkosten op die rekening zijn dat niet: die horen op een begrotingspost,
+  // net als bij een rekening-courantpost buiten de bank om.
+  for (const mutatie of spaarmutaties) {
+    if (mutatie.viaBetaalrekening || !mutatie.begrotingspost) continue;
+    if (mutatie.begrotingspost.soort === "inkomst") {
+      const huidig = inkomstenPerPost.get(mutatie.begrotingspost.id) ?? 0;
+      inkomstenPerPost.set(mutatie.begrotingspost.id, huidig + mutatie.bedragCenten);
+    } else {
+      const huidig = uitgavenPerPost.get(mutatie.begrotingspost.id) ?? 0;
+      uitgavenPerPost.set(mutatie.begrotingspost.id, huidig - mutatie.bedragCenten);
+    }
   }
 
   // Het verbruik van spullen telt mee als kosten op de begrotingspost waaraan
@@ -193,22 +341,21 @@ export async function haalBoekjaarCijfers(
   );
 
   // --- debiteuren en crediteuren -----------------------------------------
-  const openstaandeFacturen: OpenstaandeFactuurRegel[] = [];
-  let ontvangenBetalingenCenten = 0;
+  // Alle ontvangsten die in dit boekjaar zijn geboekt, ook die op een factuur uit
+  // een eerder jaar. Het geld zit immers nu op de rekening.
+  const ontvangenBetalingenCenten = ontvangen._sum.bedragCenten ?? 0;
 
-  for (const factuur of facturen) {
-    const betaaldCenten = factuur.betalingen.reduce(
+  const maakRegel = (
+    factuur: (typeof facturen)[number] | (typeof eerdereFacturen)[number],
+  ): OpenstaandeFactuurRegel | null => {
+    const nu = stand(factuur);
+    const betaaldCenten = nu.betalingen.reduce(
       (som, betaling) => som + betaling.bedragCenten,
       0,
     );
-    if (factuur.status !== "concept") {
-      ontvangenBetalingenCenten += betaaldCenten;
-    }
-
-    const openstaandCenten = factuurOpenstaand(factuur);
-    if (openstaandCenten === 0) continue;
-
-    openstaandeFacturen.push({
+    const openstaandCenten = factuurOpenstaand(nu);
+    if (openstaandCenten === 0) return null;
+    return {
       id: factuur.id,
       nummer: factuur.nummer,
       relatieId: factuur.relatie.id,
@@ -219,8 +366,74 @@ export async function haalBoekjaarCijfers(
       betaaldCenten,
       openstaandCenten,
       status: factuur.status,
-    });
-  }
+      herinneringen: factuur.herinneringen,
+      laatsteHerinneringOp: factuur.laatsteHerinneringOp,
+    };
+  };
+
+  const openstaandeFacturen = facturen
+    .map(maakRegel)
+    .filter((regel): regel is OpenstaandeFactuurRegel => regel !== null);
+
+  const eerdereOpenstaandeFacturen = eerdereFacturen
+    .filter((factuur) => eerderJaar(factuur.boekjaarId))
+    .map((factuur) => {
+      const regel = maakRegel(factuur);
+      return regel
+        ? { ...regel, boekjaarNaam: jaarNaam.get(factuur.boekjaarId) ?? "" }
+        : null;
+    })
+    .filter((regel): regel is OpenstaandeFactuurRegel & { boekjaarNaam: string } =>
+      regel !== null,
+    );
+
+  // De vorderingen waarmee dit boekjaar begon: facturen uit eerdere jaren die bij
+  // de jaarwissel nog openstonden, plus het rekening-courantsaldo van toen.
+  const eerdereDebiteurenCenten = eerdereOpenstaandeFacturen.reduce(
+    (som, factuur) => som + factuur.openstaandCenten,
+    0,
+  );
+  const openBijJaarwissel = eerdereFacturen
+    .filter((factuur) => eerderJaar(factuur.boekjaarId))
+    .reduce((som, factuur) => {
+      const toen = {
+        ...factuur,
+        betalingen: factuur.betalingen.filter((betaling) =>
+          eerderJaar(betaling.boekjaarId),
+        ),
+        creditfactuur: factuur.creditfactuur
+          ? {
+              ...factuur.creditfactuur,
+              betalingen: factuur.creditfactuur.betalingen.filter((betaling) =>
+                eerderJaar(betaling.boekjaarId),
+              ),
+            }
+          : factuur.creditfactuur,
+        crediteertFactuur: factuur.crediteertFactuur
+          ? {
+              ...factuur.crediteertFactuur,
+              betalingen: factuur.crediteertFactuur.betalingen.filter(
+                (betaling) => eerderJaar(betaling.boekjaarId),
+              ),
+            }
+          : factuur.crediteertFactuur,
+      };
+      return som + factuurOpenstaand(toen);
+    }, 0);
+
+  const rekeningcourant = maakRekeningcourant(
+    rekeningposten
+      .filter((post) => totEnMetNu(post.boekjaarId))
+      .map((post) => ({
+        relatieId: post.relatie.id,
+        relatieNaam: post.relatie.naam,
+        relatieType: post.relatie.type,
+        datum: post.datum,
+        bedragCenten: post.bedragCenten,
+        viaBank: post.viaBank,
+        eerderBoekjaar: eerderJaar(post.boekjaarId),
+      })),
+  );
 
   const openstaandeUitgaven: OpenstaandeUitgaveRegel[] = uitgaven
     .filter((uitgave) => !uitgave.betaald)
@@ -244,16 +457,34 @@ export async function haalBoekjaarCijfers(
     .filter((uitgave) => uitgave.betaald)
     .reduce((som, uitgave) => som + uitgave.bedragCenten, 0);
 
+  const spaarMutatieCenten = spaarmutaties.reduce(
+    (som, mutatie) => som + mutatie.bedragCenten,
+    0,
+  );
+  const spaarViaBetaalrekeningCenten = spaarmutaties
+    .filter((mutatie) => mutatie.viaBetaalrekening)
+    .reduce((som, mutatie) => som + mutatie.bedragCenten, 0);
+
   const balans = berekenBalans({
     beginsaldoBankCenten: boekjaar.beginsaldoBankCenten,
     beginsaldoEigenVermogenCenten: boekjaar.beginsaldoEigenVermogenCenten,
     ontvangenBetalingenCenten,
     betaaldeUitgavenCenten,
     debiteurenCenten,
+    eerdereDebiteurenCenten,
+    overgenomenVorderingenCenten:
+      openBijJaarwissel + rekeningcourant.overgenomenCenten,
+    teVorderenRekeningcourantCenten: rekeningcourant.teVorderenCenten,
+    teBetalenRekeningcourantCenten: rekeningcourant.teBetalenCenten,
+    rekeningcourantViaBankCenten: rekeningcourant.viaBankCenten,
     crediteurenCenten,
     gerealiseerdeInkomstenCenten: exploitatie.totaalInkomstenGerealiseerdCenten,
     gerealiseerdeUitgavenCenten: exploitatie.totaalUitgavenGerealiseerdCenten,
     ingevoerdBanksaldoCenten: banksaldo?.saldoCenten ?? null,
+    beginsaldoSpaarCenten: boekjaar.beginsaldoSpaarCenten,
+    spaarMutatieCenten,
+    spaarViaBetaalrekeningCenten,
+    ingevoerdSpaarsaldoCenten: spaarsaldo?.saldoCenten ?? null,
     voorraadBeginCenten: voorraad.beginwaardeCenten,
     voorraadCenten: voorraad.waardeCenten,
     // Het toegerekende deel zit al in de gerealiseerde uitgaven hierboven.
@@ -328,12 +559,32 @@ export async function haalBoekjaarCijfers(
     balans,
     voorraad,
     voorraadposten,
-    ouderdom: maakOuderdomsanalyse(openstaandeFacturen, vandaag()),
+    ouderdom: maakOuderdomsanalyse(
+      [...openstaandeFacturen, ...eerdereOpenstaandeFacturen],
+      vandaag(),
+    ),
     openstaandeFacturen,
+    eerdereOpenstaandeFacturen,
+    rekeningcourant,
     openstaandeUitgaven,
     laatsteBanksaldo: banksaldo
       ? { datum: banksaldo.datum, saldoCenten: banksaldo.saldoCenten }
       : null,
+    laatsteSpaarsaldo: spaarsaldo
+      ? { datum: spaarsaldo.datum, saldoCenten: spaarsaldo.saldoCenten }
+      : null,
+    spaarmutaties: spaarmutaties.map((mutatie) => ({
+      id: mutatie.id,
+      datum: mutatie.datum,
+      omschrijving: mutatie.omschrijving,
+      bedragCenten: mutatie.bedragCenten,
+      soort: mutatie.soort,
+      viaBetaalrekening: mutatie.viaBetaalrekening,
+      begrotingspost: mutatie.begrotingspost
+        ? { code: mutatie.begrotingspost.code, naam: mutatie.begrotingspost.naam }
+        : null,
+      uitBankimport: mutatie.bankmutatie !== null,
+    })),
     evenementen: evenementAfstemmingen,
     // Hoort altijd nul te zijn: de begrotingspost is verplicht. Blijft staan als
     // controle op gegevens die van buitenaf in de database komen.
@@ -342,5 +593,6 @@ export async function haalBoekjaarCijfers(
     ).length,
     conceptFacturen: facturen.filter((factuur) => factuur.status === "concept")
       .length,
+    openBankregels,
   };
 }

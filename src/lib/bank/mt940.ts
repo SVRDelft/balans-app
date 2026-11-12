@@ -16,6 +16,8 @@ export class Mt940Fout extends Error {
 }
 
 export interface Mt940Transactie {
+  /** De rekening waar deze regel op staat; één bestand kan er meerdere bevatten. */
+  rekening: string;
   boekdatum: string;
   valutadatum: string;
   bedragCenten: number;
@@ -34,6 +36,7 @@ export interface Mt940Transactie {
 }
 
 export interface Mt940Afschrift {
+  rekening: string;
   referentie: string;
   nummer: string;
   volgnummer: number | null;
@@ -49,6 +52,11 @@ export interface Mt940Afschrift {
 export interface Mt940Bestand {
   /** Canonical account identifier: uppercase, no spaces/dots/currency suffix. */
   rekening: string;
+  /**
+   * Alle rekeningen in het bestand, in de volgorde waarin ze voorkomen. ABN AMRO
+   * zet desgevraagd de betaalrekening en de spaarrekening in één download.
+   */
+  rekeningen: string[];
   valuta: "EUR";
   afschriften: Mt940Afschrift[];
   transacties: Mt940Transactie[];
@@ -128,10 +136,38 @@ function rekeningnummer(waarde: string): string {
   return rekening;
 }
 
+const BIC = /^[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3,4})?$/;
+
+/**
+ * ABN AMRO levert een download als losse MT940-berichten achter elkaar, elk met
+ * een eigen kop (afzender / 940 / ontvanger). Zonder deze splitsing botst de
+ * tweede kop op de velden van het eerste bericht en strandt het hele bestand.
+ */
+function abnBerichten(inhoud: string): string[] {
+  const regels = inhoud.split("\n");
+  const koppen: number[] = [];
+  for (let i = 0; i < regels.length; i++) {
+    if (
+      BIC.test(regels[i].trim()) &&
+      regels[i + 1]?.trim() === "940" &&
+      BIC.test(regels[i + 2]?.trim() ?? "")
+    ) {
+      koppen.push(i);
+    }
+  }
+  if (koppen.length < 2) return [inhoud];
+  // Staat er inhoud vóór de eerste kop, dan blijft die een eigen bericht: zomaar
+  // weggooien zou betekenen dat er stilletjes transacties verdwijnen.
+  const grenzen = koppen[0] === 0 ? koppen : [0, ...koppen];
+  return grenzen
+    .map((start, n) => regels.slice(start, grenzen[n + 1] ?? regels.length).join("\n"))
+    .filter((deel) => deel.trim());
+}
+
 /** Strip only recognized envelopes, never arbitrary text before/after a statement. */
 function berichten(invoer: string): string[] {
   const inhoud = invoer.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trim();
-  if (!inhoud.startsWith("{")) return [inhoud];
+  if (!inhoud.startsWith("{")) return abnBerichten(inhoud);
   const resultaat: string[] = [];
   let positie = 0;
   const spaties = () => { while (/\s/.test(inhoud[positie] ?? "") && positie < inhoud.length) positie++; };
@@ -171,8 +207,8 @@ function berichten(invoer: string): string[] {
 function velden(bericht: string): Veld[] {
   const regels = bericht.trim().split("\n");
   // Legacy ABN OfficeNet envelope: sender BIC, 940, receiver BIC.
-  if (/^[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3,4})?$/.test(regels[0]?.trim()) && regels[1]?.trim() === "940") {
-    if (!/^[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3,4})?$/.test(regels[2]?.trim())) return fout("De ABN AMRO-bestandskop is onvolledig.");
+  if (BIC.test(regels[0]?.trim() ?? "") && regels[1]?.trim() === "940") {
+    if (!BIC.test(regels[2]?.trim() ?? "")) return fout("De ABN AMRO-bestandskop is onvolledig.");
     regels.splice(0, 3);
   } else if (regels[0]?.trim() === "940") regels.shift();
   const resultaat: Veld[] = [];
@@ -193,6 +229,35 @@ function velden(bericht: string): Veld[] {
     if ((resultaat.at(-1)?.inhoud.length ?? 0) > 4096) return fout("Een omschrijving in het MT940-bestand is te lang.");
   }
   return resultaat;
+}
+
+/**
+ * De tweede notatie van ABN AMRO: geen /CODE/-woorden maar labels in twee
+ * kolommen, met waarden die over de regel heen doorlopen.
+ *
+ *   SEPA OVERBOEKING                 IBAN: NL28INGB0000129884
+ *   BIC: INGBNL2A                    NAAM: SCHEEPSBOUWKUNDIG GEZELSCH
+ *   AP WILLIAM FROUDE                OMSCHRIJVING: Factuur 603050
+ *
+ * Zonder dit blijft de tegenpartij leeg en kan de app een betaling niet aan een
+ * vereniging koppelen — precies waar de bankimport voor bedoeld is.
+ */
+const LABELS = /(IBAN|BIC|NAAM|OMSCHRIJVING|KENMERK|BETALINGSKENM\.|MACHTIGING|INCASSANT|VOLGNR|TRANSACTIEDATUM|VALUTADATUM)\s*:/g;
+
+function labelVelden(compact: string) {
+  const gevonden = [...compact.matchAll(LABELS)];
+  if (!gevonden.length) return null;
+  const velden = new Map<string, string>();
+  for (let i = 0; i < gevonden.length; i++) {
+    const match = gevonden[i];
+    const waarde = compact
+      .slice(match.index! + match[0].length, gevonden[i + 1]?.index ?? compact.length)
+      .trim();
+    if (!velden.has(match[1])) velden.set(match[1], waarde);
+  }
+  // Wat vóór het eerste label staat, is de soort transactie ("SEPA OVERBOEKING").
+  velden.set("SOORT", compact.slice(0, gevonden[0].index).trim());
+  return velden;
 }
 
 // Keep wrapped structured code words intact. Preserve spaces inside names and references.
@@ -216,6 +281,27 @@ function informatie(ruw: string, aanvullend: string) {
   const naam = codes.get("NAME") ?? cntp?.[2] ?? null;
   let omschrijving = codes.get("REMI")?.replace(/^(?:USTD\/\/|STRD\/(?:CUR|ISO)\/)/, "");
   if (!omschrijving) omschrijving = codes.size ? [codes.get("TRTP"), codes.get("EREF"), naam].filter(Boolean).join(" · ") : ruw.replace(/\n/g, " ");
+
+  // Geen /CODE/-woorden? Dan de notatie met labels proberen.
+  if (!codes.size) {
+    const velden = labelVelden(compact);
+    if (velden) {
+      const labelIban = velden.get("IBAN")?.replace(/\s/g, "").toUpperCase();
+      if (!iban && labelIban && /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(labelIban)) iban = labelIban;
+      const labelNaam = velden.get("NAAM");
+      const kenmerk = velden.get("BETALINGSKENM.") ?? velden.get("KENMERK");
+      const tekstDeel =
+        velden.get("OMSCHRIJVING") ||
+        [velden.get("SOORT"), labelNaam].filter(Boolean).join(" · ");
+      return {
+        omschrijving: tekst(tekstDeel || aanvullend || "Banktransactie"),
+        tegenpartijNaam: labelNaam ? tekst(labelNaam) : null,
+        tegenpartijIban: iban,
+        langeReferentie: referentie(kenmerk ?? ""),
+      };
+    }
+  }
+
   return {
     omschrijving: tekst(omschrijving || aanvullend || "Banktransactie"),
     tegenpartijNaam: naam ? tekst(naam) : null,
@@ -224,7 +310,7 @@ function informatie(ruw: string, aanvullend: string) {
   };
 }
 
-function transactie(veld: Veld, details: string, afschrift: Pick<Mt940Afschrift, "nummer" | "volgnummer">, positie: number): Mt940Transactie {
+function transactie(veld: Veld, details: string, afschrift: Pick<Mt940Afschrift, "nummer" | "volgnummer" | "rekening">, positie: number): Mt940Transactie {
   const [eersteRegel, ...overige] = veld.inhoud.split("\n");
   const match = /^(\d{6})(\d{4}| {4})?(RC|RD|C|D)([A-Z])?(\d+,\d*)([NSF][A-Z0-9]{3})(.*)$/.exec(eersteRegel.trim());
   if (!match) return fout(`Transactie ${positie} van afschrift ${afschrift.nummer} is ongeldig of onvolledig.`);
@@ -246,6 +332,7 @@ function transactie(veld: Veld, details: string, afschrift: Pick<Mt940Afschrift,
   const aanvullend = overige.join("\n");
   const info = informatie(details, aanvullend);
   return {
+    rekening: afschrift.rekening,
     boekdatum: boekdatum(match[2], valutadatum), valutadatum,
     bedragCenten: bedrag === 0 ? 0 : ["D", "RC"].includes(debetCredit) ? -bedrag : bedrag,
     debetCredit,
@@ -270,7 +357,7 @@ export function parseerMt940(invoer: string): Mt940Bestand {
   if (invoer.length > MT940_MAX_BYTES || new TextEncoder().encode(invoer).length > MT940_MAX_BYTES) return fout("Het MT940-bestand is te groot. Kies een bestand van maximaal 2 MB.");
   if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD]/.test(invoer)) return fout("Het bestand bevat onleesbare tekens. Download het opnieuw als MT940.");
   const afschriften: Mt940Afschrift[] = [];
-  let rekening: string | undefined;
+  const rekeningen: string[] = [];
   let totaalTransacties = 0;
   for (const bericht of berichten(invoer)) {
     const lijst = velden(bericht);
@@ -289,13 +376,13 @@ export function parseerMt940(invoer: string): Mt940Bestand {
       if (!ref || ref.length > 35) return fout("De afschriftreferentie in veld 20 is ongeldig.");
       if (lijst[i]?.tag === "21") neem("21");
       const account = rekeningnummer(neem("25").inhoud);
-      if (rekening && account !== rekening) return fout("Het bestand bevat meerdere bankrekeningen. Download één rekening per bestand.");
-      rekening = account;
+      if (!rekeningen.includes(account)) rekeningen.push(account);
+      if (rekeningen.length > 10) return fout("Het bestand bevat te veel verschillende bankrekeningen.");
       const nummer = /^(\d{1,5})(?:\/(\d{1,5}))?$/.exec(neem("28", "28C").inhoud.trim());
       if (!nummer || (nummer[2] && Number(nummer[2]) < 1)) return fout("Het afschrift- of paginanummer in veld 28 is ongeldig.");
       const begin = neem("60F", "60M");
       const beginSaldo = saldo(begin);
-      const basis = { nummer: nummer[1], volgnummer: nummer[2] ? Number(nummer[2]) : null };
+      const basis = { rekening: account, nummer: nummer[1], volgnummer: nummer[2] ? Number(nummer[2]) : null };
       const transacties: Mt940Transactie[] = [];
       while (lijst[i]?.tag === "61") {
         const regel = neem("61");
@@ -321,18 +408,24 @@ export function parseerMt940(invoer: string): Mt940Bestand {
       if (afschriften.length > 2000) return fout("Het bestand bevat te veel afschriften. Kies een kortere periode.");
     }
   }
-  if (!rekening || !afschriften.length) return fout("Het bestand bevat geen volledig MT940-rekeningafschrift.");
-  if (afschriften[0].beginType !== "F" || afschriften.at(-1)!.eindType !== "F") return fout("Het bestand bevat slechts een deel van een afschrift. Download alle pagina's.");
-  for (let i = 1; i < afschriften.length; i++) {
-    const vorig = afschriften[i - 1];
-    const huidig = afschriften[i];
-    if (vorig.eindSaldoCenten !== huidig.beginSaldoCenten || vorig.eindDatum > huidig.beginDatum) return fout("De afschriften sluiten niet op elkaar aan of staan niet op datumvolgorde.");
-    if (vorig.eindType === "M") {
-      if (huidig.beginType !== "M" || vorig.nummer !== huidig.nummer || vorig.volgnummer === null || huidig.volgnummer !== vorig.volgnummer + 1 || vorig.eindDatum !== huidig.beginDatum) return fout("Er ontbreekt een pagina van het afschrift of de pagina's staan niet op volgorde.");
-    } else if (huidig.beginType !== "F") return fout("Een vervolgpagina staat zonder bijbehorende beginpagina in het bestand.");
+  if (!rekeningen.length || !afschriften.length) return fout("Het bestand bevat geen volledig MT940-rekeningafschrift.");
+
+  // Elke rekening heeft zijn eigen reeks afschriften: die moet op zichzelf
+  // sluiten. Een bestand met twee rekeningen is dus twee complete reeksen.
+  for (const account of rekeningen) {
+    const reeks = afschriften.filter(a => a.rekening === account);
+    if (reeks[0].beginType !== "F" || reeks.at(-1)!.eindType !== "F") return fout("Het bestand bevat slechts een deel van een afschrift. Download alle pagina's.");
+    for (let i = 1; i < reeks.length; i++) {
+      const vorig = reeks[i - 1];
+      const huidig = reeks[i];
+      if (vorig.eindSaldoCenten !== huidig.beginSaldoCenten || vorig.eindDatum > huidig.beginDatum) return fout("De afschriften sluiten niet op elkaar aan of staan niet op datumvolgorde.");
+      if (vorig.eindType === "M") {
+        if (huidig.beginType !== "M" || vorig.nummer !== huidig.nummer || vorig.volgnummer === null || huidig.volgnummer !== vorig.volgnummer + 1 || vorig.eindDatum !== huidig.beginDatum) return fout("Er ontbreekt een pagina van het afschrift of de pagina's staan niet op volgorde.");
+      } else if (huidig.beginType !== "F") return fout("Een vervolgpagina staat zonder bijbehorende beginpagina in het bestand.");
+    }
+    for (const a of reeks) {
+      if (a.beginType === "F" && a.volgnummer !== null && a.volgnummer !== 1) return fout("De eerste pagina van een afschrift ontbreekt.");
+    }
   }
-  for (const a of afschriften) {
-    if (a.beginType === "F" && a.volgnummer !== null && a.volgnummer !== 1) return fout("De eerste pagina van een afschrift ontbreekt.");
-  }
-  return { rekening, valuta: "EUR", afschriften, transacties: afschriften.flatMap(a => a.transacties) };
+  return { rekening: rekeningen[0], rekeningen, valuta: "EUR", afschriften, transacties: afschriften.flatMap(a => a.transacties) };
 }
