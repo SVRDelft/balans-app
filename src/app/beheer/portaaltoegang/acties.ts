@@ -13,25 +13,28 @@ import {
   zetGroepRelatie,
   zetGroepWachtwoord,
   zoekKeuze,
+  koppelOpNaam,
   type ToegangKeuze,
 } from "@/lib/auth/portaaltoegang";
+import { maakBeginwachtwoord } from "@/lib/auth/beginwachtwoord";
 import { keurPortaalWachtwoord } from "@/lib/auth/wachtwoord";
 import { leesVerenigingen } from "@/lib/content";
 import { db } from "@/lib/db";
 
+/** Alleen verenigingen en overige relaties; nooit personen. */
 const haalRelaties = () =>
   db.relatie.findMany({
-    where: { actief: true },
-    select: { id: true, naam: true },
+    where: { actief: true, type: { in: ["studievereniging", "overig"] } },
+    select: { id: true, naam: true, type: true },
   });
 
-/** Nog niet gekoppeld en er is een duidelijk voorstel? Dan dat vastleggen. */
+/** Nog niet gekoppeld en een exacte naammatch? Dan die vastleggen. */
 async function koppelVoorstel(keuze: ToegangKeuze): Promise<string | undefined> {
   const bestaand = await db.portaaltoegang.findUnique({
     where: { sleutel: keuze.sleutel },
-    select: { relatieId: true },
+    select: { relatieId: true, relatieHandmatig: true },
   });
-  if (bestaand?.relatieId) return undefined;
+  if (bestaand?.relatieId || bestaand?.relatieHandmatig) return undefined;
   const relaties = await haalRelaties();
   const voorstel = stelRelatieVoor(keuze, relaties);
   if (!voorstel) return undefined;
@@ -202,7 +205,7 @@ export async function koppelToegangRelatie(
       : null;
     if (relatieId && !relatie) return { fout: "Die relatie bestaat niet meer." };
 
-    const toegang = await zetGroepRelatie(keuze, relatieId);
+    const toegang = await zetGroepRelatie(keuze, relatieId, true);
     await logAudit({
       gebruiker: sessie.naam,
       entiteit: "Portaaltoegang",
@@ -218,27 +221,37 @@ export async function koppelToegangRelatie(
   });
 }
 
-/** Elke nog niet gekoppelde regel met een duidelijk voorstel in één keer koppelen. */
-export async function koppelAlleVoorstellen(): Promise<ActieStaat> {
-  const sessie = await vereisBestuur();
+export interface BeginwachtwoordStaat {
+  fout?: string;
+  /** Alleen in het antwoord van deze ene actie; nergens opgeslagen of gelogd. */
+  lijst?: { naam: string; wachtwoord: string }[];
+}
 
-  return voerUit(async () => {
-    const { studieverenigingen, informanten } = await haalToegangKeuzes();
-    const gekoppeld: string[] = [];
+/**
+ * Een beginwachtwoord voor iedereen die er nog geen heeft. De wachtwoorden
+ * komen één keer terug naar het scherm; opgeslagen wordt alleen de hash. Er
+ * komt bewust niets van in het auditlog of in een logbestand.
+ */
+export async function maakBeginwachtwoorden(): Promise<BeginwachtwoordStaat> {
+  await vereisBestuur();
+  try {
+    const [{ studieverenigingen, informanten }, rijen] = await Promise.all([
+      haalToegangKeuzes(),
+      db.portaaltoegang.findMany({ select: { sleutel: true, wachtwoordHash: true } }),
+    ]);
+    const heeftAl = new Set(rijen.filter((rij) => rij.wachtwoordHash).map((rij) => rij.sleutel));
+    const lijst: { naam: string; wachtwoord: string }[] = [];
     for (const keuze of [...studieverenigingen, ...informanten]) {
-      const relatie = await koppelVoorstel(keuze);
-      if (relatie) gekoppeld.push(`${keuze.naam} → ${relatie}`);
+      if (heeftAl.has(keuze.sleutel)) continue;
+      const wachtwoord = maakBeginwachtwoord();
+      await zetGroepWachtwoord(keuze, wachtwoord);
+      lijst.push({ naam: keuze.naam, wachtwoord });
     }
-    if (gekoppeld.length === 0) return { melding: "Er viel niets meer te koppelen." };
-
-    await logAudit({
-      gebruiker: sessie.naam,
-      entiteit: "Portaaltoegang",
-      entiteitId: "alle",
-      actie: "facturen gekoppeld",
-      samenvatting: `Op naam gekoppeld: ${gekoppeld.join(", ")}`,
-    });
+    await koppelOpNaam();
     vernieuw();
-    return { melding: `${gekoppeld.length} gekoppeld.` };
-  });
+    if (lijst.length === 0) return { fout: "Iedereen heeft al een wachtwoord." };
+    return { lijst };
+  } catch {
+    return { fout: "Het maken van de wachtwoorden is mislukt. Er is niets getoond; probeer het opnieuw." };
+  }
 }

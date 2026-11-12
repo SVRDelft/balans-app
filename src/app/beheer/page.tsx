@@ -19,10 +19,14 @@ import { vereisBoekjaarContext } from "@/lib/boekjaar";
 import { haalBoekjaarCijfers } from "@/lib/rapportage";
 import { OUDERDOM_LABEL } from "@/lib/finance/debiteuren";
 import { cn } from "@/lib/utils";
+import { haalSignalen } from "@/lib/signalen";
 
 export default async function DashboardPagina() {
   const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
-  const cijfers = await haalBoekjaarCijfers(boekjaar.id);
+  const [cijfers, signalen] = await Promise.all([
+    haalBoekjaarCijfers(boekjaar.id),
+    haalSignalen(boekjaar.id),
+  ]);
 
   const peildatum = vandaag();
   const teLaat = cijfers.openstaandeFacturen.filter(
@@ -34,6 +38,7 @@ export default async function DashboardPagina() {
   const zonderHerinnering = teLaat.filter((factuur) => factuur.herinneringen === 0);
 
   const aandachtspunten =
+    signalen.length +
     teLaat.length +
     (cijfers.openBankregels > 0 ? 1 : 0) +
     scheveEvenementen.length +
@@ -211,6 +216,22 @@ export default async function DashboardPagina() {
                   </p>
                 </Melding>
               ) : null}
+
+              {signalen.map((signaal) => (
+                <Melding key={signaal.id} toon={signaal.toon}>
+                  <p>
+                    {signaal.tekst}
+                    {signaal.link ? (
+                      <>
+                        {" "}
+                        <Link href={signaal.link.href} className="underline">
+                          {signaal.link.label}
+                        </Link>
+                      </>
+                    ) : null}
+                  </p>
+                </Melding>
+              ))}
 
               {scheveEvenementen.map((evenement) => (
                 <Melding key={evenement.id} toon="fout">

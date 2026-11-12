@@ -71,6 +71,7 @@ vi.mock("@/lib/content", () => ({
     { slug: "leeghwater", naam: "W.S.V. 'Leeghwater'" },
     { slug: "curius", naam: "W.i.s.V. Christiaan Huygens" },
     { slug: "christiaan-huygens", naam: "Christiaan Huygens", kort: "CH" },
+    { slug: "vsv", naam: "VSV 'Leonardo da Vinci'", kort: "VSV" },
   ],
 }));
 const RELATIES = [
@@ -195,6 +196,7 @@ import { inloggen, inloggenAlsVereniging } from "@/app/inloggen/acties";
 import { wijzigWachtwoord } from "@/app/wachtwoord/acties";
 import {
   koppelToegangRelatie,
+  maakBeginwachtwoorden,
   stelToegangWachtwoordIn,
 } from "@/app/beheer/portaaltoegang/acties";
 import { beperkingOpRelatie, haalSessie, vereisBestuur, vereisPortaal } from "./server";
@@ -506,7 +508,7 @@ describe("wachtwoorden van een vereniging", () => {
 });
 
 describe("openstaande facturen bij inloggen als vereniging", () => {
-  it("stelt de relatie op naam voor, en twijfelt liever dan te gokken", () => {
+  it("koppelt alleen bij een exacte naam, en twijfelt liever dan te gokken", () => {
     expect(stelRelatieVoor({ naam: "Christiaan Huygens", kort: "CH" }, RELATIES)).toBe("r-ch");
     expect(stelRelatieVoor({ naam: "Christiaan Huygens" }, RELATIES)).toBe("r-ch");
     expect(stelRelatieVoor({ naam: "Lijst Bèta" }, RELATIES)).toBe("r-beta");
@@ -518,6 +520,11 @@ describe("openstaande facturen bij inloggen als vereniging", () => {
         { id: "a", naam: "Delta" },
         { id: "b", naam: "delta" },
       ]),
+    ).toBeUndefined();
+    // Geen losse woorden of initialen meer, en nooit een persoon.
+    expect(stelRelatieVoor({ naam: "Christiaan Huygens" }, [{ id: "x", naam: "Huygens" }])).toBeUndefined();
+    expect(
+      stelRelatieVoor({ naam: "ORAS" }, [{ id: "p", naam: "ORAS", type: "persoon" }]),
     ).toBeUndefined();
   });
 
@@ -555,5 +562,44 @@ describe("openstaande facturen bij inloggen als vereniging", () => {
     await expect(
       koppelToegangRelatie({}, formulier({ sleutel: "leeghwater", relatieId: "r-oras" })),
     ).rejects.toThrow("REDIRECT:/portaal");
+  });
+});
+
+describe("beginwachtwoorden in één keer", () => {
+  it("maakt er een voor iedereen zonder, toont ze één keer en bewaart alleen de hash", async () => {
+    await zetBestuurIn();
+    await stelToegangWachtwoordIn({}, formulier({ sleutel: "leeghwater", wachtwoord: "eigen" }));
+    mocks.audit.mockClear();
+
+    const uitkomst = await maakBeginwachtwoorden();
+    const namen = uitkomst.lijst!.map((regel) => regel.naam);
+    // Leeghwater had er al een en blijft ongemoeid.
+    expect(namen).not.toContain("W.S.V. 'Leeghwater'");
+    expect(namen).toEqual(expect.arrayContaining(["ORAS", "Christiaan Huygens"]));
+    for (const regel of uitkomst.lijst!) {
+      expect(regel.wachtwoord).toMatch(/^[a-z]+-[a-z]+-\d{2}$/);
+    }
+
+    // Opgeslagen is alleen de hash, en niets in het auditlog.
+    const oras = mocks.toegangen.find((t) => t.sleutel === "oras")!;
+    const wachtwoord = uitkomst.lijst!.find((regel) => regel.naam === "ORAS")!.wachtwoord;
+    expect(oras.wachtwoordHash).not.toContain(wachtwoord);
+    expect(JSON.stringify(mocks.audit.mock.calls)).not.toContain(wachtwoord);
+
+    // En het werkt om mee in te loggen.
+    mocks.koekjes.clear();
+    expect(await omleidingVan(alsVereniging("oras", wachtwoord))).toBe("/portaal");
+  });
+
+  it("een tweede keer is er niets meer te maken, dus ook niets te zien", async () => {
+    await zetBestuurIn();
+    await maakBeginwachtwoorden();
+    const tweede = await maakBeginwachtwoorden();
+    expect(tweede.lijst).toBeUndefined();
+    expect(tweede.fout).toBe("Iedereen heeft al een wachtwoord.");
+  });
+
+  it("alleen het bestuur", async () => {
+    await expect(maakBeginwachtwoorden()).rejects.toThrow("REDIRECT:/inloggen");
   });
 });

@@ -16,14 +16,21 @@ import {
 import { vereisBestuur } from "@/lib/auth/server";
 import {
   haalToegangKeuzes,
-  stelRelatieVoor,
+  koppelOpNaam,
   type ToegangKeuze,
 } from "@/lib/auth/portaaltoegang";
+import { ordenRelaties } from "@/lib/verenigingen";
+import { portaalStand } from "@/lib/portaal/stand";
 import { formatteerTijdstempel } from "@/lib/datum";
 import { db } from "@/lib/db";
 
-import { koppelAlleVoorstellen, verwijderInformant, zetToegangAanUit } from "./acties";
-import { InformantToevoegen, RelatieKoppeling, WachtwoordInstellen } from "./formulier";
+import { verwijderInformant, zetToegangAanUit } from "./acties";
+import {
+  BeginwachtwoordenKnop,
+  InformantToevoegen,
+  RelatieKoppeling,
+  WachtwoordInstellen,
+} from "./formulier";
 
 export const metadata: Metadata = { title: "Portaaltoegang" };
 
@@ -41,15 +48,24 @@ type Relaties = { id: string; naam: string }[];
 export default async function PortaaltoegangPagina() {
   await vereisBestuur();
 
-  const [keuzes, rijen, relaties] = await Promise.all([
+  // Wie nog niet gekoppeld is en een relatie met exact dezelfde naam heeft,
+  // wordt nu gekoppeld. Een keuze van het bestuur zelf blijft staan.
+  await koppelOpNaam();
+
+  const [keuzes, rijen, relatiesRuw, stand] = await Promise.all([
     haalToegangKeuzes(),
     db.portaaltoegang.findMany(),
+    // Alleen verenigingen en overige relaties: een persoon krijgt geen login.
     db.relatie.findMany({
-      where: { actief: true },
-      orderBy: [{ type: "asc" }, { naam: "asc" }],
-      select: { id: true, naam: true },
+      where: { actief: true, type: { in: ["studievereniging", "overig"] } },
+      select: { id: true, naam: true, type: true },
     }),
+    portaalStand(),
   ]);
+  const relaties = ordenRelaties(relatiesRuw).map((relatie) => ({
+    id: relatie.id,
+    naam: relatie.toonNaam,
+  }));
   const perSleutel = new Map(rijen.map((rij) => [rij.sleutel, rij]));
   const metStand = (keuze: ToegangKeuze): Regel => {
     const rij = perSleutel.get(keuze.sleutel);
@@ -60,14 +76,11 @@ export default async function PortaaltoegangPagina() {
       laatsteInlog: rij?.laatsteInlog ?? null,
       actief: rij?.actief ?? true,
       relatieId: rij?.relatieId ?? null,
-      voorstel: rij?.relatieId ? undefined : stelRelatieVoor(keuze, relaties),
+      voorstel: undefined,
     };
   };
   const studieverenigingen = keuzes.studieverenigingen.map(metStand);
   const informanten = keuzes.informanten.map(metStand);
-  const openVoorstellen = [...studieverenigingen, ...informanten].filter(
-    (regel) => regel.voorstel,
-  ).length;
 
   return (
     <>
@@ -87,22 +100,22 @@ export default async function PortaaltoegangPagina() {
 
       <Melding toon="info" className="mb-4" titel="Openstaande facturen">
         Wie als vereniging inlogt, ziet de openstaande facturen van de relatie
-        bij <em>Facturen van</em>. Betaalde facturen en de rekening-courant
-        blijven voor een eigen account. Bij het instellen van een wachtwoord
-        wordt een duidelijk voorstel op naam meteen gekoppeld.
-        {openVoorstellen > 0 ? (
-          <div className="mt-3">
-            <BevestigKnop
-              actie={koppelAlleVoorstellen}
-              velden={{}}
-              vraag={`${openVoorstellen} voorstel(len) op naam vastleggen? Controleer ze eerst in de kolom Facturen van.`}
-              size="sm"
-            >
-              Alle {openVoorstellen} voorstellen opslaan
-            </BevestigKnop>
-          </div>
-        ) : null}
+        bij <em>Facturen van</em>. Bij een exacte naammatch koppelt de app dat
+        zelf; kies je hier iets anders (of “Geen facturen”), dan blijft dat staan.
       </Melding>
+
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-4">
+        <p className="text-sm">
+          <strong>
+            {stand.metWachtwoord} van {stand.totaal}
+          </strong>{" "}
+          hebben een wachtwoord ·{" "}
+          <strong>{stand.recentIngelogd}</strong> hebben de afgelopen 30 dagen ingelogd
+        </p>
+        {/* Altijd op de pagina: na de actie ververst de pagina, en de lijst met
+            wachtwoorden moet dan blijven staan, ook als iedereen er een heeft. */}
+        <BeginwachtwoordenKnop zonderWachtwoord={stand.totaal - stand.metWachtwoord} />
+      </div>
 
       <ToegangTabel
         titel="Studieverenigingen"

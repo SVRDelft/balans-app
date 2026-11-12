@@ -745,6 +745,9 @@ model Portaaltoegang {
   /// facturen ziet. Leeg: geen facturen. Het bestuur legt de koppeling vast.
   relatieId String?
   relatie   Relatie? @relation(fields: [relatieId], references: [id], onDelete: SetNull)
+  /// Het bestuur heeft de koppeling zelf gekozen (ook "geen facturen"); de
+  /// automatische koppeling op naam laat hem dan met rust.
+  relatieHandmatig Boolean @default(false)
 
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt

@@ -42,6 +42,14 @@ export const verenigingVan = (naam: string): Vereniging | undefined =>
 
 export const isInformant = (naam: string) => INFORMANTEN.includes(vergelijkbaar(naam));
 
+/** "oras" of "lijstbeta" (ook voor "Bèta"), zodat twee spellingen dezelfde zijn. */
+export function informantSleutel(naam: string): string | undefined {
+  const sleutel = vergelijkbaar(naam);
+  if (sleutel === "oras") return "oras";
+  if (sleutel === "lijstbeta" || sleutel === "beta") return "lijstbeta";
+  return undefined;
+}
+
 /** Hoe een relatie in lijsten heet: bij een vereniging de naam uit content/. */
 export const toonNaam = (relatie: { naam: string }) =>
   verenigingVan(relatie.naam)?.naam ?? relatie.naam;

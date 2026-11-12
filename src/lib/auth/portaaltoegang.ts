@@ -3,6 +3,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { leesVerenigingen } from "@/lib/content";
 import { controleerHash, hashWachtwoord } from "@/lib/auth/wachtwoord";
+import { informantSleutel, verenigingVan } from "@/lib/verenigingen";
 
 // Inloggen "als vereniging": kies wie je bent uit een lijst en vul het
 // wachtwoord in dat je hele bestuur deelt.
@@ -157,33 +158,64 @@ const vergelijkbaar = (tekst: string) =>
     .trim();
 
 /**
- * Welke relatie hoort waarschijnlijk bij deze keuze? Alleen een voorstel: het
- * bestuur ziet het op Beheer › Portaaltoegang en legt het vast. Bij twijfel
- * (geen of meer dan één kandidaat) geen voorstel.
+ * Welke relatie hoort bij deze keuze? Alleen bij een exacte naammatch: op de
+ * korte of volledige naam uit content/verenigingen.json, of voor een informant
+ * op zijn naam ("Lijst Bèta" en "Bèta" zijn dezelfde). Bij geen of meer dan één
+ * kandidaat: geen koppeling. Personen komen nooit in aanmerking.
  */
 export function stelRelatieVoor(
   keuze: Pick<ToegangKeuze, "naam" | "kort">,
-  relaties: { id: string; naam: string }[],
+  relaties: { id: string; naam: string; type?: string }[],
 ): string | undefined {
-  const namen = [keuze.naam, keuze.kort].filter(Boolean).map((n) => vergelijkbaar(n!));
-  const woorden = vergelijkbaar(keuze.naam).split(" ");
-  const initialen = woorden.map((woord) => woord[0]).join("");
+  const doel =
+    verenigingVan(keuze.naam)?.slug ??
+    (keuze.kort ? verenigingVan(keuze.kort)?.slug : undefined);
+  const informant = informantSleutel(keuze.naam);
+  const eigen = vergelijkbaar(keuze.naam).replace(/ /g, "");
 
-  const pogingen: ((relatie: string) => boolean)[] = [
-    (relatie) => namen.includes(relatie),
-    (relatie) => relatie.length > 1 && woorden.includes(relatie),
-    (relatie) => woorden.length > 1 && relatie === initialen,
-  ];
-  for (const past of pogingen) {
-    const kandidaten = relaties.filter((relatie) => past(vergelijkbaar(relatie.naam)));
-    if (kandidaten.length === 1) return kandidaten[0].id;
-    if (kandidaten.length > 1) return undefined;
+  const kandidaten = relaties.filter((relatie) => {
+    if (relatie.type === "persoon") return false;
+    if (doel) return verenigingVan(relatie.naam)?.slug === doel;
+    if (informant) return informantSleutel(relatie.naam) === informant;
+    return vergelijkbaar(relatie.naam).replace(/ /g, "") === eigen;
+  });
+  return kandidaten.length === 1 ? kandidaten[0].id : undefined;
+}
+
+/**
+ * Koppelt elke regel zonder koppeling aan de relatie met exact dezelfde naam.
+ * Draait bij het openen van Beheer › Portaaltoegang en bij het maken van
+ * beginwachtwoorden, zodat bestaande regels ook eenmalig gekoppeld worden.
+ * Een koppeling die het bestuur zelf heeft gekozen, blijft altijd staan.
+ */
+export async function koppelOpNaam(): Promise<number> {
+  const [{ studieverenigingen, informanten }, rijen, relaties] = await Promise.all([
+    haalToegangKeuzes(),
+    db.portaaltoegang.findMany({ select: { sleutel: true, relatieId: true, relatieHandmatig: true } }),
+    db.relatie.findMany({
+      where: { actief: true, type: { in: ["studievereniging", "overig"] } },
+      select: { id: true, naam: true, type: true },
+    }),
+  ]);
+  const perSleutel = new Map(rijen.map((rij) => [rij.sleutel, rij]));
+  let gekoppeld = 0;
+  for (const keuze of [...studieverenigingen, ...informanten]) {
+    const rij = perSleutel.get(keuze.sleutel);
+    if (rij?.relatieId || rij?.relatieHandmatig) continue;
+    const relatieId = stelRelatieVoor(keuze, relaties);
+    if (!relatieId) continue;
+    await zetGroepRelatie(keuze, relatieId);
+    gekoppeld++;
   }
-  return undefined;
+  return gekoppeld;
 }
 
 /** Legt vast van welke relatie deze login de openstaande facturen ziet. */
-export async function zetGroepRelatie(keuze: ToegangKeuze, relatieId: string | null) {
+export async function zetGroepRelatie(
+  keuze: ToegangKeuze,
+  relatieId: string | null,
+  handmatig = false,
+) {
   return db.portaaltoegang.upsert({
     where: { sleutel: keuze.sleutel },
     create: {
@@ -191,7 +223,8 @@ export async function zetGroepRelatie(keuze: ToegangKeuze, relatieId: string | n
       groep: keuze.groep,
       naam: keuze.naam,
       relatieId,
+      relatieHandmatig: handmatig,
     },
-    update: { relatieId, naam: keuze.naam },
+    update: { relatieId, naam: keuze.naam, ...(handmatig ? { relatieHandmatig: true } : {}) },
   });
 }

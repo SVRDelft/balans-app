@@ -1,13 +1,19 @@
 "use client";
 
-import { useActionState, useRef } from "react";
-import { KeyRound, Plus } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
+import { Check, Copy, KeyRound, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import type { ActieStaat } from "@/lib/acties";
 
-import { koppelToegangRelatie, stelToegangWachtwoordIn, voegInformantToe } from "./acties";
+import {
+  koppelToegangRelatie,
+  maakBeginwachtwoorden,
+  stelToegangWachtwoordIn,
+  voegInformantToe,
+  type BeginwachtwoordStaat,
+} from "./acties";
 
 /** Eén veld en een knop per regel: zo stel je een begin- of nieuw wachtwoord in. */
 export function WachtwoordInstellen({ sleutel, naam }: { sleutel: string; naam: string }) {
@@ -142,5 +148,94 @@ export function RelatieKoppeling({
         <p role="status" className="text-xs text-success">{staat.melding}</p>
       ) : null}
     </form>
+  );
+}
+
+/**
+ * Beginwachtwoorden voor iedereen zonder wachtwoord. De lijst staat alleen hier
+ * op het scherm, één keer: na het verlaten van de pagina is hij weg.
+ */
+export function BeginwachtwoordenKnop({ zonderWachtwoord }: { zonderWachtwoord: number }) {
+  const [staat, actie, bezig] = useActionState<BeginwachtwoordStaat, FormData>(
+    async () => maakBeginwachtwoorden(),
+    {},
+  );
+
+  if (staat.lijst) {
+    return (
+      <div className="rounded-lg border border-warning/50 bg-warning/10 p-4">
+        <p className="font-medium">
+          {staat.lijst.length} beginwachtwoorden. Alleen nu zichtbaar: kopieer ze voordat je de pagina verlaat.
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Geef ze zelf door, bijvoorbeeld in de voorzitters-, onderwijs- en penningmeestersgroep.
+          Elke vereniging kan het daarna wijzigen via “Wachtwoord” in het portaal.
+        </p>
+        <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
+          {staat.lijst.map((regel) => (
+            <li key={regel.naam} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+              <span className="font-medium">{regel.naam}</span>
+              <span className="flex items-center gap-2">
+                <code className="rounded bg-muted px-2 py-0.5">{regel.wachtwoord}</code>
+                <KopieerKnop tekst={`${regel.naam}: ${regel.wachtwoord}`} />
+              </span>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3">
+          <KopieerKnop
+            tekst={staat.lijst.map((regel) => `${regel.naam}: ${regel.wachtwoord}`).join("\n")}
+            label="Alles kopiëren"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (zonderWachtwoord === 0 && !staat.fout) return null;
+
+  return (
+    <form
+      action={actie}
+      onSubmit={(gebeurtenis) => {
+        if (
+          !window.confirm(
+            `Beginwachtwoorden maken voor ${zonderWachtwoord} verenigingen en informanten zonder wachtwoord? Je ziet ze één keer.`,
+          )
+        )
+          gebeurtenis.preventDefault();
+      }}
+      className="flex flex-col gap-1"
+    >
+      <Button type="submit" disabled={bezig || zonderWachtwoord === 0}>
+        <KeyRound />
+        {bezig ? "Bezig…" : "Beginwachtwoorden maken voor iedereen zonder wachtwoord"}
+      </Button>
+      {staat.fout ? (
+        <p role="alert" className="text-xs text-destructive">{staat.fout}</p>
+      ) : null}
+    </form>
+  );
+}
+
+function KopieerKnop({ tekst, label = "Kopieer" }: { tekst: string; label?: string }) {
+  const [gekopieerd, setGekopieerd] = useState(false);
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(tekst);
+          setGekopieerd(true);
+        } catch {
+          // Geen klembord: de tekst staat er nog, selecteren kan altijd.
+        }
+      }}
+    >
+      {gekopieerd ? <Check /> : <Copy />}
+      {gekopieerd ? "Gekopieerd" : label}
+    </Button>
   );
 }
