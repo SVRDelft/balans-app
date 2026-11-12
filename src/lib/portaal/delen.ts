@@ -10,8 +10,8 @@ import { db } from "@/lib/db";
 // Zoekmachines krijgen bij elk antwoord "noindex" mee, en /delen staat niet in
 // de sitemap: een gedeelde link komt dus niet in Google terecht.
 
-/** Alleen deze soorten mogen gedeeld worden; losse documenten blijven binnen. */
-export const DEELBARE_SOORTEN = ["agenda", "notulen"] as const;
+/** De stukken van een vergadering mogen gedeeld worden; losse documenten blijven binnen. */
+export const DEELBARE_SOORTEN = ["agenda", "notulen", "presentatie", "bijlage"] as const;
 
 export const isDeelbaar = (soort: string) =>
   (DEELBARE_SOORTEN as readonly string[]).includes(soort);
@@ -37,7 +37,7 @@ export async function zorgVoorDeellink(
   });
   if (!bestand) return { fout: "Dit stuk bestaat niet meer." };
   if (!isDeelbaar(bestand.soort)) {
-    return { fout: "Alleen agenda's en notulen kunnen gedeeld worden." };
+    return { fout: "Alleen stukken van een vergadering kunnen gedeeld worden." };
   }
   if (bestand.deelsleutel) return { pad: deelpad(bestand.deelsleutel), titel: bestand.titel };
 

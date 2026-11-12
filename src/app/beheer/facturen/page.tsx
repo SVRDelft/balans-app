@@ -31,6 +31,7 @@ import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 
 import { ConceptenVersturen } from "./concepten-versturen";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Facturen" };
 
@@ -55,7 +56,7 @@ export default async function FacturenPagina({
         ? { status: statusFilter }
         : {};
 
-  const [gevonden, relaties, evenementen] = await Promise.all([
+  const [gevonden, relatiesRuw, evenementen] = await Promise.all([
     db.factuur.findMany({
       where: {
         boekjaarId: boekjaar.id,
@@ -80,7 +81,7 @@ export default async function FacturenPagina({
     db.relatie.findMany({
       where: { facturen: { some: { boekjaarId: boekjaar.id } } },
       orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
     db.evenement.findMany({
       where: { boekjaarId: boekjaar.id },
@@ -88,6 +89,11 @@ export default async function FacturenPagina({
       select: { id: true, naam: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const relaties = ordenRelaties(relatiesRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   const peildatum = vandaag();
   const facturen = gevonden.filter((factuur) => statusFilter === "vervallen" ? dagenTeLaat(factuur.vervaldatum, peildatum, factuurOpenstaand(factuur)) > 0 : statusFilter === "openstaand" ? factuurOpenstaand(factuur) !== 0 : true);

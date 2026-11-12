@@ -19,15 +19,15 @@ import { db } from "@/lib/db";
 import { betaaldBedrag } from "@/lib/facturen";
 import { factuurOpenstaand, factuurRealisatie } from "@/lib/finance/factuurstanden";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Per vereniging" };
 
 export default async function VerenigingenPagina() {
   const { boekjaar } = await vereisBoekjaarContext();
 
-  const verenigingen = await db.relatie.findMany({
+  const verenigingenRuw = await db.relatie.findMany({
     where: { type: "studievereniging" },
-    orderBy: { naam: "asc" },
     include: {
       facturen: {
         where: { boekjaarId: boekjaar.id },
@@ -35,6 +35,12 @@ export default async function VerenigingenPagina() {
       },
     },
   });
+
+  // Op oprichtingsjaar, met de naam uit content/ (zie src/lib/verenigingen.ts).
+  const verenigingen = ordenRelaties(verenigingenRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   const rijen = verenigingen.map((vereniging) => {
     const tellend = vereniging.facturen.filter((factuur) =>

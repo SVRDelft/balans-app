@@ -3,6 +3,8 @@ import "server-only";
 import { db } from "@/lib/db";
 import { factuurStandRelaties } from "@/lib/factuur-includes";
 import { factuurOpenstaand } from "@/lib/finance/factuurstanden";
+import { soortVolgorde } from "@/lib/portaal/vergaderingen";
+import { toonNaam } from "@/lib/verenigingen";
 
 // Wat het portaal laat zien. Mededelingen, vergaderingen en documenten zijn voor
 // álle aangesloten verenigingen hetzelfde. Daarnaast is er één ding dat per
@@ -25,6 +27,12 @@ export async function haalVergaderingen() {
     },
   });
 
+  for (const vergadering of vergaderingen) {
+    vergadering.bestanden.sort(
+      (a, b) => soortVolgorde(a.soort) - soortVolgorde(b.soort) || a.geuploadOp.getTime() - b.geuploadOp.getTime(),
+    );
+  }
+
   // Vandaag telt nog als "komend": de notulen komen pas later.
   const vandaag = new Date();
   vandaag.setUTCHours(0, 0, 0, 0);
@@ -43,7 +51,10 @@ export async function haalDocumenten() {
 export const gastheerVan = (vergadering: {
   gastheer: { naam: string } | null;
   gastheerNaam: string;
-}) => vergadering.gastheer?.naam || vergadering.gastheerNaam || "nog niet bekend";
+}) => {
+  const naam = vergadering.gastheer?.naam || vergadering.gastheerNaam;
+  return naam ? toonNaam({ naam }) : "nog niet bekend";
+};
 
 /**
  * De eigen rekening van één vereniging: haar facturen en haar
@@ -101,4 +112,19 @@ export async function haalEigenRekening(relatieId: string) {
     ),
     iban: instellingen?.iban ?? "",
   };
+}
+
+/**
+ * De vergaderingen voor de agenda-feed, eventueel van één overleg. Alleen van
+ * de afgelopen drie maanden en later: oudere hebben geen zin in een agenda.
+ */
+export async function haalAgendaVergaderingen(overleg?: string) {
+  const vanaf = new Date();
+  vanaf.setUTCMonth(vanaf.getUTCMonth() - 3);
+  const vergaderingen = await db.vergadering.findMany({
+    where: { datum: { gte: vanaf }, ...(overleg ? { reeks: overleg } : {}) },
+    orderBy: { datum: "asc" },
+    include: { gastheer: { select: { naam: true } } },
+  });
+  return vergaderingen.map((vergadering) => ({ ...vergadering, gastheer: gastheerVan(vergadering) }));
 }

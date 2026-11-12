@@ -19,6 +19,7 @@ import {
 import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { RELATIE_TYPES, RELATIE_TYPE_LABEL, type RelatieType } from "@/lib/domein";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Relaties" };
 
@@ -35,7 +36,9 @@ export default async function RelatiesPagina({
       : null;
   const toonInactief = parameters.inactief === "1";
 
-  const relaties = await db.relatie.findMany({
+  // Verenigingen eerst, op oprichtingsjaar; de namen blijven zoals ze in de
+  // administratie staan, want hier pas je ze aan.
+  const relatiesRuw = await db.relatie.findMany({
     where: {
       ...(gekozenType ? { type: gekozenType } : {}),
       ...(toonInactief ? {} : { actief: true }),
@@ -44,6 +47,7 @@ export default async function RelatiesPagina({
     orderBy: [{ type: "asc" }, { naam: "asc" }],
     include: { _count: { select: { facturen: true } } },
   });
+  const relaties = ordenRelaties(relatiesRuw);
 
   return (
     <>

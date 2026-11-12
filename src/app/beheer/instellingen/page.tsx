@@ -4,6 +4,7 @@ import { Paginakop } from "@/components/paginakop";
 import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 
+import { AgendaInstellingen } from "./agenda";
 import { InstellingenFormulier } from "./formulier";
 
 export const metadata: Metadata = { title: "Instellingen" };
@@ -40,6 +41,10 @@ export default async function InstellingenPagina() {
           betaaltermijnDagen: instellingen?.betaaltermijnDagen ?? 30,
           factuurVoetnoot: instellingen?.factuurVoetnoot ?? "",
         }}
+      />
+      <AgendaInstellingen
+        googleAgendaUrl={instellingen?.googleAgendaUrl ?? ""}
+        feedPad={instellingen?.agendaSleutel ? `/agenda/${instellingen.agendaSleutel}` : null}
       />
     </>
   );

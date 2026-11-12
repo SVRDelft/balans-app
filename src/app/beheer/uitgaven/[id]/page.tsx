@@ -15,6 +15,7 @@ import { centenNaarInvoer, formatteerEuro } from "@/lib/geld";
 
 import { verwijderUitgave } from "../acties";
 import { UitgaveFormulier } from "../formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Uitgave" };
 
@@ -34,7 +35,7 @@ export default async function UitgavePagina({
   });
   if (!uitgave) notFound();
 
-  const [posten, leveranciers, evenementen] = await Promise.all([
+  const [posten, leveranciersRuw, evenementen] = await Promise.all([
     db.begrotingspost.findMany({
       where: { boekjaarId: boekjaar.id },
       orderBy: [{ soort: "desc" }, { volgorde: "asc" }],
@@ -43,7 +44,7 @@ export default async function UitgavePagina({
     db.relatie.findMany({
       where: { actief: true },
       orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
     db.evenement.findMany({
       where: { boekjaarId: boekjaar.id },
@@ -51,6 +52,11 @@ export default async function UitgavePagina({
       select: { id: true, naam: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const leveranciers = ordenRelaties(leveranciersRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   return (
     <>

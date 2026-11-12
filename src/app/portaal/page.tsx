@@ -4,7 +4,7 @@ import { CalendarDays, Download, FileText, Megaphone, Receipt } from "lucide-rea
 
 import { DeelKnop } from "@/components/deelknop";
 import { vereisPortaal } from "@/lib/auth/server";
-import { formatteerDatum } from "@/lib/datum";
+import { formatteerDatum, vandaag } from "@/lib/datum";
 import {
   gastheerVan,
   haalDocumenten,
@@ -14,7 +14,8 @@ import {
 } from "@/lib/portaal/gegevens";
 import { FACTUUR_STATUS_LABEL, type FactuurStatus } from "@/lib/domein";
 import { formatteerEuro } from "@/lib/geld";
-import { REEKS_UITLEG, type Reeks } from "@/lib/portaal/vergaderingen";
+import { REEKSEN, REEKS_UITLEG, isReeks, vergaderNaam, type Reeks } from "@/lib/portaal/vergaderingen";
+import { db } from "@/lib/db";
 import { leesSvr } from "@/lib/content";
 
 import { uitloggen } from "../inloggen/acties";
@@ -43,11 +44,78 @@ function Bestandsknop({
   );
 }
 
+type PortaalVergadering = Awaited<ReturnType<typeof haalVergaderingen>>["komend"][number];
+
+/** "Nog niet beschikbaar" alleen vlak voor een vergadering; verder weg is het ruis. */
+const DAGEN_VOOR_STUKKEN = 14;
+
+function VergaderingKaart({
+  vergadering,
+  vandaag,
+  uitgelicht = false,
+}: {
+  vergadering: PortaalVergadering;
+  /** Vandaag, als middernacht UTC (zoals de vergaderdatums). */
+  vandaag: Date;
+  uitgelicht?: boolean;
+}) {
+  const afgelast = vergadering.status === "afgelast";
+  const verplaatst = vergadering.status === "verplaatst";
+  const dagenTot = Math.round((vergadering.datum.getTime() - vandaag.getTime()) / 86_400_000);
+  const toonNogNiet = !afgelast && dagenTot >= 0 && dagenTot <= DAGEN_VOOR_STUKKEN;
+
+  return (
+    <li
+      className={`rounded-xl border bg-card p-4 ${afgelast ? "border-border opacity-70" : verplaatst ? "border-warning/60" : "border-border"} ${uitgelicht ? "h-full" : ""}`}
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="font-semibold">
+          <span className={afgelast ? "line-through" : undefined}>{vergaderNaam(vergadering)}</span>
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            {REEKS_UITLEG[vergadering.reeks as Reeks] ?? ""}
+          </span>
+          {afgelast || verplaatst ? (
+            <span
+              className={`ml-2 rounded-full px-2 py-0.5 text-xs font-semibold ${afgelast ? "bg-destructive/10 text-destructive" : "bg-warning/20 text-warning-foreground"}`}
+            >
+              {afgelast ? "Afgelast" : "Verplaatst"}
+            </span>
+          ) : null}
+        </p>
+        <p className={`cijfers text-sm text-muted-foreground ${afgelast ? "line-through" : ""}`}>
+          {formatteerDatum(vergadering.datum)} · {vergadering.tijd}
+        </p>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Bij {gastheerVan(vergadering)}
+        {vergadering.locatie ? ` · ${vergadering.locatie}` : ""}
+      </p>
+      {vergadering.notitie ? (
+        <p className="mt-2 whitespace-pre-wrap text-sm">{vergadering.notitie}</p>
+      ) : null}
+      {vergadering.bestanden.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {vergadering.bestanden.map((bestand) => (
+            <span key={bestand.id} className="inline-flex items-center gap-2">
+              <Bestandsknop bestand={bestand} />
+              <DeelKnop bestandId={bestand.id} />
+            </span>
+          ))}
+        </div>
+      ) : toonNogNiet ? (
+        <p className="mt-3 text-sm text-muted-foreground">Nog niet beschikbaar</p>
+      ) : null}
+    </li>
+  );
+}
+
 function Vergaderingen({
   vergaderingen,
+  vandaag,
   leeg,
 }: {
-  vergaderingen: Awaited<ReturnType<typeof haalVergaderingen>>["komend"];
+  vergaderingen: PortaalVergadering[];
+  vandaag: Date;
   leeg: string;
 }) {
   if (vergaderingen.length === 0) {
@@ -55,52 +123,28 @@ function Vergaderingen({
   }
   return (
     <ul className="space-y-3">
-      {vergaderingen.map((vergadering) => {
-        const agenda = vergadering.bestanden.filter((b) => b.soort === "agenda");
-        const notulen = vergadering.bestanden.filter((b) => b.soort === "notulen");
-        return (
-          <li key={vergadering.id} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="font-semibold">
-                {vergadering.reeks}
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  {REEKS_UITLEG[vergadering.reeks as Reeks] ?? ""}
-                </span>
-              </p>
-              <p className="cijfers text-sm text-muted-foreground">
-                {formatteerDatum(vergadering.datum)} · {vergadering.tijd} · bij{" "}
-                {gastheerVan(vergadering)}
-              </p>
-            </div>
-            {vergadering.notitie ? (
-              <p className="mt-2 whitespace-pre-wrap text-sm">{vergadering.notitie}</p>
-            ) : null}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {agenda.length === 0 && notulen.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nog niet beschikbaar</p>
-              ) : (
-                [...agenda, ...notulen].map((bestand) => (
-                  <span key={bestand.id} className="inline-flex items-center gap-2">
-                    <Bestandsknop bestand={bestand} />
-                    <DeelKnop bestandId={bestand.id} />
-                  </span>
-                ))
-              )}
-            </div>
-          </li>
-        );
-      })}
+      {vergaderingen.map((vergadering) => (
+        <VergaderingKaart key={vergadering.id} vergadering={vergadering} vandaag={vandaag} />
+      ))}
     </ul>
   );
 }
 
-export default async function PortaalPagina() {
+export default async function PortaalPagina({ searchParams }: PageProps<"/portaal">) {
   const sessie = await vereisPortaal();
   const svr = leesSvr();
-  const [mededelingen, vergaderingen, documenten, rekening] = await Promise.all([
+  const parameters = await searchParams;
+  const gevraagd = typeof parameters.overleg === "string" ? parameters.overleg : "";
+  const overleg = isReeks(gevraagd) ? gevraagd : null;
+  const dag = vandaag();
+  const [mededelingen, vergaderingen, documenten, agenda, rekening] = await Promise.all([
     haalMededelingen(),
     haalVergaderingen(),
     haalDocumenten(),
+    db.instellingen.findUnique({
+      where: { id: "svr" },
+      select: { googleAgendaUrl: true, agendaSleutel: true },
+    }),
     // Alleen een vereniging heeft een eigen rekening; het bestuur ziet die in de
     // administratie, niet hier.
     // Wie als vereniging inlogt, ziet de openstaande facturen van de relatie
@@ -301,20 +345,96 @@ export default async function PortaalPagina() {
 
       <section className="mb-10">
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-          <CalendarDays className="size-5" /> Komende vergaderingen
+          <CalendarDays className="size-5" /> Eerstvolgende per overleg
         </h2>
-        <Vergaderingen
-          vergaderingen={vergaderingen.komend}
-          leeg="Er staan geen vergaderingen meer gepland. Het bestuur voert het nieuwe rooster in."
-        />
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {REEKSEN.map((reeks) => {
+            const eerstvolgende = vergaderingen.komend.find(
+              (vergadering) => vergadering.reeks === reeks && vergadering.status !== "afgelast",
+            );
+            return eerstvolgende ? (
+              <VergaderingKaart key={reeks} vergadering={eerstvolgende} vandaag={dag} uitgelicht />
+            ) : (
+              <li key={reeks} className="rounded-xl border border-dashed border-border p-4">
+                <p className="font-semibold">{reeks}</p>
+                <p className="mt-1 text-sm text-muted-foreground">Nog geen datum gepland.</p>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+          {agenda?.googleAgendaUrl ? (
+            <a
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 hover:bg-muted/60"
+              href={agenda.googleAgendaUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <CalendarDays className="size-4" />
+              Alle activiteiten (cobo’s, Dé DDB, gala)
+            </a>
+          ) : null}
+          <a
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 hover:bg-muted/60"
+            href={`/portaal/agenda${overleg ? `?overleg=${overleg}` : ""}`}
+          >
+            <Download className="size-4" />
+            {overleg ? `${overleg} in je agenda (.ics)` : "Vergaderingen in je agenda (.ics)"}
+          </a>
+        </div>
+        {agenda?.agendaSleutel ? (
+          <details className="mt-2 text-sm text-muted-foreground">
+            <summary className="cursor-pointer">Liever abonneren, zodat wijzigingen vanzelf meekomen?</summary>
+            <p className="mt-2">
+              Kopieer deze link en kies in Google Calendar “Andere agenda’s › Via URL”, of in Outlook
+              “Agenda toevoegen › Abonneren via internet”. Deel hem alleen binnen je bestuur.
+            </p>
+            <input
+              readOnly
+              className="mt-2 w-full rounded border border-border bg-card px-2 py-1 font-mono text-xs"
+              value={`https://svr.tudelft.nl/agenda/${agenda.agendaSleutel}${overleg ? `?overleg=${overleg}` : ""}`}
+            />
+          </details>
+        ) : null}
       </section>
 
-      {vergaderingen.geweest.length > 0 ? (
-        <section className="mb-10">
-          <h2 className="mb-3 text-lg font-semibold">Geweest</h2>
-          <Vergaderingen vergaderingen={vergaderingen.geweest} leeg="" />
-        </section>
-      ) : null}
+      <section className="mb-10" id="vergaderingen">
+        <h2 className="mb-3 text-lg font-semibold">Alle komende vergaderingen</h2>
+        <nav className="mb-3 flex flex-wrap gap-2 text-sm" aria-label="Filter op overleg">
+          {[null, ...REEKSEN].map((reeks) => (
+            <Link
+              key={reeks ?? "alle"}
+              href={reeks ? `/portaal?overleg=${encodeURIComponent(reeks)}#vergaderingen` : "/portaal#vergaderingen"}
+              aria-current={overleg === reeks ? "page" : undefined}
+              className={`rounded-full border px-3 py-1 ${overleg === reeks ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted/60"}`}
+            >
+              {reeks ?? "Alle"}
+              {reeks ? <span className="ml-1 opacity-70">· {REEKS_UITLEG[reeks]}</span> : null}
+            </Link>
+          ))}
+        </nav>
+        <Vergaderingen
+          vandaag={dag}
+          vergaderingen={vergaderingen.komend.filter((v) => !overleg || v.reeks === overleg)}
+          leeg="Er staan hier geen vergaderingen meer gepland. Het bestuur voert het nieuwe rooster in."
+        />
+
+        {vergaderingen.geweest.length > 0 ? (
+          <details className="mt-6">
+            <summary className="cursor-pointer text-lg font-semibold">
+              Geweest ({vergaderingen.geweest.filter((v) => !overleg || v.reeks === overleg).length})
+            </summary>
+            <div className="mt-3">
+              <Vergaderingen
+                vandaag={dag}
+                vergaderingen={vergaderingen.geweest.filter((v) => !overleg || v.reeks === overleg)}
+                leeg="Nog niets geweest."
+              />
+            </div>
+          </details>
+        ) : null}
+      </section>
 
       <section className="mb-10">
         <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">

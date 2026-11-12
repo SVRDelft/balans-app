@@ -48,6 +48,7 @@ import {
   SluitKnop,
   TenLasteVanSvrKnop,
 } from "./knoppen";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Evenement" };
 
@@ -82,11 +83,13 @@ export default async function EvenementPagina({
   });
   if (!evenement) notFound();
 
-  const relaties = await db.relatie.findMany({
-    where: { actief: true },
-    orderBy: [{ type: "asc" }, { naam: "asc" }],
-    select: { id: true, naam: true },
-  });
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const relaties = ordenRelaties(
+    await db.relatie.findMany({
+      where: { actief: true },
+      select: { id: true, naam: true, type: true },
+    }),
+  ).map((relatie) => ({ ...relatie, naam: relatie.toonNaam }));
 
   const deelnemersVoorRekenen = evenement.deelnemers.map((deelnemer) => ({
     id: deelnemer.id,

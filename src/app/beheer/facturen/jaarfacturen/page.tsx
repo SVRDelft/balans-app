@@ -8,13 +8,14 @@ import { datumNaarInvoer, vandaag } from "@/lib/datum";
 import { verdeelCenten } from "@/lib/geld";
 
 import { JaarfactuurFormulier } from "./formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Jaarfacturen bijdrage" };
 
 export default async function JaarfacturenPagina() {
   const boekjaar = await vereisSchrijfbaarBoekjaar("/beheer/facturen");
 
-  const [posten, verenigingen] = await Promise.all([
+  const [posten, verenigingenRuw] = await Promise.all([
     db.begrotingspost.findMany({
       where: { boekjaarId: boekjaar.id, categorie: "vast", soort: "inkomst" },
       orderBy: { volgorde: "asc" },
@@ -22,9 +23,14 @@ export default async function JaarfacturenPagina() {
     db.relatie.findMany({
       where: { type: "studievereniging", bijdragePlichtig: true, actief: true },
       orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const verenigingen = ordenRelaties(verenigingenRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   if (posten.length === 0) {
     return (

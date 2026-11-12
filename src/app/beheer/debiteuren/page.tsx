@@ -31,6 +31,7 @@ import { haalBoekjaarCijfers } from "@/lib/rapportage";
 
 import { verwijderRekeningpost } from "./acties";
 import { RekeningpostFormulier } from "./formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Debiteuren" };
 
@@ -44,7 +45,7 @@ export const metadata: Metadata = { title: "Debiteuren" };
  */
 export default async function DebiteurenPagina() {
   const { boekjaar, schrijfbaar } = await vereisBoekjaarContext();
-  const [cijfers, posten, relaties, begrotingsposten] = await Promise.all([
+  const [cijfers, posten, relatiesRuw, begrotingsposten] = await Promise.all([
     haalBoekjaarCijfers(boekjaar.id),
     db.rekeningpost.findMany({
       orderBy: [{ datum: "desc" }, { aangemaaktOp: "desc" }],
@@ -66,6 +67,11 @@ export default async function DebiteurenPagina() {
       select: { id: true, code: true, naam: true, soort: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const relaties = ordenRelaties(relatiesRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   const { rekeningcourant, ouderdom } = cijfers;
   // Alleen de posten tot en met dit boekjaar: latere jaren horen hier niet bij.

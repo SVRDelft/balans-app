@@ -20,6 +20,9 @@ import { db } from "@/lib/db";
 import { datumNaarInvoer, formatteerDatum, vandaag } from "@/lib/datum";
 import { gastheerVan, haalMededelingen, haalVergaderingen } from "@/lib/portaal/gegevens";
 import { TOEGESTAAN } from "@/lib/portaal/opslag";
+import { STATUS_LABEL, isStatus, vergaderNaam } from "@/lib/portaal/vergaderingen";
+import { ordenRelaties } from "@/lib/verenigingen";
+import { Badge } from "@/components/ui/badge";
 
 import {
   MededelingFormulier,
@@ -47,15 +50,20 @@ export default async function PortaalBeheerPagina() {
     }),
     db.relatie.findMany({
       where: { type: "studievereniging", actief: true },
-      orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
   ]);
+  const gastheren = ordenRelaties(verenigingen).map((relatie) => ({
+    id: relatie.id,
+    naam: relatie.toonNaam,
+  }));
 
   const keuzelijst = [...vergaderingen.komend, ...vergaderingen.geweest].map(
     (vergadering) => ({
       id: vergadering.id,
-      label: `${vergadering.reeks} · ${formatteerDatum(vergadering.datum)} · ${gastheerVan(vergadering)}`,
+      label: `${vergaderNaam(vergadering)} · ${formatteerDatum(vergadering.datum)} · ${gastheerVan(vergadering)}`,
+      heeftAgenda: vergadering.bestanden.some((bestand) => bestand.soort === "agenda"),
+      heeftNotulen: vergadering.bestanden.some((bestand) => bestand.soort === "notulen"),
     }),
   );
 
@@ -80,7 +88,7 @@ export default async function PortaalBeheerPagina() {
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
         <MededelingFormulier />
         <VergaderingFormulier
-          verenigingen={verenigingen}
+          verenigingen={gastheren}
           vandaag={datumNaarInvoer(vandaag())}
         />
       </div>
@@ -154,11 +162,25 @@ export default async function PortaalBeheerPagina() {
           <TableBody>
             {[...vergaderingen.komend, ...vergaderingen.geweest].map((vergadering) => (
               <TableRow key={vergadering.id}>
-                <TableCell className="font-medium">{vergadering.reeks}</TableCell>
+                <TableCell className="font-medium">
+                  <span className={vergadering.status === "afgelast" ? "line-through" : undefined}>
+                    {vergaderNaam(vergadering)}
+                  </span>
+                  {vergadering.status !== "gepland" && isStatus(vergadering.status) ? (
+                    <Badge variant="waarschuwing" className="ml-2">
+                      {STATUS_LABEL[vergadering.status]}
+                    </Badge>
+                  ) : null}
+                </TableCell>
                 <TableCell className="cijfers whitespace-nowrap">
                   {formatteerDatum(vergadering.datum)} · {vergadering.tijd}
                 </TableCell>
-                <TableCell>{gastheerVan(vergadering)}</TableCell>
+                <TableCell>
+                  {gastheerVan(vergadering)}
+                  {vergadering.locatie ? (
+                    <span className="block text-xs text-muted-foreground">{vergadering.locatie}</span>
+                  ) : null}
+                </TableCell>
                 <TableCell>
                   {vergadering.bestanden.length === 0 ? (
                     <span className="text-muted-foreground">—</span>
@@ -196,6 +218,23 @@ export default async function PortaalBeheerPagina() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
+                  <div className="flex flex-col items-end gap-1">
+                  <VergaderingFormulier
+                    ingeklapt
+                    verenigingen={gastheren}
+                    vandaag={datumNaarInvoer(vandaag())}
+                    vergadering={{
+                      id: vergadering.id,
+                      reeks: vergadering.reeks,
+                      datum: datumNaarInvoer(vergadering.datum),
+                      tijd: vergadering.tijd,
+                      gastheerId: vergadering.gastheerId,
+                      notitie: vergadering.notitie,
+                      locatie: vergadering.locatie,
+                      status: vergadering.status,
+                      volgnummer: vergadering.volgnummer,
+                    }}
+                  />
                   <BevestigKnop
                     actie={verwijderVergadering}
                     velden={{ id: vergadering.id }}
@@ -205,6 +244,7 @@ export default async function PortaalBeheerPagina() {
                   >
                     Verwijderen
                   </BevestigKnop>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

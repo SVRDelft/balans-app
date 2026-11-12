@@ -18,6 +18,7 @@ import { MutatieFormulier } from "./mutatie-formulier";
 import { SelectieFormulier } from "./selectie-formulier";
 import { SnelBoeken, type SnelRegel } from "./snel-boeken";
 import { SpaarRegelFormulier } from "./spaar-formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Bankimport controleren" };
 
@@ -30,11 +31,14 @@ export default async function BankimportPagina({ params }: PageProps<"/beheer/ba
   });
   if (!bestand) notFound();
 
-  const [keuzes, posten, relaties] = await Promise.all([
+  const [keuzes, posten, relatiesRuw] = await Promise.all([
     bankKeuzes(boekjaar.id),
     db.begrotingspost.findMany({ where: { boekjaarId: boekjaar.id }, orderBy: { code: "asc" }, select: { id: true, code: true, naam: true, soort: true } }),
-    db.relatie.findMany({ where: { actief: true }, orderBy: { naam: "asc" }, select: { id: true, naam: true, iban: true } }),
+    db.relatie.findMany({ where: { actief: true }, orderBy: { naam: "asc" }, select: { id: true, naam: true, type: true, iban: true } }),
   ]);
+  // Vaste volgorde (zie src/lib/verenigingen.ts); de namen blijven zoals ze zijn,
+  // want de bankimport vergelijkt ze met de tegenpartij.
+  const relaties = ordenRelaties(relatiesRuw);
   const uitgavenposten = posten.filter((p) => p.soort === "uitgave");
   const inkomstenposten = posten.filter((p) => p.soort === "inkomst");
 

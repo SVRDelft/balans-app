@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { datumNaarInvoer, vandaag } from "@/lib/datum";
 
 import { UitgaveFormulier } from "../formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Nieuwe uitgave" };
 
@@ -16,7 +17,7 @@ export default async function NieuweUitgavePagina({
   const boekjaar = await vereisSchrijfbaarBoekjaar("/beheer/uitgaven");
   const parameters = await searchParams;
 
-  const [posten, leveranciers, evenementen] = await Promise.all([
+  const [posten, leveranciersRuw, evenementen] = await Promise.all([
     db.begrotingspost.findMany({
       where: { boekjaarId: boekjaar.id },
       orderBy: [{ soort: "desc" }, { volgorde: "asc" }],
@@ -25,7 +26,7 @@ export default async function NieuweUitgavePagina({
     db.relatie.findMany({
       where: { actief: true },
       orderBy: { naam: "asc" },
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
     db.evenement.findMany({
       where: { boekjaarId: boekjaar.id, status: { not: "afgesloten" } },
@@ -33,6 +34,11 @@ export default async function NieuweUitgavePagina({
       select: { id: true, naam: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const leveranciers = ordenRelaties(leveranciersRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   if (posten.length === 0) {
     return (

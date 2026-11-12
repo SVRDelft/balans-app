@@ -7,7 +7,14 @@ import { vereisBestuur } from "@/lib/auth/server";
 import { db } from "@/lib/db";
 import { datumUitInvoer } from "@/lib/datum";
 import { bewaarBestand, MAX_BYTES, verwijderBestand } from "@/lib/portaal/opslag";
-import { isReeks } from "@/lib/portaal/vergaderingen";
+import {
+  BESTAND_SOORT_LABEL,
+  isBestandSoort,
+  isReeks,
+  isStatus,
+  vergaderNaam,
+  type BestandSoort,
+} from "@/lib/portaal/vergaderingen";
 import { leesTekst, voerUit, type ActieStaat } from "@/lib/acties";
 
 function vernieuw() {
@@ -88,8 +95,16 @@ export async function bewaarVergadering(
     const tijd = leesTekst(formulier, "tijd") ?? "14:00";
     const gastheerId = leesTekst(formulier, "gastheerId") ?? null;
     const notitie = leesTekst(formulier, "notitie") ?? null;
+    const locatie = (leesTekst(formulier, "locatie") ?? "").slice(0, 150);
+    const status = leesTekst(formulier, "status") ?? "gepland";
+    const volgnummerTekst = leesTekst(formulier, "volgnummer");
+    const volgnummer = volgnummerTekst ? Number(volgnummerTekst) : null;
 
     if (!isReeks(reeks)) return { fout: "Kies een van de vier overleggen." };
+    if (!isStatus(status)) return { fout: "Kies gepland, verplaatst of afgelast." };
+    if (volgnummer !== null && (!Number.isInteger(volgnummer) || volgnummer < 1 || volgnummer > 99)) {
+      return { fout: "Het volgnummer is een heel getal, bijvoorbeeld 4." };
+    }
     if (!datum) return { fout: "Vul een geldige datum in." };
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(tijd)) {
       return { fout: "Vul een tijd in als 14:00." };
@@ -107,9 +122,16 @@ export async function bewaarVergadering(
       gastheerId,
       gastheerNaam: gastheer?.naam ?? "",
       notitie,
+      locatie,
+      status,
+      volgnummer,
     };
 
+    // Bij bewerken blijft het id hetzelfde, en daarmee blijven de agenda en
+    // notulen gewoon aan deze vergadering hangen.
     if (id) {
+      const bestaand = await db.vergadering.findUnique({ where: { id }, select: { id: true } });
+      if (!bestaand) return { fout: "Deze vergadering bestaat niet meer." };
       await db.vergadering.update({ where: { id }, data: gegevens });
     } else {
       await db.vergadering.create({ data: gegevens });
@@ -120,7 +142,7 @@ export async function bewaarVergadering(
       entiteit: "Vergadering",
       entiteitId: id ?? undefined,
       actie: id ? "gewijzigd" : "aangemaakt",
-      samenvatting: `${reeks} van ${datum.toISOString().slice(0, 10)} ${id ? "gewijzigd" : "toegevoegd"}`,
+      samenvatting: `${vergaderNaam({ reeks, volgnummer })} van ${datum.toISOString().slice(0, 10)} ${id ? "gewijzigd" : "toegevoegd"}${status !== "gepland" ? ` (${status})` : ""}`,
     });
 
     vernieuw();
@@ -169,13 +191,13 @@ export async function uploadBestand(
   const sessie = await vereisBestuur();
 
   return voerUit(async () => {
-    const soort = String(formulier.get("soort") ?? "document");
-    if (!["agenda", "notulen", "document"].includes(soort)) {
-      return { fout: "Kies agenda, notulen of document." };
+    let soort = String(formulier.get("soort") ?? "document");
+    if (!isBestandSoort(soort)) {
+      return { fout: "Kies agenda, notulen, presentatie, bijlage of document." };
     }
     const vergaderingId = leesTekst(formulier, "vergaderingId") ?? null;
-    if ((soort === "agenda" || soort === "notulen") && !vergaderingId) {
-      return { fout: "Een agenda of notulen horen bij een vergadering." };
+    if (soort !== "document" && !vergaderingId) {
+      return { fout: "Dit stuk hoort bij een vergadering. Kies er een." };
     }
 
     const bestand = formulier.get("bestand");
@@ -191,12 +213,37 @@ export async function uploadBestand(
       if (!vergadering) return { fout: "Die vergadering bestaat niet meer." };
     }
 
+    // Een tweede agenda of tweede notulen gaat nooit stilletjes erbij: eerst
+    // kiezen tussen vervangen en toevoegen als extra stuk met een eigen titel.
+    let teVervangen: { id: string; opslagnaam: string }[] = [];
+    if ((soort === "agenda" || soort === "notulen") && vergaderingId) {
+      const bestaand = await db.portaalbestand.findMany({
+        where: { vergaderingId, soort },
+        select: { id: true, opslagnaam: true },
+      });
+      if (bestaand.length > 0) {
+        const keuze = leesTekst(formulier, "bestaand");
+        if (keuze === "vervangen") {
+          teVervangen = bestaand;
+        } else if (keuze === "toevoegen") {
+          if (!leesTekst(formulier, "titel")) {
+            return { fout: "Geef het extra stuk een eigen titel, bijvoorbeeld “Presentatie”." };
+          }
+          soort = "bijlage";
+        } else {
+          return {
+            fout: `Bij deze vergadering staan al ${soort === "agenda" ? "een agenda" : "notulen"}. Kies vervangen of toevoegen als extra stuk.`,
+          };
+        }
+      }
+    }
+
     const data = new Uint8Array(await bestand.arrayBuffer());
     const opgeslagen = await bewaarBestand(data);
 
     const titel =
       leesTekst(formulier, "titel") ??
-      (soort === "agenda" ? "Agenda" : soort === "notulen" ? "Notulen" : bestand.name);
+      (soort === "document" ? bestand.name : BESTAND_SOORT_LABEL[soort as BestandSoort]);
 
     const rij = await db.portaalbestand.create({
       data: {
@@ -211,11 +258,16 @@ export async function uploadBestand(
       },
     });
 
+    for (const oud of teVervangen) {
+      await db.portaalbestand.delete({ where: { id: oud.id } });
+      await verwijderBestand(oud.opslagnaam);
+    }
+
     await logAudit({
       gebruiker: sessie.naam,
       entiteit: "Portaalbestand",
       entiteitId: rij.id,
-      actie: "geüpload",
+      actie: teVervangen.length ? "vervangen" : "geüpload",
       samenvatting: `${soort} "${titel}" geüpload (${Math.round(opgeslagen.grootte / 1024)} kB)`,
     });
 

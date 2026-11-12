@@ -45,3 +45,35 @@ export const VERGADERINGEN_2026_2027: {
 
 export const isReeks = (waarde: string): waarde is Reeks =>
   (REEKSEN as readonly string[]).includes(waarde);
+
+/** Gepland is de standaard; verplaatst en afgelast vallen op in het portaal. */
+export const STATUSSEN = ["gepland", "verplaatst", "afgelast"] as const;
+export type VergaderStatus = (typeof STATUSSEN)[number];
+export const isStatus = (waarde: string): waarde is VergaderStatus =>
+  (STATUSSEN as readonly string[]).includes(waarde);
+
+export const STATUS_LABEL: Record<VergaderStatus, string> = {
+  gepland: "Gepland",
+  verplaatst: "Verplaatst",
+  afgelast: "Afgelast",
+};
+
+/** "SVR 4" als er een volgnummer is, anders alleen "SVR". */
+export const vergaderNaam = (vergadering: { reeks: string; volgnummer: number | null }) =>
+  vergadering.volgnummer ? `${vergadering.reeks} ${vergadering.volgnummer}` : vergadering.reeks;
+
+/** De soorten stukken. Alles behalve "document" hoort bij een vergadering. */
+export const BESTAND_SOORTEN = ["agenda", "notulen", "presentatie", "bijlage", "document"] as const;
+export type BestandSoort = (typeof BESTAND_SOORTEN)[number];
+export const isBestandSoort = (waarde: string): waarde is BestandSoort =>
+  (BESTAND_SOORTEN as readonly string[]).includes(waarde);
+export const BESTAND_SOORT_LABEL: Record<BestandSoort, string> = {
+  agenda: "Agenda",
+  notulen: "Notulen",
+  presentatie: "Presentatie",
+  bijlage: "Bijlage",
+  document: "Document",
+};
+/** Volgorde in het portaal: eerst de agenda, dan de notulen, dan de rest. */
+export const soortVolgorde = (soort: string) =>
+  Math.max(0, (BESTAND_SOORTEN as readonly string[]).indexOf(soort));

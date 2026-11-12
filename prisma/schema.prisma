@@ -43,6 +43,12 @@ model Instellingen {
   btwPercentage    Int     @default(21)
   betaaltermijnDagen Int   @default(30)
   factuurVoetnoot  String  @default("") @db.Text
+  /// Link naar de openbare Google-agenda met alle activiteiten (cobo's, Dé DDB,
+  /// gala). Leeg: het portaal toont geen knop.
+  googleAgendaUrl  String  @default("") @db.Text
+  /// Geheime sleutel voor de agenda-feed (/agenda/<sleutel>). Leeg: alleen
+  /// bereikbaar met een portaalsessie. Een nieuwe sleutel trekt de oude in.
+  agendaSleutel    String? @unique
   bijgewerktOp     DateTime @updatedAt
 }
 
@@ -790,6 +796,14 @@ model Vergadering {
   gastheerNaam String @default("")
 
   notitie String? @db.Text
+
+  /// Waar precies, bijvoorbeeld "PSOR" of "Classroom 6". Vrije tekst.
+  locatie String @default("")
+  /// 'gepland' | 'verplaatst' | 'afgelast'. Een afgelaste vergadering blijft
+  /// staan (doorgestreept), zodat niemand denkt dat hij vergeten is.
+  status  String @default("gepland")
+  /// Optioneel: "SVR 4" in plaats van alleen "SVR".
+  volgnummer Int?
 
   aangemaaktOp DateTime @default(now())
   bijgewerktOp DateTime @updatedAt

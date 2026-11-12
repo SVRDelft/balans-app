@@ -8,6 +8,7 @@ import { datumNaarInvoer, telDagenOp, vandaag } from "@/lib/datum";
 import { centenNaarInvoer } from "@/lib/geld";
 
 import { FactuurFormulier } from "../formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Nieuwe factuur" };
 
@@ -18,7 +19,7 @@ export default async function NieuweFactuurPagina({
   const parameters = await searchParams;
   const vanId = typeof parameters.van === "string" ? parameters.van : "";
 
-  const [relaties, posten, evenementen, instellingen] = await Promise.all([
+  const [relatiesRuw, posten, evenementen, instellingen] = await Promise.all([
     db.relatie.findMany({
       where: { actief: true },
       orderBy: [{ type: "asc" }, { naam: "asc" }],
@@ -36,6 +37,11 @@ export default async function NieuweFactuurPagina({
     }),
     db.instellingen.findUnique({ where: { id: "svr" } }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const relaties = ordenRelaties(relatiesRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   // "Kopiëren": dezelfde omschrijving en regels, nieuwe datums en nog geen
   // relatie gekozen, zodat je hem makkelijk voor iemand anders maakt.

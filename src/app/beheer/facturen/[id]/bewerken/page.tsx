@@ -10,6 +10,7 @@ import { isVergrendeld } from "@/lib/domein";
 import { centenNaarInvoer } from "@/lib/geld";
 
 import { FactuurFormulier } from "../../formulier";
+import { ordenRelaties } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Factuur bewerken" };
 
@@ -38,11 +39,11 @@ export default async function BewerkFactuurPagina({
     );
   }
 
-  const [relaties, posten, evenementen] = await Promise.all([
+  const [relatiesRuw, posten, evenementen] = await Promise.all([
     db.relatie.findMany({
       where: { actief: true },
       orderBy: [{ type: "asc" }, { naam: "asc" }],
-      select: { id: true, naam: true },
+      select: { id: true, naam: true, type: true },
     }),
     db.begrotingspost.findMany({
       where: { boekjaarId: boekjaar.id },
@@ -55,6 +56,11 @@ export default async function BewerkFactuurPagina({
       select: { id: true, naam: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const relaties = ordenRelaties(relatiesRuw).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   return (
     <>

@@ -19,13 +19,14 @@ import { formatteerTijdstempel } from "@/lib/datum";
 
 import { AccountFormulier } from "./formulier";
 import { nieuwWachtwoord, zetActief } from "./acties";
+import { ordenRelaties, zonderPersonen } from "@/lib/verenigingen";
 
 export const metadata: Metadata = { title: "Accounts" };
 
 export default async function AccountsPagina() {
   const sessie = await vereisBestuur();
 
-  const [gebruikers, verenigingen] = await Promise.all([
+  const [gebruikers, verenigingenRuw] = await Promise.all([
     db.gebruiker.findMany({
       orderBy: [{ rol: "asc" }, { email: "asc" }],
       include: { relatie: { select: { naam: true } } },
@@ -38,6 +39,11 @@ export default async function AccountsPagina() {
       select: { id: true, naam: true, type: true },
     }),
   ]);
+  // Vaste volgorde en één naam per vereniging, zie src/lib/verenigingen.ts.
+  const verenigingen = ordenRelaties(zonderPersonen(verenigingenRuw)).map((relatie) => ({
+    ...relatie,
+    naam: relatie.toonNaam,
+  }));
 
   return (
     <>
